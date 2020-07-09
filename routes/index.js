@@ -493,7 +493,9 @@ router.post("/attendance", upload.single("attendance"), async function (
     lon2 = longlat[0]["SubCompany"].long;
     lat1 = req.body.latitude;
     lat2 = longlat[0]["SubCompany"].lat;
-    console.log(lon1 + " " + lon2 + " " + lat1 + " " + lat2);
+    console.log(
+      "User-" + lon1 + " Comapny-" + lon2 + " User-" + lat1 + " Company-" + lat2
+    );
     unit = "K";
     var radlat1 = (Math.PI * lat1) / 180;
     var radlat2 = (Math.PI * lat2) / 180;
@@ -515,6 +517,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       dist = dist * 0.8684;
     }
     var fd = dist * 1000;
+    console.log(fd);
     var area = fd > 100 ? "Outside Area" : "Inside Area";
     if (req.body.filename == undefined) {
       var record = attendeanceSchema({
