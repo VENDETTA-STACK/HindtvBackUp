@@ -493,6 +493,7 @@ router.post("/attendance", upload.single("attendance"), async function (
     lon2 = longlat[0]["SubCompany"].long;
     lat1 = req.body.latitude;
     lat2 = longlat[0]["SubCompany"].lat;
+    console.log(lon1 + " " + lon2 + " " + lat1 + " " + lat2);
     unit = "K";
     var radlat1 = (Math.PI * lat1) / 180;
     var radlat2 = (Math.PI * lat2) / 180;
