@@ -517,8 +517,8 @@ router.post("/attendance", upload.single("attendance"), async function (
       dist = dist * 0.8684;
     }
     var fd = dist * 1000;
-    console.log(fd);
     var area = fd > 100 ? "Outside Area" : longlat[0]["Subcompany"].Name;
+    console.log(area);
     if (req.body.filename == undefined) {
       var record = attendeanceSchema({
         EmployeeId: req.body.employeeid,
