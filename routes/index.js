@@ -526,26 +526,15 @@ router.post("/attendance", upload.single("attendance"), async function (
       var fd = dist * 1000;
       var area = fd > 100 ? "Outside Area" : longlat[0]["Subcompany"].Name;
     }
-    if (req.body.filename == undefined) {
-      var record = attendeanceSchema({
-        EmployeeId: req.body.employeeid,
-        Status: req.body.type,
-        Date: date,
-        Time: time,
-        Day: day,
-        Area: area,
-      });
-    } else {
-      var record = attendeanceSchema({
-        EmployeeId: req.body.employeeid,
-        Status: req.body.type,
-        Date: date,
-        Time: time,
-        Day: day,
-        Image: req.file.filename,
-        Area: area,
-      });
-    }
+    var record = attendeanceSchema({
+      EmployeeId: req.body.employeeid,
+      Status: req.body.type,
+      Date: date,
+      Time: time,
+      Day: day,
+      Image: req.file.filename,
+      Area: area,
+    });
     record.save({}, function (err, record) {
       var result = {};
       if (err) {
