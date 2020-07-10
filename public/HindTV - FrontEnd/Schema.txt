@@ -1,0 +1,51 @@
+Main Company
+	-Comapny Name
+	-Comapny Address
+	-Company Number
+	-Company Email
+	-Company GSTIN
+
+Sub Company
+	-CompanyID
+	-Name
+	-Address
+	-Number
+	-Email
+	-GSTIN
+	-Status
+
+Employee
+	-Employee Code(Auto Genrate)
+	-SubComapnyId
+	-First Name
+	-Middle Name
+	-Last Name
+	-Gender
+	-Marital Status
+	-Mobile
+	-Join Date
+	-Confirmation Date
+	-Termination Date
+	-Probation (Months)
+	-ID Type
+	-Unique Identity/Passport No/Work Permit
+	-Department Code
+	-Section Code	
+	-Designation Code
+
+Department Code(?)
+Section Code(?)
+Designation Code(?)
+Desig Group Code(?)
+Holiday Group(?)
+Category Code(?)
+Leave Category(?)
+Shift Type(?)
+OT Type(?)
+
+Level Type
+	-Name
+
+User Level
+	-Employee Id
+	-Level Type Id
