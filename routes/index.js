@@ -15,6 +15,7 @@ var attendImg = multer.diskStorage({
     cb(null, "uploads");
   },
   filename: function (req, file, cb) {
+    console.log(file);
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(
       null,
