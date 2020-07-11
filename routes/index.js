@@ -540,9 +540,9 @@ router.post("/attendance", upload.single("attendance"), async function (
     var area =
       fd > 100
         ? "http://www.google.com/maps/place/" +
-          req.body.longitude +
+          req.body.latitude +
           "," +
-          req.body.latitude
+          req.body.longitude
         : NAME;
     var record = attendeanceSchema({
       EmployeeId: req.body.employeeid,
