@@ -692,6 +692,26 @@ router.post("/attendance", upload.single("attendance"), async function (
       result.isSuccess = true;
     }
     res.json(result);
+  } else if (req.body.type == "getareafilter") {
+    subcompanySchema.find({}, (err, record) => {
+      var result = {};
+      if (err) {
+        result.Message = "SubComapny Not Found";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        if (record.length == 0) {
+          result.Message = "SubComapny Not Found";
+          result.Data = [];
+          result.isSuccess = false;
+        } else {
+          result.Message = "SubComapny Found";
+          result.Data = record;
+          result.isSuccess = true;
+        }
+      }
+      res.json(result);
+    });
   }
 });
 
