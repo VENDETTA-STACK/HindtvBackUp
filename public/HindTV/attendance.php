@@ -24,7 +24,7 @@
         <!-- Main content -->
         <div class="content">
           <div class="container-fluid">
-            <div class="card card-danger">
+            <div class="card card-danger" style="display:none;">
               <div class="card-header">
                 <h3 class="card-title">Filter Data</h3>
               </div>
@@ -50,10 +50,7 @@
                   </div>
                   <div class="col-3">
                     <label>Area Filter</label>
-                    <select class="form-control" id="area-filter">
-                      <option value="0">All</option>
-                      <option value="1">Inside Area</option>
-                      <option value="2">Outside Area</option>
+                    <select class="form-control" id="area-filter">                      
                     </select>
                   </div>
                   <div class="col-3">

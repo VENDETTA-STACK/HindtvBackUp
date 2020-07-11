@@ -123,14 +123,14 @@ $(document).ready(function () {
           $("#middlename").val(data.Data[0].MiddleName);
           $("#lastname").val(data.Data[0].LastName);
           $("#gender").val(data.Data[0].Gender);
-          $("#dob").val(dob);
+          $("#dob").val(data.Data[0].DOB);
           $("#mobile").val(data.Data[0].Mobile);
           $("#mail").val(data.Data[0].Mail);
           $("#married").val(data.Data[0].MartialStatus);
-          $("#joindate").val(joindate);
+          $("#joindate").val(data.Data[0].JoinDate);
           $("#subcompany").val(data.Data[0].SubCompany);
-          $("#confirmationdate").val(confirmationdate);
-          $("#terminationdate").val(data.Data[0].terminationdate);
+          $("#confirmationdate").val(data.Data[0].ConfirmationDate);
+          $("#terminationdate").val(data.Data[0].TerminationDate);
           $("#prohibition").val(data.Data[0].Prohibition);
           $("#department").val(data.Data[0].Department);
           $("#designation").val(data.Data[0].Designation);
@@ -204,6 +204,7 @@ $(document).ready(function () {
             $("#staticmessage").removeAttr("style");
             $("#staticmessage");
           });
+          $("form")[0].reset();
           loaddata();
           $("#btn-submit-on").html(
             "<button type='submit' class='btn btn-success' id='btn-submit'>Submit</button>" +
@@ -266,6 +267,7 @@ $(document).ready(function () {
             $("#staticmessage").removeAttr("style");
             $("#staticmessage");
           });
+          $("form")[0].reset();
           loaddata();
         }
       },

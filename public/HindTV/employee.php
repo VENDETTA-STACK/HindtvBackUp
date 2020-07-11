@@ -41,6 +41,7 @@
                           placeholder="First Name"
                         />
                       </div>
+                      <label id="errorFirstName"></label>
                       <div class="form-group col-md-3">
                         <label for="lastname">Middle Name</label>
                         <input
@@ -51,6 +52,7 @@
                           placeholder="Middle Name"
                         />
                       </div>
+                      <label id="errorMiddleName"></label>
                       <div class="form-group col-md-3">
                         <label for="lastname">Last Name</label>
                         <input
@@ -61,6 +63,7 @@
                           placeholder="Last Name"
                         />
                       </div>
+                      <label id="errorLastName"></label>
                       <div class="form-group col-md-3">
                         <label for="gender">Gender</label>
                         <div class="input-group">
@@ -76,6 +79,7 @@
                           </div>
                         </div>
                       </div>
+                      <label id="errorGender"></label>
                       <div class="form-group col-md-3">
                         <label for="dob">DOB</label>
                         <div class="input-group">
@@ -89,6 +93,7 @@
                           </div>
                         </div>
                       </div>
+                      <label id="errorDOB"></label>
                       <div class="form-group col-md-3">
                         <label for="mobile">Mobile Number</label>
                         <div class="input-group">
@@ -103,6 +108,7 @@
                           </div>
                         </div>
                       </div>
+                      <label id="errorMobile"></label>
                       <div class="form-group col-md-3">
                         <label for="mail">Mail</label>
                         <div class="input-group">
@@ -117,6 +123,7 @@
                           </div>
                         </div>
                       </div>
+                      <label id="errorMail"></label>
                       <div class="form-group col-md-3">
                         <label for="married">Maritial Status</label>
                         <div class="input-group">
@@ -145,6 +152,7 @@
                           </div>
                         </div>
                       </div>
+                      <label id="errorJoinDate"></label>
                       <div class="form-group col-md-3">
                         <label for="confirmationdate">Confirmation Date</label>
                         <div class="input-group">
@@ -158,6 +166,7 @@
                           </div>
                         </div>
                       </div>
+                      <label id="errorConfirmationDate"></label>
                       <div class="form-group col-md-3">
                         <label for="terminationdate">Termination Date</label>
                         <div class="input-group">
@@ -171,6 +180,7 @@
                           </div>
                         </div>
                       </div>
+                      <label id="errorTerminationDate"></label>
                       <div class="form-group col-md-3">
                         <label for="prohibition">Prohibition</label>
                         <input
@@ -181,6 +191,7 @@
                           placeholder="Prohibition Period(Months)"
                         />
                       </div>
+                      <label id="Prohibition"></label>
                       <div class="form-group col-md-3">
                         <label for="subcompany">Sub Company</label>
                         <div class="input-group">

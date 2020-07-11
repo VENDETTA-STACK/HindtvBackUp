@@ -36,8 +36,10 @@ $(document).ready(function () {
   if (id != undefined) {
     loadsingleemployee();
   } else {
+    $(".card-danger").css("display", "block");
     loaddata();
   }
+  loadarea();
 
   function loadsingleemployee() {
     var afilter = $("#area-filter").val();
@@ -56,8 +58,20 @@ $(document).ready(function () {
         if (data.isSuccess == true) {
           $("#displaydata").html("");
           for (i = 0; i < data.Data.length; i++) {
+            checkstring = "http://www.google.com/maps/place/";
+            data.Data[i]["Day"] =
+              data.Data[i]["Day"] == undefined ? "-" : data.Data[i]["Day"];
+            data.Data[i]["Time"] =
+              data.Data[i]["Time"] == undefined ? "-" : data.Data[i]["Time"];
             data.Data[i]["Area"] =
               data.Data[i]["Area"] == undefined ? "-" : data.Data[i]["Area"];
+            console.log(data.Data[i]["Area"].search(checkstring));
+            if (data.Data[i]["Area"].search(checkstring) == 0) {
+              data.Data[i]["Area"] =
+                "<a href=" +
+                data.Data[i]["Area"] +
+                " target=_blank>Outside Area</a>";
+            }
             $("#displaydata").append(
               "<tr><td>" +
                 data.Data[i].EmployeeId["Name"] +
@@ -72,7 +86,7 @@ $(document).ready(function () {
                 "</td><td>" +
                 "<a href = " +
                 $("#website-url").attr("value") +
-                "public/images/attendance/" +
+                "uploads/" +
                 data.Data[i]["Image"] +
                 " target=_blank>View Image</a>" +
                 "</td><td>" +
@@ -120,12 +134,20 @@ $(document).ready(function () {
         if (data.isSuccess == true) {
           $("#displaydata").html("");
           for (i = 0; i < data.Data.length; i++) {
+            checkstring = "http://www.google.com/maps/place/";
             data.Data[i]["Day"] =
               data.Data[i]["Day"] == undefined ? "-" : data.Data[i]["Day"];
             data.Data[i]["Time"] =
               data.Data[i]["Time"] == undefined ? "-" : data.Data[i]["Time"];
             data.Data[i]["Area"] =
               data.Data[i]["Area"] == undefined ? "-" : data.Data[i]["Area"];
+            console.log(data.Data[i]["Area"].search(checkstring));
+            if (data.Data[i]["Area"].search(checkstring) == 0) {
+              data.Data[i]["Area"] =
+                "<a href=" +
+                data.Data[i]["Area"] +
+                " target=_blank>Outside Area</a>";
+            }
             $("#displaydata").append(
               "<tr><td>" +
                 data.Data[i].EmployeeId["Name"] +
@@ -140,7 +162,7 @@ $(document).ready(function () {
                 "</td><td>" +
                 "<a href = " +
                 $("#website-url").attr("value") +
-                "public/images/attendance/" +
+                "uploads/" +
                 data.Data[i]["Image"] +
                 " target=_blank>View Image</a>" +
                 "</td><td>" +
@@ -182,13 +204,39 @@ $(document).ready(function () {
   });
 
   function convertdatetostring(date) {
-    alert(date);
-    if (date != "" || date != undefined) {
+    if (date != "" && date != undefined) {
       date = date.split("-");
       date = date[2] + "/" + date[1] + "/" + date[0];
     } else {
       date = "";
     }
     return date;
+  }
+
+  function loadarea() {
+    $.ajax({
+      type: "POST",
+      url: $("#website-url").attr("value") + "attendance",
+      data: { type: "getareafilter" },
+      dataType: "json",
+      cache: false,
+      success: function (data) {
+        if (data.isSuccess == true) {
+          $("#area-filter").append("<option value=0>All</option>");
+          $("#area-filter").append(
+            "<option value=2><b>Outside Area</b></option>"
+          );
+          for (i = 0; i < data.Data.length; i++) {
+            $("#area-filter").append(
+              "<option value='" +
+                data.Data[i]["Name"] +
+                "'>" +
+                data.Data[i]["Name"] +
+                "</option>"
+            );
+          }
+        }
+      },
+    });
   }
 });

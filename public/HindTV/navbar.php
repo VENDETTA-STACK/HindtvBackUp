@@ -45,10 +45,28 @@
               <ul class="nav nav-treeview" style="display: none;">
                 <li class="nav-item">
                   <a href="timing.php" class="nav-link">
-                    <i class="far fa-clock nav-icon"></i>
+                    <i class="fas fa-clock nav-icon"></i>
                     <p>Timing</p>
                   </a>
-                </li>              
+                </li>
+                <li class="nav-item">
+                  <a href="department.php" class="nav-link">
+                    <i class="fas fa-building nav-icon"></i>
+                    <p>Department</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="designation.php" class="nav-link">
+                    <i class="fas fa-male nav-icon"></i>
+                    <p>Designation</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="idtype.php" class="nav-link">
+                    <i class="fas fa-id-card nav-icon"></i>
+                    <p>ID Type</p>
+                  </a>
+                </li>
               </ul>
             </li>
               <li class="nav-item">
