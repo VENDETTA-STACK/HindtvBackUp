@@ -539,13 +539,11 @@ router.post("/attendance", upload.single("attendance"), async function (
     var fd = dist * 1000;
     var area =
       fd > 100
-        ? "https://www.google.com/maps?ll=" +
-          longlat[0]["SubCompany"].long +
+        ? "http://www.google.com/maps/place/" +
+          req.body.longitude +
           "," +
-          longlat[0]["SubCompany"].lat +
-          "&z=16&t=m&hl=en&gl=IN&mapclient=embed&cid=17769882531349746865"
+          longlat[0]["SubCompany"].long
         : NAME;
-    console.log(req.body);
     var record = attendeanceSchema({
       EmployeeId: req.body.employeeid,
       Status: req.body.type,
@@ -781,12 +779,6 @@ router.post("/timing", (req, res) => {
 router.post("/testing", async (req, res) => {
   long = 21.141069;
   lat = 72.803673;
-  console.log(
-    "https://www.google.com/maps?ll=" +
-      long +
-      "," +
-      lat +
-      "&z=16&t=m&hl=en&gl=IN&mapclient=embed&cid=17769882531349746865"
-  );
+  console.log("http://www.google.com/maps/place/" + long + "," + lat);
 });
 module.exports = router;
