@@ -539,7 +539,7 @@ router.post("/attendance", upload.single("attendance"), async function (
     var fd = dist * 1000;
     var area =
       fd > 100
-        ? "http://www.google.com/maps/place/" +
+        ? "Outside-http://www.google.com/maps/place/" +
           req.body.latitude +
           "," +
           req.body.longitude
@@ -586,7 +586,7 @@ router.post("/attendance", upload.single("attendance"), async function (
     var fd = dist * 1000;
     var area =
       fd > 100
-        ? "http://www.google.com/maps/place/" +
+        ? "Outside-http://www.google.com/maps/place/" +
           req.body.latitude +
           "," +
           req.body.longitude
@@ -641,7 +641,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       if (area) {
         if (area == 0) {
         } else if (area == 2) {
-          query.Area = { $ne: "Outside Area" };
+          query.Area = { $regex: "http://www.google.com/maps/place/" };
         } else {
           query.Area = area;
         }
