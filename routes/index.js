@@ -597,6 +597,8 @@ router.post("/attendance", upload.single("attendance"), async function (
       Date: date,
       Time: time,
       Day: day,
+      Image: req.file.filename,
+      Area: area,
     });
     record.save({}, function (err, record) {
       var result = {};
