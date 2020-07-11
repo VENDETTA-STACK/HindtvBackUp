@@ -573,6 +573,24 @@ router.post("/attendance", upload.single("attendance"), async function (
       res.json(result);
     });
   } else if (req.body.type == "out") {
+    var longlat = await employeeSchema
+      .find({ _id: req.body.employeeid })
+      .populate("SubCompany");
+    dist = calculatedistance(
+      req.body.longitude,
+      longlat[0]["SubCompany"].lat,
+      req.body.latitude,
+      longlat[0]["SubCompany"].long
+    );
+    var NAME = longlat[0]["SubCompany"].Name;
+    var fd = dist * 1000;
+    var area =
+      fd > 100
+        ? "http://www.google.com/maps/place/" +
+          req.body.latitude +
+          "," +
+          req.body.longitude
+        : NAME;
     var record = attendeanceSchema({
       EmployeeId: req.body.employeeid,
       Status: req.body.type,
