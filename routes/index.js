@@ -544,7 +544,7 @@ router.post("/attendance", upload.single("attendance"), async function (
     var fd = dist * 1000;
     var area =
       fd > 100
-        ? "Outside-http://www.google.com/maps/place/" +
+        ? "http://www.google.com/maps/place/" +
           req.body.latitude +
           "," +
           req.body.longitude
@@ -591,7 +591,7 @@ router.post("/attendance", upload.single("attendance"), async function (
     var fd = dist * 1000;
     var area =
       fd > 100
-        ? "Outside-http://www.google.com/maps/place/" +
+        ? "http://www.google.com/maps/place/" +
           req.body.latitude +
           "," +
           req.body.longitude
