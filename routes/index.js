@@ -640,10 +640,10 @@ router.post("/attendance", upload.single("attendance"), async function (
       }
       if (area) {
         if (area == 0) {
-        } else if (area == 1) {
+        } else if (area == 2) {
           query.Area = { $ne: "Outside Area" };
         } else {
-          query.Area = "Outside Area";
+          query.Area = area;
         }
       }
       if (status) {
