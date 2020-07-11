@@ -594,9 +594,9 @@ router.post("/attendance", upload.single("attendance"), async function (
     var record = attendeanceSchema({
       EmployeeId: req.body.employeeid,
       Status: req.body.type,
-      Date: date,
-      Time: time,
-      Day: day,
+      Date: period.date,
+      Time: period.time,
+      Day: period.day,
       Image: req.file.filename,
       Area: area,
     });
