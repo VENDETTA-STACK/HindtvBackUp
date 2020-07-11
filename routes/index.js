@@ -477,12 +477,31 @@ router.post("/login", function (req, res, next) {
   }
 });
 
-router.post("/attendance", upload.single("attendance"), async function (
-  req,
-  res,
-  next
-) {
+function calculatedistance(plon1, plon2, plat1, plat2) {
+  lon1 = plon1;
+  lon2 = plon2;
+  lat1 = plat1;
+  lat2 = plat2;
+  var radlat1 = (Math.PI * lat1) / 180;
+  var radlat2 = (Math.PI * lat2) / 180;
+  var theta = lon1 - lon2;
+  var radtheta = (Math.PI * theta) / 180;
+  var dist =
+    Math.sin(radlat1) * Math.sin(radlat2) +
+    Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+  if (dist > 1) {
+    dist = 1;
+  }
+  dist = Math.acos(dist);
+  dist = (dist * 180) / Math.PI;
+  dist = dist * 60 * 1.1515;
+  dist = dist * 1.609344;
+  return dist;
+}
+
+function getdate() {
   moment.locale("en-in");
+  var attendance = {};
   var date = moment()
     .tz("Asia/Calcutta")
     .format("DD MM YYYY, h:mm:ss a")
@@ -494,48 +513,38 @@ router.post("/attendance", upload.single("attendance"), async function (
     .format("DD MM YYYY, h:mm:ss a")
     .split(",")[1];
   var day = moment().tz("Asia/Calcutta").format("dddd");
+  attendance.date = date;
+  attendance.time = time;
+  attendance.day = day;
+  return attendance;
+}
+
+router.post("/attendance", upload.single("attendance"), async function (
+  req,
+  res,
+  next
+) {
+  period = getdate();
   if (req.body.type == "in") {
     var longlat = await employeeSchema
       .find({ _id: req.body.employeeid })
       .populate("SubCompany");
-    if (longlat[0]["SubCompany"].long != "") {
-      lon1 = req.body.longitude;
-      lon2 = longlat[0]["SubCompany"].lat;
-      lat1 = req.body.latitude;
-      lat2 = longlat[0]["SubCompany"].long;
-      console.log(lon1 + " " + lon2 + " " + lat1 + " " + lat2);
-      unit = "K";
-      var radlat1 = (Math.PI * lat1) / 180;
-      var radlat2 = (Math.PI * lat2) / 180;
-      var theta = lon1 - lon2;
-      var radtheta = (Math.PI * theta) / 180;
-      var dist =
-        Math.sin(radlat1) * Math.sin(radlat2) +
-        Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-      if (dist > 1) {
-        dist = 1;
-      }
-      dist = Math.acos(dist);
-      dist = (dist * 180) / Math.PI;
-      dist = dist * 60 * 1.1515;
-      if (unit == "K") {
-        dist = dist * 1.609344;
-      }
-      if (unit == "N") {
-        dist = dist * 0.8684;
-      }
-      var NAME = longlat[0]["SubCompany"].Name;
-      var fd = dist * 1000;
-      var area = fd > 100 ? "Outside Area" : NAME;
-      console.log(area);
-    }
+    dist = calculatedistance(
+      req.body.longitude,
+      longlat[0]["SubCompany"].lat,
+      req.body.latitude,
+      longlat[0]["SubCompany"].long
+    );
+    var NAME = longlat[0]["SubCompany"].Name;
+    var fd = dist * 1000;
+    var area = fd > 100 ? "Outside Area" : NAME;
     console.log(req.body);
     var record = attendeanceSchema({
       EmployeeId: req.body.employeeid,
       Status: req.body.type,
-      Date: date,
-      Time: time,
-      Day: day,
+      Date: period.date,
+      Time: period.time,
+      Day: period.day,
       Image: req.file.filename,
       Area: area,
     });
@@ -764,10 +773,6 @@ router.post("/timing", (req, res) => {
 });
 
 router.post("/testing", async (req, res) => {
-  result = await attendeanceSchema.find({
-    Day: "Thursday",
-    Date: { $gte: "09/07/2020", $lte: "09/07/2020" },
-  });
-  res.json(result);
+  period = getdate();
 });
 module.exports = router;
