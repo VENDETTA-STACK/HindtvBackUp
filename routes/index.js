@@ -616,7 +616,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       if (area) {
         if (area == 0) {
         } else if (area == 1) {
-          query.Area = "Inside Area";
+          query.Area = { $ne: "Outside Area" };
         } else {
           query.Area = "Outside Area";
         }
@@ -630,7 +630,6 @@ router.post("/attendance", upload.single("attendance"), async function (
         }
       }
     }
-    console.log(query);
     var record = await attendeanceSchema.find(query).populate("EmployeeId");
     var result = {};
     if (record.length == 0) {
