@@ -12,7 +12,7 @@ var timingSchema = require("../models/timing.models");
 const { stat } = require("fs");
 var attendImg = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "/uploads");
+    cb(null, "uploads");
   },
   filename: function (req, file, cb) {
     console.log(file);
