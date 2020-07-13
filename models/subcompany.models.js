@@ -4,7 +4,7 @@ var newSchema = mongoose.Schema({
   Name: String,
   Address: String,
   ContactPersonName: String,
-  ContactPersonNumber: Number,
+  ContactPersonNumber: String,
   Email: String,
   GSTIN: String,
   Status: String,
