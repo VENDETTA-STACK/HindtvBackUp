@@ -531,6 +531,7 @@ router.post("/attendance", upload.single("attendance"), async function (
 ) {
   period = getdate();
   if (req.body.type == "in") {
+    console.log(req.body);
     var longlat = await employeeSchema
       .find({ _id: req.body.employeeid })
       .populate("SubCompany");
