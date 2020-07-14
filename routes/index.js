@@ -482,28 +482,6 @@ router.post("/login", function (req, res, next) {
   }
 });
 
-function calculatedistance(plon1, plon2, plat1, plat2) {
-  lon1 = plon1;
-  lon2 = plon2;
-  lat1 = plat1;
-  lat2 = plat2;
-  var radlat1 = (Math.PI * lat1) / 180;
-  var radlat2 = (Math.PI * lat2) / 180;
-  var theta = lon1 - lon2;
-  var radtheta = (Math.PI * theta) / 180;
-  var dist =
-    Math.sin(radlat1) * Math.sin(radlat2) +
-    Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-  if (dist > 1) {
-    dist = 1;
-  }
-  dist = Math.acos(dist);
-  dist = (dist * 180) / Math.PI;
-  dist = dist * 60 * 1.1515;
-  dist = dist * 1.609344;
-  return dist;
-}
-
 function getdate() {
   moment.locale("en-in");
   var attendance = {};
@@ -524,6 +502,33 @@ function getdate() {
   return attendance;
 }
 
+function calculatedistance(lat1, lon1, lat2, lon2, unit) {
+  if (lat1 == lat2 && lon1 == lon2) {
+    return 0;
+  } else {
+    var radlat1 = (Math.PI * lat1) / 180;
+    var radlat2 = (Math.PI * lat2) / 180;
+    var theta = lon1 - lon2;
+    var radtheta = (Math.PI * theta) / 180;
+    var dist =
+      Math.sin(radlat1) * Math.sin(radlat2) +
+      Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+    if (dist > 1) {
+      dist = 1;
+    }
+    dist = Math.acos(dist);
+    dist = (dist * 180) / Math.PI;
+    dist = dist * 60 * 1.1515;
+    if (unit == "K") {
+      dist = dist * 1.609344;
+    }
+    if (unit == "N") {
+      dist = dist * 0.8684;
+    }
+    return dist;
+  }
+}
+
 router.post("/attendance", upload.single("attendance"), async function (
   req,
   res,
@@ -536,10 +541,11 @@ router.post("/attendance", upload.single("attendance"), async function (
       .find({ _id: req.body.employeeid })
       .populate("SubCompany");
     dist = calculatedistance(
+      req.body.latitude,
       req.body.longitude,
       longlat[0]["SubCompany"].lat,
-      req.body.latitude,
-      longlat[0]["SubCompany"].long
+      longlat[0]["SubCompany"].long,
+      "K"
     );
     var NAME = longlat[0]["SubCompany"].Name;
     var fd = dist * 1000;
