@@ -535,6 +535,9 @@ router.post("/attendance", upload.single("attendance"), async function (
     var longlat = await employeeSchema
       .find({ _id: req.body.employeeid })
       .populate("SubCompany");
+    console.log(
+      longlat[0]["SubCompany"].lat + " " + longlat[0]["SubCompany"].long
+    );
     dist = calculatedistance(
       req.body.longitude,
       longlat[0]["SubCompany"].lat,
