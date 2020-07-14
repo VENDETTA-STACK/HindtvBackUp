@@ -561,7 +561,7 @@ router.post("/attendance", upload.single("attendance"), async function (
     console.log(heading);
     var NAME = longlat[0]["SubCompany"].Name;
     var area =
-      heading.heading > 100
+      heading > 100
         ? "http://www.google.com/maps/place/" +
           req.body.latitude +
           "," +
