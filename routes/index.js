@@ -598,9 +598,8 @@ router.post("/attendance", upload.single("attendance"), async function (
       longlat[0]["SubCompany"].long
     );
     var NAME = longlat[0]["SubCompany"].Name;
-    var fd = dist * 1000;
     var area =
-      fd > 100
+      fd > 100.0
         ? "http://www.google.com/maps/place/" +
           req.body.latitude +
           "," +
