@@ -543,12 +543,12 @@ router.post("/attendance", upload.single("attendance"), async function (
       .find({ _id: req.body.employeeid })
       .populate("SubCompany");
     const location1 = {
-      lat: parseFloat(req.body.latitude),
-      lon: parseFloat(req.body.longitude),
-    };
-    const location2 = {
       lat: parseFloat(longlat[0]["SubCompany"].lat),
       lon: parseFloat(longlat[0]["SubCompany"].long),
+    };
+    const location2 = {
+      lat: parseFloat(req.body.latitude),
+      lon: parseFloat(req.body.longitude),
     };
     console.log("User" + req.body.latitude + " - " + req.body.longitude);
     console.log(
