@@ -565,7 +565,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       Area: area,
       Elat: req.body.latitude,
       Elong: req.body.longitude,
-      Distance: fd,
+      Distance: area,
     });
     record.save({}, function (err, record) {
       var result = {};
@@ -614,7 +614,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       Area: area,
       Elat: req.body.latitude,
       Elong: req.body.longitude,
-      Distance: fd,
+      Distance: area,
     });
     record.save({}, function (err, record) {
       var result = {};
