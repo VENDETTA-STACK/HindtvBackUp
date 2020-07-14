@@ -550,15 +550,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       lat: parseFloat(req.body.latitude),
       lon: parseFloat(req.body.longitude),
     };
-    console.log("User" + req.body.latitude + " - " + req.body.longitude);
-    console.log(
-      "Company" +
-        longlat[0]["SubCompany"].lat +
-        " - " +
-        longlat[0]["SubCompany"].long
-    );
     heading = geolib.getDistance(location1, location2);
-    console.log(heading);
     var NAME = longlat[0]["SubCompany"].Name;
     var area =
       heading > 100
@@ -577,7 +569,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       Area: area,
       Elat: req.body.latitude,
       Elong: req.body.longitude,
-      Distance: heading.heading,
+      Distance: heading,
     });
     record.save({}, function (err, record) {
       var result = {};
@@ -602,15 +594,18 @@ router.post("/attendance", upload.single("attendance"), async function (
     var longlat = await employeeSchema
       .find({ _id: req.body.employeeid })
       .populate("SubCompany");
-    dist = calculatedistance(
-      req.body.longitude,
-      longlat[0]["SubCompany"].lat,
-      req.body.latitude,
-      longlat[0]["SubCompany"].long
-    );
+    const location1 = {
+      lat: parseFloat(longlat[0]["SubCompany"].lat),
+      lon: parseFloat(longlat[0]["SubCompany"].long),
+    };
+    const location2 = {
+      lat: parseFloat(req.body.latitude),
+      lon: parseFloat(req.body.longitude),
+    };
+    heading = geolib.getDistance(location1, location2);
     var NAME = longlat[0]["SubCompany"].Name;
     var area =
-      dist > 100.0
+      heading > 100
         ? "http://www.google.com/maps/place/" +
           req.body.latitude +
           "," +
@@ -626,7 +621,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       Area: area,
       Elat: req.body.latitude,
       Elong: req.body.longitude,
-      Distance: area,
+      Distance: heading,
     });
     record.save({}, function (err, record) {
       var result = {};
