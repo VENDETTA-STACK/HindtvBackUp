@@ -543,18 +543,18 @@ router.post("/attendance", upload.single("attendance"), async function (
       .find({ _id: req.body.employeeid })
       .populate("SubCompany");
     const location1 = {
-      lat: parseInt(req.body.latitude),
-      lon: parseInt(req.body.longitude),
+      lat: parseFloat(req.body.latitude),
+      lon: parseFloat(req.body.longitude),
     };
     const location2 = {
-      lat: parseInt(longlat[0]["SubCompany"].lat),
-      lon: parseInt(longlat[0]["SubCompany"].long),
+      lat: parseFloat(longlat[0]["SubCompany"].lat),
+      lon: parseFloat(longlat[0]["SubCompany"].long),
     };
-    console.log("User" + req.body.latitude + "-" + req.body.longitude);
+    console.log("User" + req.body.latitude + " - " + req.body.longitude);
     console.log(
       "Company" +
         longlat[0]["SubCompany"].lat +
-        "-" +
+        " - " +
         longlat[0]["SubCompany"].long
     );
     heading = geolocationutils.headingDistanceTo(location1, location2);
