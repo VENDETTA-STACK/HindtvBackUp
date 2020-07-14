@@ -9,6 +9,8 @@ var subcompanySchema = require("../models/subcompany.models");
 var employeeSchema = require("../models/employee.model");
 var attendeanceSchema = require("../models/attendance.models");
 var timingSchema = require("../models/timing.models");
+const geolib = require("geolib");
+const geolocationutils = require("geolocation-utils");
 const { stat } = require("fs");
 var attendImg = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -540,16 +542,15 @@ router.post("/attendance", upload.single("attendance"), async function (
     var longlat = await employeeSchema
       .find({ _id: req.body.employeeid })
       .populate("SubCompany");
-    dist = calculatedistance(
-      req.body.latitude,
-      req.body.longitude,
-      longlat[0]["SubCompany"].lat,
-      longlat[0]["SubCompany"].long,
-      "K"
-    );
+    const location1 = { lat: req.body.latitude, lon: req.body.longitude };
+    const location2 = {
+      lat: longlat[0]["SubCompany"].lat,
+      lon: longlat[0]["SubCompany"].long,
+    };
+    heading = geolocationutils.headingDistanceTo(location1, location2);
     var NAME = longlat[0]["SubCompany"].Name;
     var area =
-      dist > 100
+      heading.heading > 100
         ? "http://www.google.com/maps/place/" +
           req.body.latitude +
           "," +
@@ -565,7 +566,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       Area: area,
       Elat: req.body.latitude,
       Elong: req.body.longitude,
-      Distance: area,
+      Distance: heading.heading,
     });
     record.save({}, function (err, record) {
       var result = {};
@@ -833,8 +834,11 @@ router.post("/timing", (req, res) => {
 });
 
 router.post("/testing", async (req, res) => {
-  long = 21.141069;
-  lat = 72.803673;
-  console.log("http://www.google.com/maps/place/" + long + "," + lat);
+  // console.log(
+  //   geolib.getDistance(
+  //     { latitude: 21.1915346, longitude: 72.8582823 },
+  //     { latitude: 21.1111713, longitude: 73.3892366 }
+  //   )
+  // );
 });
 module.exports = router;
