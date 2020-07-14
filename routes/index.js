@@ -564,6 +564,9 @@ router.post("/attendance", upload.single("attendance"), async function (
       Day: period.day,
       Image: req.file.filename,
       Area: area,
+      Elat: req.body.latitude,
+      Elong: req.body.longitude,
+      Distance: fd,
     });
     record.save({}, function (err, record) {
       var result = {};

@@ -12,6 +12,9 @@ var newSchema = mongoose.Schema({
   Image: String,
   Status: String,
   Area: String,
+  Elat: String,
+  Elong: String,
+  Distance: String,
 });
 
 const admin = mongoose.model("attendance", newSchema);
