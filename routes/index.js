@@ -542,10 +542,13 @@ router.post("/attendance", upload.single("attendance"), async function (
     var longlat = await employeeSchema
       .find({ _id: req.body.employeeid })
       .populate("SubCompany");
-    const location1 = { lat: req.body.latitude, lon: req.body.longitude };
+    const location1 = {
+      lat: parseInt(req.body.latitude),
+      lon: parseInt(req.body.longitude),
+    };
     const location2 = {
-      lat: longlat[0]["SubCompany"].lat,
-      lon: longlat[0]["SubCompany"].long,
+      lat: parseInt(longlat[0]["SubCompany"].lat),
+      lon: parseInt(longlat[0]["SubCompany"].long),
     };
     console.log(location1.lat + " " + location2);
     heading = geolocationutils.headingDistanceTo(location1, location2);
