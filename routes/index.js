@@ -550,7 +550,13 @@ router.post("/attendance", upload.single("attendance"), async function (
       lat: parseInt(longlat[0]["SubCompany"].lat),
       lon: parseInt(longlat[0]["SubCompany"].long),
     };
-    console.log(location1.lat + " " + location2);
+    console.log("User" + req.body.latitude + "-" + req.body.longitude);
+    console.log(
+      "Company" +
+        longlat[0]["SubCompany"].lat +
+        "-" +
+        longlat[0]["SubCompany"].long
+    );
     heading = geolocationutils.headingDistanceTo(location1, location2);
     console.log(heading.heading);
     var NAME = longlat[0]["SubCompany"].Name;
