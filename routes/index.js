@@ -557,7 +557,7 @@ router.post("/attendance", upload.single("attendance"), async function (
         " - " +
         longlat[0]["SubCompany"].long
     );
-    heading = geolocationutils.headingDistanceTo(location1, location2);
+    heading = geolib.getDistance(location1, location2);
     console.log(heading.heading);
     var NAME = longlat[0]["SubCompany"].Name;
     var area =
