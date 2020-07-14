@@ -552,6 +552,7 @@ router.post("/attendance", upload.single("attendance"), async function (
     };
     console.log(location1.lat + " " + location2);
     heading = geolocationutils.headingDistanceTo(location1, location2);
+    console.log(heading.heading);
     var NAME = longlat[0]["SubCompany"].Name;
     var area =
       heading.heading > 100
