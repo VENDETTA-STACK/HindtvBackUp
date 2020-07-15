@@ -9,6 +9,7 @@ var subcompanySchema = require("../models/subcompany.models");
 var employeeSchema = require("../models/employee.model");
 var attendeanceSchema = require("../models/attendance.models");
 var timingSchema = require("../models/timing.models");
+var thoughtSchema = require("../models/thoughts.model");
 const geolib = require("geolib");
 const geolocationutils = require("geolocation-utils");
 const { stat } = require("fs");
@@ -505,34 +506,6 @@ function getdate() {
   attendance.day = day;
   return attendance;
 }
-
-function calculatedistance(lat1, lon1, lat2, lon2, unit) {
-  if (lat1 == lat2 && lon1 == lon2) {
-    return 0;
-  } else {
-    var radlat1 = (Math.PI * lat1) / 180;
-    var radlat2 = (Math.PI * lat2) / 180;
-    var theta = lon1 - lon2;
-    var radtheta = (Math.PI * theta) / 180;
-    var dist =
-      Math.sin(radlat1) * Math.sin(radlat2) +
-      Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-    if (dist > 1) {
-      dist = 1;
-    }
-    dist = Math.acos(dist);
-    dist = (dist * 180) / Math.PI;
-    dist = dist * 60 * 1.1515;
-    if (unit == "K") {
-      dist = dist * 1.609344;
-    }
-    if (unit == "N") {
-      dist = dist * 0.8684;
-    }
-    return dist;
-  }
-}
-
 router.post("/attendance", upload.single("attendance"), async function (
   req,
   res,
@@ -867,6 +840,75 @@ router.post("/timing", async (req, res) => {
       result.isSuccess = false;
       res.json(result);
     }
+  }
+});
+
+router.post("/thought", (req, res) => {
+  if (req.body.type == "insert") {
+    var record = thoughtSchema({
+      Quote: req.body.quote,
+      Name: req.body.name,
+      Status: false,
+    });
+    record.save({}, (err, record) => {
+      var result = {};
+      if (err) {
+        result.Message = "Thought Not Inserted";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        if (record.length == 0) {
+          result.Message = "Thought Not Inserted";
+          result.Data = [];
+          result.isSuccess = false;
+        } else {
+          result.Message = "New Thought Inserted";
+          result.Data = record;
+          result.isSuccess = true;
+        }
+      }
+      res.json(result);
+    });
+  } else if (req.body.type == "getalldata") {
+    thoughtSchema.find({}, (err, record) => {
+      var result = {};
+      if (err) {
+        result.Message = "No Thought Found";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        if (record.length == 0) {
+          result.Message = "No Thought Found";
+          result.Data = [];
+          result.isSuccess = false;
+        } else {
+          result.Message = "Thought Found";
+          result.Data = record;
+          result.isSuccess = true;
+        }
+      }
+      res.json(result);
+    });
+  } else if (req.body.type == "getsingledata") {
+    thoughtSchema.findOne({ Status: true }, (err, record) => {
+      var result = {};
+      if (err) {
+        result.Message = "No Thought Found";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        if (record.length == 0) {
+          result.Message = "No Thought Found";
+          result.Data = [];
+          result.isSuccess = false;
+        } else {
+          result.Message = "Thought Found";
+          result.Data = record;
+          result.isSuccess = true;
+        }
+      }
+      res.json(result);
+    });
   }
 });
 
