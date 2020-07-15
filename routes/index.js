@@ -260,7 +260,7 @@ router.post("/subcompany", function (req, res, next) {
         GSTIN: req.body.GSTIN,
         Status: "Active",
         CompanyId: req.body.companyid,
-        lat: parseFLoat(req.body.lat),
+        lat: parseFloat(req.body.lat),
         long: parseFloat(req.body.long),
         Link: req.body.googlelink,
         Timing: req.body.timing,
