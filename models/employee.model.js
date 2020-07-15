@@ -23,11 +23,6 @@ var newSchema = mongoose.Schema({
     ref: "subcompany",
     required: true,
   },
-  Timing: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "timing",
-    required: true,
-  },
 });
 
 const admin = mongoose.model("employee", newSchema);

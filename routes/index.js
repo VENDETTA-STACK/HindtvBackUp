@@ -146,9 +146,10 @@ router.post("/subcompany", function (req, res, next) {
       GSTIN: req.body.GSTIN,
       Status: "Active",
       CompanyId: req.body.companyid,
-      lat: req.body.lat,
-      long: req.body.long,
+      lat: parseFloat(req.body.lat),
+      long: parseFloat(req.body.long),
       Link: req.body.googlelink,
+      Timing: req.body.timing,
     });
     record.save({}, function (err, record) {
       console.log(err);
