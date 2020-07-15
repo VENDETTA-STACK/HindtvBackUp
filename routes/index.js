@@ -858,14 +858,15 @@ router.post("/timing", async (req, res) => {
             result.isSuccess = true;
           }
         }
+        res.json(result);
       });
     } else {
       result.Message =
         "Timing is currently been used in " + record.length + " companies.";
       result.Data = [];
       result.isSuccess = false;
+      res.json(result);
     }
-    res.json(result);
   }
 });
 
