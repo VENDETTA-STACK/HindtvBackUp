@@ -839,10 +839,10 @@ router.post("/timing", async (req, res) => {
       }
     );
   } else if (req.body.type == "deletetimedata") {
-    result = await subcompanySchema.find({ Timing: req.body.id });
-    if (result == 0) {
+    record = await subcompanySchema.find({ Timing: req.body.id });
+    var result = {};
+    if (record == 0) {
       timingSchema.findByIdAndDelete(req.body.id, (err, record) => {
-        var result = {};
         if (err) {
           result.Message = "Timing Not Deleted";
           result.Data = [];
@@ -861,10 +861,11 @@ router.post("/timing", async (req, res) => {
       });
     } else {
       result.Message =
-        "Time is currently been used in " + result.length + "companies.";
+        "Time is currently been used in " + record.length + "companies.";
       result.Data = [];
       result.isSuccess = false;
     }
+    res.json(result);
   }
 });
 
