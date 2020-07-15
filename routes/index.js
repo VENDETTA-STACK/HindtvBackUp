@@ -748,7 +748,7 @@ router.post("/location", async (req, res) => {
   res.json(data);
 });
 
-router.post("/timing", (req, res) => {
+router.post("/timing", async (req, res) => {
   if (req.body.type == "insert") {
     var record = timingSchema({
       Name: req.body.name,
@@ -838,15 +838,38 @@ router.post("/timing", (req, res) => {
         res.json(result);
       }
     );
+  } else if (req.body.type == "deletetimedata") {
+    result = await subcompanySchema.find({ Timing: req.body.id });
+    if (result == 0) {
+      timingSchema.findByIdAndDelete(req.body.id, (err, record) => {
+        var result = {};
+        if (err) {
+          result.Message = "Timing Not Deleted";
+          result.Data = [];
+          result.isSuccess = false;
+        } else {
+          if (record.length == 0) {
+            result.Message = "Timing Not Deleted";
+            result.Data = [];
+            result.isSuccess = false;
+          } else {
+            result.Message = "Timing Deleted";
+            result.Data = record;
+            result.isSuccess = true;
+          }
+        }
+      });
+    } else {
+      result.Message =
+        "Time is currently been used in " + result.length + "companies.";
+      result.Data = [];
+      result.isSuccess = false;
+    }
   }
 });
 
 router.post("/testing", async (req, res) => {
-  // console.log(
-  //   geolib.getDistance(
-  //     { latitude: 21.1915346, longitude: 72.8582823 },
-  //     { latitude: 21.1111713, longitude: 73.3892366 }
-  //   )
-  // );
+  //result = await subcompanySchema.find({ Timing: req.body.time });
+  console.log(result);
 });
 module.exports = router;
