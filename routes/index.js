@@ -861,7 +861,7 @@ router.post("/timing", async (req, res) => {
       });
     } else {
       result.Message =
-        "Time is currently been used in " + record.length + "companies.";
+        "Timing is currently been used in " + record.length + " companies.";
       result.Data = [];
       result.isSuccess = false;
     }
