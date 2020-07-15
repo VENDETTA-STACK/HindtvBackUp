@@ -909,6 +909,26 @@ router.post("/thought", (req, res) => {
       }
       res.json(result);
     });
+  } else if (req.body.type == "getdata") {
+    thoughtSchema.findById(req.body.id, (err, record) => {
+      var result = {};
+      if (err) {
+        result.Message = "No Thought Found";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        if (record.length == 0) {
+          result.Message = "No Thought Found";
+          result.Data = [];
+          result.isSuccess = false;
+        } else {
+          result.Message = "Thought Found";
+          result.Data = record;
+          result.isSuccess = true;
+        }
+      }
+      res.json(result);
+    });
   }
 });
 
