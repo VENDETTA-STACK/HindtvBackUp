@@ -138,6 +138,8 @@ router.post("/company", function (req, res, next) {
 
 router.post("/subcompany", function (req, res, next) {
   if (req.body.type == "insert") {
+    req.body.lat = req.body.lat == undefined ? 0 : req.body.lat;
+    req.body.long = req.body.long == undefined ? 0 : req.body.long;
     var record = new subcompanySchema({
       Name: req.body.name,
       Address: req.body.address,
@@ -250,6 +252,8 @@ router.post("/subcompany", function (req, res, next) {
       res.json(result);
     });
   } else if (req.body.type == "update") {
+    req.body.lat = req.body.lat == undefined ? 0 : req.body.lat;
+    req.body.long = req.body.long == undefined ? 0 : req.body.long;
     subcompanySchema.findByIdAndUpdate(
       req.body.id,
       {
@@ -751,16 +755,16 @@ router.post("/timing", async (req, res) => {
     timingSchema.find({}, (err, record) => {
       var result = {};
       if (err) {
-        result.Message = "Timing Not Inserted";
+        result.Message = "Timing Not Found";
         result.Data = [];
         result.isSuccess = false;
       } else {
         if (record.length == 0) {
-          result.Message = "Timing Not Inserted";
+          result.Message = "Timing Not Found";
           result.Data = [];
           result.isSuccess = false;
         } else {
-          result.Message = "New Timing Inserted";
+          result.Message = "Timing Found";
           result.Data = record;
           result.isSuccess = true;
         }
@@ -933,7 +937,25 @@ router.post("/thought", (req, res) => {
 });
 
 router.post("/testing", async (req, res) => {
-  //result = await subcompanySchema.find({ Timing: req.body.time });
-  console.log(result);
+  var location1 = {
+    lat: parseFloat(21.1915798),
+    lon: parseFloat(72.8556223),
+  };
+  var location2 = {
+    lat: parseFloat(21.1916376),
+    lon: parseFloat(72.8578122),
+  };
+  heading = geolib.getDistance(location1, location2);
+  console.log(heading);
+  var location1 = {
+    lat: parseFloat(21.191579818725586),
+    lon: parseFloat(72.8578109741211),
+  };
+  var location2 = {
+    lat: parseFloat(21.1916376),
+    lon: parseFloat(72.8578122),
+  };
+  heading = geolib.getDistance(location1, location2);
+  console.log(heading);
 });
 module.exports = router;
