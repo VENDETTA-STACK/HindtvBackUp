@@ -858,11 +858,11 @@ router.post("/timing", async (req, res) => {
   }
 });
 
-router.post("/thought", (req, res) => {
+router.post("/thought", async (req, res) => {
   if (req.body.type == "insert") {
     var record = thoughtSchema({
       Quote: req.body.quote,
-      Name: req.body.name,
+      // Name: req.body.name,
       Status: false,
     });
     record.save({}, (err, record) => {
@@ -949,7 +949,7 @@ router.post("/thought", (req, res) => {
       req.body.id,
       {
         Quote: req.body.quote,
-        Name: req.body.name,
+        // Name: req.body.name,
       },
       (err, record) => {
         var result = {};
@@ -971,6 +971,66 @@ router.post("/thought", (req, res) => {
         res.json(result);
       }
     );
+  } else if (req.body.type == "statusupdate") {
+    if (req.body.sts == 0) {
+      thoughtSchema.findByIdAndUpdate(
+        req.body.id,
+        { Status: false },
+        (err, record) => {
+          var result = {};
+          if (err) {
+            result.Message = "Error Occurred";
+            result.Data = [];
+            result.isSuccess = false;
+          } else {
+            if (record.length == 0) {
+              result.Message = "Error Occurred";
+              result.Data = [];
+              result.isSuccess = false;
+            } else {
+              result.Message = "Status updated to block";
+              result.Data = record;
+              result.isSuccess = true;
+            }
+          }
+          res.json(result);
+        }
+      );
+    } else {
+      record = await thoughtSchema.find({ Status: true });
+      if (record.length < 1) {
+        thoughtSchema.findByIdAndUpdate(
+          req.body.id,
+          { Status: true },
+          (err, record) => {
+            var result = {};
+            if (err) {
+              result.Message = "Error Occurred";
+              result.Data = [];
+              result.isSuccess = false;
+            } else {
+              if (record.length == 0) {
+                result.Message = "Error Occurred";
+                result.Data = [];
+                result.isSuccess = false;
+              } else {
+                result.Message = "Status updated to unblock";
+                result.Data = record;
+                result.isSuccess = true;
+              }
+            }
+            res.json(result);
+          }
+        );
+      } else {
+        var result = {};
+        result.Message =
+          "Status can't be updated as there is one thought which is unblock";
+        result.Data = [];
+        result.isSuccess = false;
+        res.json(result);
+      }
+    }
   }
 });
 
