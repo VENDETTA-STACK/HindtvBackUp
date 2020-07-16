@@ -553,7 +553,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       heading = geolib.getDistance(location1, location2);
       var NAME = longlat[0]["SubCompany"].Name;
       var area =
-        heading > 100
+        heading > 25
           ? "http://www.google.com/maps/place/" +
             req.body.latitude +
             "," +
@@ -627,7 +627,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       heading = geolib.getDistance(location1, location2);
       var NAME = longlat[0]["SubCompany"].Name;
       var area =
-        heading > 100
+        heading > 25
           ? "http://www.google.com/maps/place/" +
             req.body.latitude +
             "," +
