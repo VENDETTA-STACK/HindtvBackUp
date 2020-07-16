@@ -521,106 +521,150 @@ router.post("/attendance", upload.single("attendance"), async function (
     var longlat = await employeeSchema
       .find({ _id: req.body.employeeid })
       .populate("SubCompany");
-    const location1 = {
-      lat: parseFloat(longlat[0]["SubCompany"].lat),
-      lon: parseFloat(longlat[0]["SubCompany"].long),
-    };
-    const location2 = {
-      lat: parseFloat(req.body.latitude),
-      lon: parseFloat(req.body.longitude),
-    };
-    heading = geolib.getDistance(location1, location2);
-    var NAME = longlat[0]["SubCompany"].Name;
-    var area =
-      heading > 100
-        ? "http://www.google.com/maps/place/" +
-          req.body.latitude +
-          "," +
-          req.body.longitude
-        : NAME;
-    var record = attendeanceSchema({
-      EmployeeId: req.body.employeeid,
-      Status: req.body.type,
-      Date: period.date,
-      Time: period.time,
-      Day: period.day,
-      Image: req.file.filename,
-      Area: area,
-      Elat: req.body.latitude,
-      Elong: req.body.longitude,
-      Distance: heading,
-    });
-    record.save({}, function (err, record) {
+    if (
+      longlat[0]["SubCompany"].lat == 0 ||
+      longlat[0]["SubCompany"].long == 0
+    ) {
       var result = {};
-      if (err) {
-        result.Message = "Attendance Not Marked";
-        result.Data = [];
-        result.isSuccess = false;
-      } else {
-        if (record.length == 0) {
+      result.Message =
+        "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+      result.Data = [];
+      result.isSuccess = false;
+      res.json(result);
+    } else if (
+      req.body.latitude == undefined ||
+      req.body.longitude == undefined
+    ) {
+      var result = {};
+      result.Message =
+        "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+      result.Data = [];
+      result.isSuccess = false;
+      res.json(result);
+    } else {
+      const location1 = {
+        lat: parseFloat(longlat[0]["SubCompany"].lat),
+        lon: parseFloat(longlat[0]["SubCompany"].long),
+      };
+      const location2 = {
+        lat: parseFloat(req.body.latitude),
+        lon: parseFloat(req.body.longitude),
+      };
+      heading = geolib.getDistance(location1, location2);
+      var NAME = longlat[0]["SubCompany"].Name;
+      var area =
+        heading > 100
+          ? "http://www.google.com/maps/place/" +
+            req.body.latitude +
+            "," +
+            req.body.longitude
+          : NAME;
+      var record = attendeanceSchema({
+        EmployeeId: req.body.employeeid,
+        Status: req.body.type,
+        Date: period.date,
+        Time: period.time,
+        Day: period.day,
+        Image: req.file.filename,
+        Area: area,
+        Elat: req.body.latitude,
+        Elong: req.body.longitude,
+        Distance: heading,
+      });
+      record.save({}, function (err, record) {
+        var result = {};
+        if (err) {
           result.Message = "Attendance Not Marked";
           result.Data = [];
           result.isSuccess = false;
         } else {
-          result.Message = "Attendance Marked";
-          result.Data = [record];
-          result.isSuccess = true;
+          if (record.length == 0) {
+            result.Message = "Attendance Not Marked";
+            result.Data = [];
+            result.isSuccess = false;
+          } else {
+            result.Message = "Attendance Marked";
+            result.Data = [record];
+            result.isSuccess = true;
+          }
         }
-      }
-      res.json(result);
-    });
+        res.json(result);
+      });
+    }
   } else if (req.body.type == "out") {
     var longlat = await employeeSchema
       .find({ _id: req.body.employeeid })
       .populate("SubCompany");
-    const location1 = {
-      lat: parseFloat(longlat[0]["SubCompany"].lat),
-      lon: parseFloat(longlat[0]["SubCompany"].long),
-    };
-    const location2 = {
-      lat: parseFloat(req.body.latitude),
-      lon: parseFloat(req.body.longitude),
-    };
-    heading = geolib.getDistance(location1, location2);
-    var NAME = longlat[0]["SubCompany"].Name;
-    var area =
-      heading > 100
-        ? "http://www.google.com/maps/place/" +
-          req.body.latitude +
-          "," +
-          req.body.longitude
-        : NAME;
-    var record = attendeanceSchema({
-      EmployeeId: req.body.employeeid,
-      Status: req.body.type,
-      Date: period.date,
-      Time: period.time,
-      Day: period.day,
-      Image: req.file.filename,
-      Area: area,
-      Elat: req.body.latitude,
-      Elong: req.body.longitude,
-      Distance: heading,
-    });
-    record.save({}, function (err, record) {
+    if (
+      longlat[0]["SubCompany"].lat == 0 ||
+      longlat[0]["SubCompany"].long == 0
+    ) {
       var result = {};
-      if (err) {
-        result.Message = "Attendance Not Marked";
-        result.Data = [];
-        result.isSuccess = false;
-      } else {
-        if (record.length == 0) {
+      result.Message =
+        "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+      result.Data = [];
+      result.isSuccess = false;
+      res.json(result);
+    } else if (
+      req.body.latitude == undefined ||
+      req.body.longitude == undefined
+    ) {
+      var result = {};
+      result.Message =
+        "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+      result.Data = [];
+      result.isSuccess = false;
+      res.json(result);
+    } else {
+      const location1 = {
+        lat: parseFloat(longlat[0]["SubCompany"].lat),
+        lon: parseFloat(longlat[0]["SubCompany"].long),
+      };
+      const location2 = {
+        lat: parseFloat(req.body.latitude),
+        lon: parseFloat(req.body.longitude),
+      };
+      heading = geolib.getDistance(location1, location2);
+      var NAME = longlat[0]["SubCompany"].Name;
+      var area =
+        heading > 100
+          ? "http://www.google.com/maps/place/" +
+            req.body.latitude +
+            "," +
+            req.body.longitude
+          : NAME;
+      var record = attendeanceSchema({
+        EmployeeId: req.body.employeeid,
+        Status: req.body.type,
+        Date: period.date,
+        Time: period.time,
+        Day: period.day,
+        Image: req.file.filename,
+        Area: area,
+        Elat: req.body.latitude,
+        Elong: req.body.longitude,
+        Distance: heading,
+      });
+      record.save({}, function (err, record) {
+        var result = {};
+        if (err) {
           result.Message = "Attendance Not Marked";
           result.Data = [];
           result.isSuccess = false;
         } else {
-          result.Message = "Attendance Marked";
-          result.Data = [record];
-          result.isSuccess = true;
+          if (record.length == 0) {
+            result.Message = "Attendance Not Marked";
+            result.Data = [];
+            result.isSuccess = false;
+          } else {
+            result.Message = "Attendance Marked";
+            result.Data = [record];
+            result.isSuccess = true;
+          }
         }
-      }
-      res.json(result);
-    });
+        res.json(result);
+      });
+    }
   } else if (req.body.type == "getdata") {
     const day = req.body.day;
     const sdate = req.body.sd == "" ? undefined : req.body.sd;
