@@ -521,6 +521,8 @@ router.post("/attendance", upload.single("attendance"), async function (
     var longlat = await employeeSchema
       .find({ _id: req.body.employeeid })
       .populate("SubCompany");
+    console.log(req.body.latitude);
+    console.log(req.body.longitude);
     if (
       longlat[0]["SubCompany"].lat == 0 ||
       longlat[0]["SubCompany"].long == 0
@@ -531,10 +533,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       result.Data = [];
       result.isSuccess = false;
       res.json(result);
-    } else if (
-      req.body.latitude == undefined ||
-      req.body.longitude == undefined
-    ) {
+    } else if (req.body.latitude == "" || req.body.longitude == "") {
       var result = {};
       result.Message =
         "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
@@ -605,10 +604,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       result.Data = [];
       result.isSuccess = false;
       res.json(result);
-    } else if (
-      req.body.latitude == undefined ||
-      req.body.longitude == undefined
-    ) {
+    } else if (req.body.latitude == "" || req.body.longitude == "") {
       var result = {};
       result.Message =
         "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
@@ -859,35 +855,6 @@ router.post("/timing", async (req, res) => {
         res.json(result);
       }
     );
-  } else if (req.body.type == "deletetimedata") {
-    record = await subcompanySchema.find({ Timing: req.body.id });
-    var result = {};
-    if (record == 0) {
-      timingSchema.findByIdAndDelete(req.body.id, (err, record) => {
-        if (err) {
-          result.Message = "Timing Not Deleted";
-          result.Data = [];
-          result.isSuccess = false;
-        } else {
-          if (record.length == 0) {
-            result.Message = "Timing Not Deleted";
-            result.Data = [];
-            result.isSuccess = false;
-          } else {
-            result.Message = "Timing Deleted";
-            result.Data = record;
-            result.isSuccess = true;
-          }
-        }
-        res.json(result);
-      });
-    } else {
-      result.Message =
-        "Timing is currently been used in " + record.length + " companies.";
-      result.Data = [];
-      result.isSuccess = false;
-      res.json(result);
-    }
   }
 });
 
