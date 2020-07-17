@@ -1,8 +1,8 @@
 $(document).ready(function () {
   var d = new Date();
-  var REMOVEFILTER = 1;
-  // $("#startdate").val(createdate());
-  // $("#enddate").val(createdate());
+  var REMOVEFILTER = 0; //0 means the query filter is on, 1 means the query filter is off
+  $("#startdate").val(createdate());
+  $("#enddate").val(createdate());
   // $("#day-filter").val(typeDay());
 
   // function typeDay() {
@@ -18,19 +18,19 @@ $(document).ready(function () {
   //   return day;
   // }
 
-  // function createdate() {
-  //   var month = d.getMonth() + 1;
-  //   var day = d.getDate();
-  //   date =
-  //     d.getFullYear() +
-  //     "-" +
-  //     (month < 10 ? "0" : "") +
-  //     month +
-  //     "-" +
-  //     (day < 10 ? "0" : "") +
-  //     day;
-  //   return date;
-  // }
+  function createdate() {
+    var month = d.getMonth() + 1;
+    var day = d.getDate();
+    date =
+      d.getFullYear() +
+      "-" +
+      (month < 10 ? "0" : "") +
+      month +
+      "-" +
+      (day < 10 ? "0" : "") +
+      day;
+    return date;
+  }
 
   var id = $(location).attr("href").split("=")[1];
   if (id != undefined) {
@@ -51,7 +51,7 @@ $(document).ready(function () {
       cache: false,
       beforeSend: function () {
         $("#displaydata").html(
-          '<tr><td colspan="8" class="text-center font-weight-bold">Loading...</td></tr></center>'
+          '<tr><td colspan="9" class="text-center font-weight-bold">Loading...</td></tr></center>'
         );
       },
       success: function (data) {
@@ -92,13 +92,16 @@ $(document).ready(function () {
                 "</td><td>" +
                 data.Data[i]["Area"] +
                 "</td><td>" +
+                data.Data[i]["Distance"] +
+                "m" +
+                "</td><td>" +
                 data.Data[i]["Status"].toUpperCase() +
                 "</td></tr>"
             );
           }
         } else {
           $("#displaydata").html(
-            '<tr><td colspan="8" class="text-center font-weight-bold">No Records Found.</td></tr></center>'
+            '<tr><td colspan="9" class="text-center font-weight-bold">No Records Found.</td></tr>'
           );
         }
       },
@@ -127,7 +130,7 @@ $(document).ready(function () {
       cache: false,
       beforeSend: function () {
         $("#displaydata").html(
-          '<tr><td colspan="8" class="text-center font-weight-bold">Loading...</td></tr></center>'
+          '<tr><td colspan="9" class="text-center font-weight-bold">Loading...</td></tr></center>'
         );
       },
       success: function (data) {
@@ -168,13 +171,16 @@ $(document).ready(function () {
                 "</td><td>" +
                 data.Data[i]["Area"] +
                 "</td><td>" +
+                data.Data[i]["Distance"] +
+                "m" +
+                "</td><td>" +
                 data.Data[i]["Status"].toUpperCase() +
                 "</td></tr>"
             );
           }
         } else {
           $("#displaydata").html(
-            '<tr><td colspan="8" class="text-center font-weight-bold">No Records Found.</td></tr></center>'
+            '<tr><td colspan="9" class="text-center font-weight-bold">No Records Found.</td></tr></center>'
           );
         }
       },

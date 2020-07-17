@@ -1034,6 +1034,37 @@ router.post("/thought", async (req, res) => {
   }
 });
 
+router.post("/birthday", async (req, res) => {
+  var date = moment()
+    .tz("Asia/Calcutta")
+    .format("DD MM YYYY, h:mm:ss a")
+    .split(",")[0];
+  date = date.split(" ");
+  date = date[0] + "/" + date[1] + "/" + date[2];
+  var record = await employeeSchema
+    .find({ DOB: date })
+    .populate("SubCompany", "Name");
+  var result = {};
+  if (record.length == 0) {
+    result.Message = "Birthday Not Found";
+    result.Data = [];
+    result.isSuccess = false;
+  } else {
+    result.Message = "Birthday Found";
+    result.Data = [];
+    for (i = 0; i < record.length; i++) {
+      data = {
+        Message: "Many many happy returns of the day from DL Team",
+        Name: record[i].Name + " - " + record[i].SubCompany.Name,
+        Mobile: record[i].Mobile,
+      };
+      result.Data.push(data);
+    }
+    result.isSuccess = true;
+  }
+  res.json(result);
+});
+
 router.post("/testing", async (req, res) => {
   var location1 = {
     lat: parseFloat(21.1915798),

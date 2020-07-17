@@ -10,7 +10,7 @@
           <div class="container-fluid">
             <div class="row mb-2">
               <div class="col-sm-6">
-                <h1 class="m-0 text-dark">Timing Details</h1>
+                <h1 class="m-0 text-dark">Thoughts</h1>
               </div>
               <!-- /.col -->
             </div>
@@ -27,43 +27,33 @@
               <div class="col-lg-12">
                 <div class="card card-success">
                   <div class="card-header">
-                    <h3 class="card-title">Add Shift Times</h3>
+                    <h3 class="card-title">Add Thoughts</h3>
                   </div>
                   <form role="form">
                     <div class="card-body row">
-                      <div class="form-group col-md-3">
-                        <label for="name">Name</label>
+                      <div class="form-group col-md-12">
+                        <label for="quote">Quote</label>
+                        <textarea
+                          type="textarea"
+                          class="form-control"
+                          id="quote"
+                          name="quote"
+                          placeholder="Quote"
+                          rows="5"
+                        ></textarea>
+                        <label id="errorquote" class="text-danger"></label>
+                      </div>                      
+                      <!-- <div class="form-group col-md-3">
+                        <label for="saidby">Said By</label>
                         <input
                           type="text"
                           class="form-control"
-                          id="name"
-                          name="name"
-                          placeholder="Name"
+                          id="saidby"
+                          name="saidby"
+                          placeholder="Said By Name"
                         />
-                        <label id="errorName" class="text-danger"></label>
-                      </div>
-                      <div class="form-group col-md-3">
-                        <label for="sst">Shift Start Time</label>
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="sst"
-                          name="sst"
-                          placeholder="Shift Start Time"
-                        />
-                        <label id="errorSST" class="text-danger"></label>
-                      </div>
-                      <div class="form-group col-md-3">
-                        <label for="set">Shift End Time</label>
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="set"
-                          name="set"
-                          placeholder="Shift End Time"
-                        />
-                        <label id="errorSET" class="text-danger"></label>
-                      </div>                                   
+                        <label id="errorsaidby" class="text-danger"></label>
+                      </div>                                    -->
                     </div>
                     <!-- /.card-body -->
                     <center>
@@ -94,17 +84,13 @@
           </div>
           <!-- /.container-fluid -->
           <div class="container-fluid">
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">Display Data</h3>
-              </div>
-              <!-- /.card-header -->
+            <div class="card">                            
               <table class="table table-bordered">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
+                    <th>Quote</th>
+                    <!-- <th>Said By</th> -->
+                    <th>Status</th>                 
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -122,6 +108,6 @@
       </footer>
     </div>    
     <?php include('script.php'); ?>
-    <script src="js/timing.js"></script>
+    <script src="js/thoughts.js"></script>
   </body>
 </html>

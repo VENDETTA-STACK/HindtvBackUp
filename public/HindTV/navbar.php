@@ -50,23 +50,13 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="department.php" class="nav-link">
-                    <i class="fas fa-building nav-icon"></i>
-                    <p>Department</p>
+                  <a href="thoughts.php" class="nav-link">
+                    <i class="nav-icon fas fa-quote-left"></i>
+                    <p>
+                      Thoughts
+                    </p>
                   </a>
-                </li>
-                <li class="nav-item">
-                  <a href="designation.php" class="nav-link">
-                    <i class="fas fa-male nav-icon"></i>
-                    <p>Designation</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="idtype.php" class="nav-link">
-                    <i class="fas fa-id-card nav-icon"></i>
-                    <p>ID Type</p>
-                  </a>
-                </li>
+                </li>               
               </ul>
             </li>
               <li class="nav-item">
@@ -92,7 +82,7 @@
                     Employee
                   </p>
                 </a>
-              </li>
+              </li>              
               <li class="nav-item has-treeview">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-hourglass"></i>
@@ -122,7 +112,7 @@
               </li>     
               <li class="nav-item">
                 <a href="map.php" class="nav-link">
-                  <i class="nav-icon fas fa-map-marker"></i>
+                  <i class="nav-icon fas fa-map-marker-alt"></i>
                   <p>
                     Live Location
                   </p>

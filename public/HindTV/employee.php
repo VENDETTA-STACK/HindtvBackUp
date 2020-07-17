@@ -40,8 +40,8 @@
                           name="firstname"
                           placeholder="First Name"
                         />
-                      </div>
-                      <label id="errorFirstName"></label>
+                        <label id="errorFirstName" class="text-danger"></label>
+                      </div>                      
                       <div class="form-group col-md-3">
                         <label for="lastname">Middle Name</label>
                         <input
@@ -51,8 +51,8 @@
                           name="middlename"
                           placeholder="Middle Name"
                         />
-                      </div>
-                      <label id="errorMiddleName"></label>
+                        <label id="errorMiddleName"></label>
+                      </div>                      
                       <div class="form-group col-md-3">
                         <label for="lastname">Last Name</label>
                         <input
@@ -62,8 +62,8 @@
                           name="lastname"
                           placeholder="Last Name"
                         />
-                      </div>
-                      <label id="errorLastName"></label>
+                        <label id="errorLastName"></label>
+                      </div>                      
                       <div class="form-group col-md-3">
                         <label for="gender">Gender</label>
                         <div class="input-group">
@@ -78,8 +78,8 @@
                             </select>
                           </div>
                         </div>
-                      </div>
-                      <label id="errorGender"></label>
+                        <label id="errorGender"></label>
+                      </div>                      
                       <div class="form-group col-md-3">
                         <label for="dob">DOB</label>
                         <div class="input-group">
@@ -89,11 +89,12 @@
                               class="form-control"
                               id="dob"
                               name="dob"
+                              placeholder = "DOB"
                             />
                           </div>
                         </div>
-                      </div>
-                      <label id="errorDOB"></label>
+                        <label id="errorDOB"></label>
+                      </div>                      
                       <div class="form-group col-md-3">
                         <label for="mobile">Mobile Number</label>
                         <div class="input-group">
@@ -107,8 +108,8 @@
                             />
                           </div>
                         </div>
-                      </div>
-                      <label id="errorMobile"></label>
+                        <label id="errorMobile" class="text-danger"></label>
+                      </div>                      
                       <div class="form-group col-md-3">
                         <label for="mail">Mail</label>
                         <div class="input-group">
@@ -122,8 +123,8 @@
                             />
                           </div>
                         </div>
-                      </div>
-                      <label id="errorMail"></label>
+                        <label id="errorMail"></label>
+                      </div>                      
                       <div class="form-group col-md-3">
                         <label for="married">Maritial Status</label>
                         <div class="input-group">
@@ -148,11 +149,12 @@
                               class="form-control"
                               id="joindate"
                               name="joindate"
+                              placeholder = "Join Date"
                             />
                           </div>
                         </div>
-                      </div>
-                      <label id="errorJoinDate"></label>
+                        <label id="errorJoinDate"></label>
+                      </div>                      
                       <div class="form-group col-md-3">
                         <label for="confirmationdate">Confirmation Date</label>
                         <div class="input-group">
@@ -162,11 +164,12 @@
                               class="form-control"
                               id="confirmationdate"
                               name="confirmationdate"
+                              placeholder = "Confirmation Date"
                             />
                           </div>
                         </div>
-                      </div>
-                      <label id="errorConfirmationDate"></label>
+                        <label id="errorConfirmationDate"></label>
+                      </div>                      
                       <div class="form-group col-md-3">
                         <label for="terminationdate">Termination Date</label>
                         <div class="input-group">
@@ -176,11 +179,12 @@
                               class="form-control"
                               id="terminationdate"
                               name="terminationdate"
+                              placeholder = "Termination Date"
                             />
                           </div>
                         </div>
-                      </div>
-                      <label id="errorTerminationDate"></label>
+                        <label id="errorTerminationDate"></label>
+                      </div>                      
                       <div class="form-group col-md-3">
                         <label for="prohibition">Prohibition</label>
                         <input
@@ -258,16 +262,7 @@
                           </div>
                         </div>
                       </div>
-                      <div class="form-group col-md-3">
-                        <label for="timing">Timing</label>
-                        <div class="input-group">
-                          <select
-                            class="form-control"
-                            id="timing"
-                            name="timing"
-                          ></select>
-                        </div>
-                      </div>
+                      
                     </div>
                     <!-- /.card-body -->
                     <center>

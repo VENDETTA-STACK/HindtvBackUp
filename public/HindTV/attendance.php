@@ -86,6 +86,7 @@
                       <th>Time</th>
                       <th>View Image</th>
                       <th>Area of Attendance</th>
+                      <th>Distance(in meter)</th>
                       <th>Status</th>
                     </tr>
                   </thead>

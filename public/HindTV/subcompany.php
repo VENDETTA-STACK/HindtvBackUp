@@ -43,6 +43,7 @@
                           name="companyname"
                           placeholder="Company Name"
                         />
+                        <label id="errorName" class="text-danger"></label>
                       </div>
                       <div class="form-group col-md-3">
                         <label for="companyaddress">Company Address</label>
@@ -65,14 +66,14 @@
                         />
                       </div>
                       <div class="form-group col-md-3">
-                        <label for="ccpn">Contact Person Number</label>
+                        <label for="cpn">Contact Person Number</label>
                         <div class="input-group">
                           <div class="custom-file">
                             <input
                               type="text"
                               class="form-control"
-                              id="ccpn"
-                              name="ccpn"
+                              id="cpn"
+                              name="cpn"
                               placeholder="Contact Person Number"
                             />
                           </div>
@@ -119,6 +120,7 @@
                             />
                           </div>
                         </div>
+                        <label id="errorLatLong" class='text-danger'></label>
                       </div>
                       <div class="form-group col-md-3">
                         <label for="company">Company</label>
@@ -131,6 +133,16 @@
                             >
                             </select>
                           </div>
+                        </div>
+                      </div>
+                      <div class="form-group col-md-3">
+                        <label for="timing">Timing</label>
+                        <div class="input-group">
+                          <select
+                            class="form-control"
+                            id="timing"
+                            name="timing"
+                          ></select>
                         </div>
                       </div>
                     </div>
