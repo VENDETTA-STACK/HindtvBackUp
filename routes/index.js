@@ -13,6 +13,9 @@ var thoughtSchema = require("../models/thoughts.model");
 const geolib = require("geolib");
 const geolocationutils = require("geolocation-utils");
 const { stat } = require("fs");
+var Excel = require("exceljs");
+const tempfile = require("tempfile");
+const { start } = require("repl");
 var attendImg = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads");
@@ -918,7 +921,8 @@ router.post("/thought", async (req, res) => {
           result.isSuccess = false;
         } else {
           result.Message = "Thought Found";
-          result.Data = record;
+          result.Data = [];
+          result.Data.push(record);
           result.isSuccess = true;
         }
       }
@@ -1066,25 +1070,92 @@ router.post("/birthday", async (req, res) => {
 });
 
 router.post("/testing", async (req, res) => {
-  var location1 = {
-    lat: parseFloat(21.1915798),
-    lon: parseFloat(72.8556223),
-  };
-  var location2 = {
-    lat: parseFloat(21.1916376),
-    lon: parseFloat(72.8578122),
-  };
-  heading = geolib.getDistance(location1, location2);
-  console.log(heading);
-  var location1 = {
-    lat: parseFloat(21.191579818725586),
-    lon: parseFloat(72.8578109741211),
-  };
-  var location2 = {
-    lat: parseFloat(21.1916376),
-    lon: parseFloat(72.8578122),
-  };
-  heading = geolib.getDistance(location1, location2);
-  console.log(heading);
+  // start_date = moment().tz("Asia/Calcutta").format("DD MM YYYY, h:mm:ss");
+  // time = "10:30:00";
+  // end_date = moment()
+  //   .tz("Asia/Calcutta")
+  //   .format("DD MM YYYY" + ", " + time);
+  // console.log(typeof start_date);
+  // console.log(typeof end_date);
+  // var duration = moment.duration(end_date.diff(start_date));
+  // var days = duration.asDays();
+  // console.log(days);
+  // valuestart = "10:30:00";
+  // valuestop = "11:50:00";
+  // var timeStart = new Date("01/01/2007 " + valuestart).getHours();
+  // var timeEnd = new Date("01/01/2007 " + valuestop).getHours();
+  // var difference = timeEnd - timeStart;
+  var id = req.body.id;
+  var record = await employeeSchema.findById(id).populate({
+    path: "SubCompany",
+    populate: {
+      path: "Timing",
+    },
+  });
+  var time = moment()
+    .tz("Asia/Calcutta")
+    .format("DD MM YYYY, h:mm:ss a")
+    .split(",")[1];
+  var startTime = moment(record.SubCompany.Timing.StartTime, "HH:mm:ss a");
+  var endTime = moment(time, "HH:mm:ss a");
+
+  var duration = moment.duration(endTime.diff(startTime));
+  var hours = parseInt(duration.asHours());
+  var minutes = parseInt(duration.asMinutes()) - hours * 60;
+  var seconds = parseInt(duration.asSeconds()) - minutes * 60 - hours * 3600;
+  if (hours > 0 || minutes > 0 || seconds > 0) {
+    console.log("Late Entry");
+  } else {
+    console.log("Early Entry");
+  }
+  var startTime = moment(record.SubCompany.Timing.EndTime, "HH:mm:ss a");
+  var endTime = moment(time, "HH:mm:ss a");
+  var duration = moment.duration(endTime.diff(startTime));
+  var hours = parseInt(duration.asHours());
+  var minutes = parseInt(duration.asMinutes()) - hours * 60;
+  var seconds = parseInt(duration.asSeconds()) - minutes * 60 - hours * 3600;
+  if (hours < 0 || minutes < 0 || seconds < 0) {
+    console.log("Early Exit");
+  } else {
+    console.log("Late Exit");
+  }
+  // console.log(
+  //   record.SubCompany.Timing.StartTime.split(" ")[0] + ":00" - "15:46:30"
+  // );
+  // res.json(
+  //   record.SubCompany.Timing.StartTime.split(" ")[0] + ":00" > "15:46:30"
+  // );
+
+  // try {
+  //   var workbook = new Excel.Workbook();
+  //   var worksheet = workbook.addWorksheet("My Sheet");
+
+  //   var record = await employeeSchema.find({});
+
+  //   worksheet.columns = [
+  //     { header: "Id", key: "id", width: 10 },
+  //     { header: "Name", key: "Name", width: 32 },
+  //     { header: "Number", key: "Number", width: 20 },
+  //   ];
+
+  //   for (i = 0; i < record.length; i++) {
+  //     worksheet.addRow({
+  //       id: i + 1,
+  //       Name: record[i].Name,
+  //       Number: record[i].Mobile,
+  //     });
+  //   }
+
+  //   var tempFilePath = tempfile(".xlsx");
+  //   console.log(tempFilePath);
+  //   workbook.xlsx.writeFile(tempFilePath).then(function () {
+  //     console.log("file is written");
+  //     res.sendFile(tempFilePath, function (err) {
+  //       console.log("---------- error downloading file: " + err);
+  //     });
+  //   });
+  // } catch (err) {
+  //   console.log("OOOOOOO this is the error: " + err);
+  // }
 });
 module.exports = router;
