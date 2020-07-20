@@ -1162,6 +1162,30 @@ router.post("/birthday", async (req, res) => {
   res.json(result);
 });
 
+router.post("/memo", (req, res) => {
+  if (req.body.type == "singlememo") {
+    memoSchema.find({ Eid: req.body.id }, (err, record) => {
+      var result = {};
+      if (err) {
+        result.Message = "No Memo Found";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        if (record.length == 0) {
+          result.Message = "No Memo Found";
+          result.Data = [];
+          result.isSuccess = false;
+        } else {
+          result.Message = "Memo Found";
+          result.Data = record;
+          result.isSuccess = true;
+        }
+      }
+      res.json(result);
+    });
+  }
+});
+
 router.post("/testing", async (req, res) => {
   // start_date = moment().tz("Asia/Calcutta").format("DD MM YYYY, h:mm:ss");
   // time = "10:30:00";
