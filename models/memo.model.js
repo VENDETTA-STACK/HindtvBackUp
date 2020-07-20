@@ -10,9 +10,10 @@ var newSchema = mongoose.Schema({
   Hour: String,
   Minutes: String,
   Seconds: String,
-  Status: Boolean,
   Type: String,
   Reason: String,
+  ReasonSend: String,
+  Status: Boolean,
 });
 
 const memo = mongoose.model("memo", newSchema);

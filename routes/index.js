@@ -538,6 +538,7 @@ async function entrymemo(id, timing, period) {
       Seconds: seconds,
       Type: "in",
       Status: false,
+      ReasonSend: false,
     });
     record = await record.save();
     if (record.length == 1) {
@@ -574,6 +575,7 @@ async function exitmemo(id, timing, period) {
       Seconds: seconds,
       Type: "out",
       Status: false,
+      ReasonSend: false,
     });
     record = await record.save();
     if (record.length == 1) {
