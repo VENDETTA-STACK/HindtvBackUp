@@ -10,18 +10,19 @@ var employeeSchema = require("../models/employee.model");
 var attendeanceSchema = require("../models/attendance.models");
 var timingSchema = require("../models/timing.models");
 var thoughtSchema = require("../models/thoughts.model");
+var memoSchema = require("../models/memo.model");
 const geolib = require("geolib");
-const geolocationutils = require("geolocation-utils");
-const { stat } = require("fs");
+const { fs } = require("fs");
+const { promisify } = require("util");
 var Excel = require("exceljs");
 const tempfile = require("tempfile");
 const { start } = require("repl");
+
 var attendImg = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads");
   },
   filename: function (req, file, cb) {
-    console.log(file);
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(
       null,
@@ -513,54 +514,129 @@ function getdate() {
   attendance.day = day;
   return attendance;
 }
+
+async function entrymemo(id, timing, period) {
+  var message;
+  var startTime = moment(timing, "HH:mm:ss a");
+  var endTime = moment(period.time, "HH:mm:ss a");
+  var duration = moment.duration(endTime.diff(startTime));
+  var hours = parseInt(duration.asHours());
+  var minutes = parseInt(duration.asMinutes()) - hours * 60;
+  var seconds = parseInt(duration.asSeconds()) - minutes * 60 - hours * 3600;
+  if (hours > 0 || minutes > 0 || seconds > 0) {
+    var record = memoSchema({
+      Eid: id,
+      Hour: hours,
+      Minutes: minutes,
+      Seconds: seconds,
+      Status: false,
+    });
+    record = await record.save();
+    if (record.length == 1) {
+      message = 1;
+    } else {
+      message = 0;
+    }
+  } else {
+    message = 2;
+  }
+  return message;
+}
+
+async function exitmemo(id, timing, period) {
+  var message;
+  var startTime = moment(timing, "HH:mm:ss a");
+  var endTime = moment(period.time, "HH:mm:ss a");
+  var duration = moment.duration(endTime.diff(startTime));
+  var hours = parseInt(duration.asHours());
+  var minutes = parseInt(duration.asMinutes()) - hours * 60;
+  var seconds = parseInt(duration.asSeconds()) - minutes * 60 - hours * 3600;
+  if (hours < 0 || minutes < 0 || seconds < 0) {
+    var record = memoSchema({
+      Eid: id,
+      Hour: hours,
+      Minutes: minutes,
+      Seconds: seconds,
+      Status: false,
+    });
+    record = await record.save();
+    if (record.length == 1) {
+      message = 1;
+    } else {
+      message = 0;
+    }
+  } else {
+    message = 2;
+  }
+  return message;
+}
+
+function calculatelocation(name, lat1, long1, lat2, long2) {
+  if (lat1 == 0 || long1 == 0) {
+    area = 1; // Company Lat and Long is not defined.
+  } else {
+    const location1 = {
+      lat: parseFloat(lat1),
+      lon: parseFloat(long1),
+    };
+    const location2 = {
+      lat: parseFloat(lat2),
+      lon: parseFloat(long2),
+    };
+    heading = geolib.getDistance(location1, location2);
+    if (!isNaN(heading)) {
+      var area =
+        heading > 25
+          ? "http://www.google.com/maps/place/" + lat2 + "," + long2
+          : name; // Employee Lat and Long found.
+    } else {
+      area = 0; // Employee Lat and Long is not defined.
+    }
+  }
+  return area;
+}
+
 router.post("/attendance", upload.single("attendance"), async function (
   req,
   res,
   next
 ) {
-  console.log(req.body);
   period = getdate();
   if (req.body.type == "in") {
-    var longlat = await employeeSchema
-      .find({ _id: req.body.employeeid })
-      .populate("SubCompany");
-    console.log(req.body.latitude);
-    console.log(req.body.longitude);
-    if (
-      longlat[0]["SubCompany"].lat == 0 ||
-      longlat[0]["SubCompany"].long == 0
-    ) {
-      var result = {};
-      result.Message =
-        "Attendance Not Marked, Latitude and Longitude Not Found of Company";
-      result.Data = [];
-      result.isSuccess = false;
-      res.json(result);
-    } else if (req.body.latitude == "" || req.body.longitude == "") {
-      var result = {};
-      result.Message =
-        "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
-      result.Data = [];
-      result.isSuccess = false;
+    var longlat = await employeeSchema.findById(req.body.employeeid).populate({
+      path: "SubCompany",
+      populate: {
+        path: "Timing",
+      },
+    });
+    area = calculatelocation(
+      longlat.SubCompany.Name,
+      longlat.SubCompany.lat,
+      longlat.SubCompany.long,
+      req.body.latitude,
+      req.body.longitude
+    );
+    if (area == 0 || area == 1) {
+      if (area == 1) {
+        var result = {};
+        result.Message =
+          "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        var result = {};
+        result.Message =
+          "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+        result.Data = [];
+        result.isSuccess = false;
+      }
       res.json(result);
     } else {
-      const location1 = {
-        lat: parseFloat(longlat[0]["SubCompany"].lat),
-        lon: parseFloat(longlat[0]["SubCompany"].long),
-      };
-      const location2 = {
-        lat: parseFloat(req.body.latitude),
-        lon: parseFloat(req.body.longitude),
-      };
-      heading = geolib.getDistance(location1, location2);
-      var NAME = longlat[0]["SubCompany"].Name;
-      var area =
-        heading > 25
-          ? "http://www.google.com/maps/place/" +
-            req.body.latitude +
-            "," +
-            req.body.longitude
-          : NAME;
+      memo = await entrymemo(
+        req.body.employeeid,
+        longlat.SubCompany.Timing.StartTime,
+        period
+      );
       var record = attendeanceSchema({
         EmployeeId: req.body.employeeid,
         Status: req.body.type,
@@ -572,12 +648,13 @@ router.post("/attendance", upload.single("attendance"), async function (
         Elat: req.body.latitude,
         Elong: req.body.longitude,
         Distance: heading,
+        Memo: memo,
       });
       record.save({}, function (err, record) {
         var result = {};
         if (err) {
           result.Message = "Attendance Not Marked";
-          result.Data = [];
+          result.Data = err;
           result.isSuccess = false;
         } else {
           if (record.length == 0) {
@@ -594,44 +671,40 @@ router.post("/attendance", upload.single("attendance"), async function (
       });
     }
   } else if (req.body.type == "out") {
-    var longlat = await employeeSchema
-      .find({ _id: req.body.employeeid })
-      .populate("SubCompany");
-    if (
-      longlat[0]["SubCompany"].lat == 0 ||
-      longlat[0]["SubCompany"].long == 0
-    ) {
-      var result = {};
-      result.Message =
-        "Attendance Not Marked, Latitude and Longitude Not Found of Company";
-      result.Data = [];
-      result.isSuccess = false;
-      res.json(result);
-    } else if (req.body.latitude == "" || req.body.longitude == "") {
-      var result = {};
-      result.Message =
-        "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
-      result.Data = [];
-      result.isSuccess = false;
+    var longlat = await employeeSchema.findById(req.body.employeeid).populate({
+      path: "SubCompany",
+      populate: {
+        path: "Timing",
+      },
+    });
+    area = calculatelocation(
+      longlat.SubCompany.Name,
+      longlat.SubCompany.lat,
+      longlat.SubCompany.long,
+      req.body.latitude,
+      req.body.longitude
+    );
+    if (area == 0 || area == 1) {
+      if (area == 1) {
+        var result = {};
+        result.Message =
+          "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        var result = {};
+        result.Message =
+          "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+        result.Data = [];
+        result.isSuccess = false;
+      }
       res.json(result);
     } else {
-      const location1 = {
-        lat: parseFloat(longlat[0]["SubCompany"].lat),
-        lon: parseFloat(longlat[0]["SubCompany"].long),
-      };
-      const location2 = {
-        lat: parseFloat(req.body.latitude),
-        lon: parseFloat(req.body.longitude),
-      };
-      heading = geolib.getDistance(location1, location2);
-      var NAME = longlat[0]["SubCompany"].Name;
-      var area =
-        heading > 25
-          ? "http://www.google.com/maps/place/" +
-            req.body.latitude +
-            "," +
-            req.body.longitude
-          : NAME;
+      memo = await exitmemo(
+        req.body.employeeid,
+        longlat.SubCompany.Timing.EndTime,
+        period
+      );
       var record = attendeanceSchema({
         EmployeeId: req.body.employeeid,
         Status: req.body.type,
@@ -643,12 +716,14 @@ router.post("/attendance", upload.single("attendance"), async function (
         Elat: req.body.latitude,
         Elong: req.body.longitude,
         Distance: heading,
+        Memo: parseInt(memo),
       });
       record.save({}, function (err, record) {
+        console.log(record);
         var result = {};
         if (err) {
           result.Message = "Attendance Not Marked";
-          result.Data = [];
+          result.Data = err;
           result.isSuccess = false;
         } else {
           if (record.length == 0) {
@@ -1087,59 +1162,21 @@ router.post("/testing", async (req, res) => {
   // var timeStart = new Date("01/01/2007 " + valuestart).getHours();
   // var timeEnd = new Date("01/01/2007 " + valuestop).getHours();
   // var difference = timeEnd - timeStart;
-  var id = req.body.id;
-  var record = await employeeSchema.findById(id).populate({
-    path: "SubCompany",
-    populate: {
-      path: "Timing",
-    },
-  });
-  var time = moment()
-    .tz("Asia/Calcutta")
-    .format("DD MM YYYY, h:mm:ss a")
-    .split(",")[1];
-  var startTime = moment(record.SubCompany.Timing.StartTime, "HH:mm:ss a");
-  var endTime = moment(time, "HH:mm:ss a");
-
-  var duration = moment.duration(endTime.diff(startTime));
-  var hours = parseInt(duration.asHours());
-  var minutes = parseInt(duration.asMinutes()) - hours * 60;
-  var seconds = parseInt(duration.asSeconds()) - minutes * 60 - hours * 3600;
-  if (hours > 0 || minutes > 0 || seconds > 0) {
-    console.log("Late Entry");
-  } else {
-    console.log("Early Entry");
-  }
-  var startTime = moment(record.SubCompany.Timing.EndTime, "HH:mm:ss a");
-  var endTime = moment(time, "HH:mm:ss a");
-  var duration = moment.duration(endTime.diff(startTime));
-  var hours = parseInt(duration.asHours());
-  var minutes = parseInt(duration.asMinutes()) - hours * 60;
-  var seconds = parseInt(duration.asSeconds()) - minutes * 60 - hours * 3600;
-  if (hours < 0 || minutes < 0 || seconds < 0) {
-    console.log("Early Exit");
-  } else {
-    console.log("Late Exit");
-  }
   // console.log(
   //   record.SubCompany.Timing.StartTime.split(" ")[0] + ":00" - "15:46:30"
   // );
   // res.json(
   //   record.SubCompany.Timing.StartTime.split(" ")[0] + ":00" > "15:46:30"
   // );
-
   // try {
   //   var workbook = new Excel.Workbook();
   //   var worksheet = workbook.addWorksheet("My Sheet");
-
   //   var record = await employeeSchema.find({});
-
   //   worksheet.columns = [
   //     { header: "Id", key: "id", width: 10 },
   //     { header: "Name", key: "Name", width: 32 },
   //     { header: "Number", key: "Number", width: 20 },
   //   ];
-
   //   for (i = 0; i < record.length; i++) {
   //     worksheet.addRow({
   //       id: i + 1,
@@ -1147,7 +1184,6 @@ router.post("/testing", async (req, res) => {
   //       Number: record[i].Mobile,
   //     });
   //   }
-
   //   var tempFilePath = tempfile(".xlsx");
   //   console.log(tempFilePath);
   //   workbook.xlsx.writeFile(tempFilePath).then(function () {

@@ -15,6 +15,7 @@ var newSchema = mongoose.Schema({
   Elat: String,
   Elong: String,
   Distance: String,
+  Memo: Number,
 });
 
 const admin = mongoose.model("attendance", newSchema);
