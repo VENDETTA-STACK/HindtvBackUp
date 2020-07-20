@@ -6,6 +6,7 @@ var newSchema = mongoose.Schema({
     ref: "employee",
     required: true,
   },
+  Date: String,
   Hour: String,
   Minutes: String,
   Seconds: String,

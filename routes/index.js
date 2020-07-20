@@ -524,8 +524,15 @@ async function entrymemo(id, timing, period) {
   var minutes = parseInt(duration.asMinutes()) - hours * 60;
   var seconds = parseInt(duration.asSeconds()) - minutes * 60 - hours * 3600;
   if (hours > 0 || minutes > 0 || seconds > 0) {
+    var date = moment()
+      .tz("Asia/Calcutta")
+      .format("DD MM YYYY, h:mm:ss a")
+      .split(",")[0];
+    date = date.split(" ");
+    date = date[0] + "/" + date[1] + "/" + date[2];
     var record = memoSchema({
       Eid: id,
+      Date: date,
       Hour: hours,
       Minutes: minutes,
       Seconds: seconds,
@@ -552,8 +559,15 @@ async function exitmemo(id, timing, period) {
   var minutes = parseInt(duration.asMinutes()) - hours * 60;
   var seconds = parseInt(duration.asSeconds()) - minutes * 60 - hours * 3600;
   if (hours < 0 || minutes < 0 || seconds < 0) {
+    var date = moment()
+      .tz("Asia/Calcutta")
+      .format("DD MM YYYY, h:mm:ss a")
+      .split(",")[0];
+    date = date.split(" ");
+    date = date[0] + "/" + date[1] + "/" + date[2];
     var record = memoSchema({
       Eid: id,
+      Date: date,
       Hour: hours,
       Minutes: minutes,
       Seconds: seconds,
