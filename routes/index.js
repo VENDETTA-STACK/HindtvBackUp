@@ -536,6 +536,7 @@ async function entrymemo(id, timing, period) {
       Hour: hours,
       Minutes: minutes,
       Seconds: seconds,
+      Type: "in",
       Status: false,
     });
     record = await record.save();
@@ -571,6 +572,7 @@ async function exitmemo(id, timing, period) {
       Hour: hours,
       Minutes: minutes,
       Seconds: seconds,
+      Type: "out",
       Status: false,
     });
     record = await record.save();

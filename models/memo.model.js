@@ -11,6 +11,7 @@ var newSchema = mongoose.Schema({
   Minutes: String,
   Seconds: String,
   Status: Boolean,
+  Type: String,
 });
 
 const memo = mongoose.model("memo", newSchema);
