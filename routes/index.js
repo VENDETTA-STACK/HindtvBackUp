@@ -1059,7 +1059,9 @@ router.post("/birthday", async (req, res) => {
     for (i = 0; i < record.length; i++) {
       data = {
         Message: "Many many happy returns of the day from DL Team",
-        Name: record[i].Name + " - " + record[i].SubCompany.Name,
+        From: "DL - Team",
+        Name: record[i].Name,
+        Subcompany: record[i].SubCompany.Name,
         Mobile: record[i].Mobile,
       };
       result.Data.push(data);
