@@ -1232,6 +1232,21 @@ router.post("/memo", async (req, res) => {
         res.json(result);
       }
     );
+  } else if (req.body.type == "datememo") {
+    var record = await memoSchema
+      .find({ Date: { $gte: req.body.startdate, $lte: req.body.enddate } })
+      .populate("Eid", "Name");
+    var result = {};
+    if (record.length == 0) {
+      result.Message = "No Memo Found";
+      result.Data = [];
+      result.isSuccess = false;
+    } else {
+      result.Message = "Memo Found";
+      result.Data = record;
+      result.isSuccess = true;
+    }
+    res.json(result);
   }
 });
 
@@ -1258,7 +1273,7 @@ router.post("/beforeattendance", (req, res) => {
               duty: "in",
             },
           ];
-          result.isSuccess = false;
+          result.isSuccess = true;
         } else {
           result.Message = "Attendance Found";
           result.Data = [
