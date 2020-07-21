@@ -17,6 +17,7 @@ const { promisify } = require("util");
 var Excel = require("exceljs");
 const tempfile = require("tempfile");
 const { start } = require("repl");
+const mongoose = require("mongoose");
 
 var attendImg = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -1233,9 +1234,15 @@ router.post("/memo", async (req, res) => {
       }
     );
   } else if (req.body.type == "datememo") {
-    var record = await memoSchema
-      .find({ Date: { $gte: req.body.startdate, $lte: req.body.enddate } })
-      .populate("Eid", "Name");
+    record = await memoSchema
+      .find({
+        Eid: req.body.employee,
+        Date: { $gte: req.body.startdate, $lte: req.body.enddate },
+      })
+      .populate({
+        path: "Eid",
+        select: "Name",
+      });
     var result = {};
     if (record.length == 0) {
       result.Message = "No Memo Found";
