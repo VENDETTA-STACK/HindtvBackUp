@@ -12,8 +12,9 @@ var newSchema = mongoose.Schema({
   Seconds: String,
   Type: String,
   Reason: String,
-  ReasonSend: String,
-  Status: Boolean,
+  ReasonSend: Boolean,
+  Status: String,
+  DateTime: String,
 });
 
 const memo = mongoose.model("memo", newSchema);
