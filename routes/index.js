@@ -857,7 +857,7 @@ router.post("/location", async (req, res) => {
   if (req.body.type == "getnamefrommobile") {
     record = await employeeSchema
       .find({ Mobile: req.body.mobile })
-      .select("Name");
+      .select("Name Mobile");
     res.json(record);
   } else {
     var dbRef = firebase.database().ref("Database");
