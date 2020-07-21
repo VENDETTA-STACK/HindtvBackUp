@@ -854,11 +854,18 @@ router.post("/attendance", upload.single("attendance"), async function (
 });
 
 router.post("/location", async (req, res) => {
-  var dbRef = firebase.database().ref("Database");
-  const data = await dbRef.once("value", function (snapshot) {
-    return snapshot.val();
-  });
-  res.json(data);
+  if (req.body.type == "getnamefrommobile") {
+    record = await employeeSchema
+      .find({ Mobile: req.body.mobile })
+      .select("Name");
+    res.json(record);
+  } else {
+    var dbRef = firebase.database().ref("Database");
+    const data = await dbRef.once("value", function (snapshot) {
+      return snapshot.val();
+    });
+    res.json(data);
+  }
 });
 
 router.post("/timing", async (req, res) => {
