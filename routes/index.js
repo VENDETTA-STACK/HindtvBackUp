@@ -1376,4 +1376,12 @@ router.post("/testing", async (req, res) => {
   //   console.log("OOOOOOO this is the error: " + err);
   // }
 });
+
+router.post("/getotp", (req, res) => {
+  var result = {};
+  result.Message = "OPT";
+  result.Data = 0;
+  result.isSuccess = true;
+});
+
 module.exports = router;
