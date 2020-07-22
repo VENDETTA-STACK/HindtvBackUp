@@ -1382,6 +1382,7 @@ router.post("/getotp", (req, res) => {
   result.Message = "OPT";
   result.Data = 0;
   result.isSuccess = true;
+  res.json(result);
 });
 
 module.exports = router;
