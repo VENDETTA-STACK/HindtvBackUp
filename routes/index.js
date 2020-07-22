@@ -1229,6 +1229,32 @@ router.post("/memo", async (req, res) => {
       result.isSuccess = true;
     }
     res.json(result);
+  } else if (req.body.type == "verifymemo") {
+    memoSchema.findByIdAndUpdate(
+      req.body.id,
+      {
+        Status: req.body.status,
+      },
+      (err, record) => {
+        var result = {};
+        if (err) {
+          result.Message = "No Memo Found";
+          result.Data = [];
+          result.isSuccess = false;
+        } else {
+          if (record.length == 0) {
+            result.Message = "No Memo Found";
+            result.Data = [];
+            result.isSuccess = false;
+          } else {
+            result.Message = "Memo Found";
+            result.Data = record;
+            result.isSuccess = true;
+          }
+        }
+        res.json(result);
+      }
+    );
   }
 });
 
