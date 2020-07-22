@@ -1174,25 +1174,34 @@ router.post("/birthday", async (req, res) => {
 
 router.post("/memo", async (req, res) => {
   if (req.body.type == "singlememo") {
-    memoSchema.find({ Eid: req.body.id }, async (err, record) => {
-      var result = {};
-      if (err) {
-        result.Message = "No Memo Found";
-        result.Data = [];
-        result.isSuccess = false;
-      } else {
-        if (record.length == 0) {
+    memoSchema.find(
+      {
+        Eid: req.body.id,
+        Date: {
+          $gte: req.body.startdate,
+          $lte: req.body.enddate,
+        },
+      },
+      async (err, record) => {
+        var result = {};
+        if (err) {
           result.Message = "No Memo Found";
           result.Data = [];
           result.isSuccess = false;
         } else {
-          result.Message = "Memo Found";
-          result.Data = record;
-          result.isSuccess = true;
+          if (record.length == 0) {
+            result.Message = "No Memo Found";
+            result.Data = [];
+            result.isSuccess = false;
+          } else {
+            result.Message = "Memo Found";
+            result.Data = record;
+            result.isSuccess = true;
+          }
         }
+        res.json(result);
       }
-      res.json(result);
-    });
+    );
   } else if (req.body.type == "datememo") {
     record = await memoSchema
       .find({
