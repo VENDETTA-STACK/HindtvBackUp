@@ -606,7 +606,7 @@ function calculatelocation(name, lat1, long1, lat2, long2) {
     heading = geolib.getDistance(location1, location2);
     if (!isNaN(heading)) {
       var area =
-        heading > 10
+        heading > 30
           ? "http://www.google.com/maps/place/" + lat2 + "," + long2
           : name; // Employee Lat and Long found.
     } else {
@@ -1340,8 +1340,8 @@ router.post("/testing", async (req, res) => {
   record = await attendeanceSchema
     .find({
       Date: {
-        $gte: "01/07/2020",
-        $lte: "31/07/2020",
+        $gte: "20/07/2020",
+        $lte: "20/07/2020",
       },
     })
     .select("Status Date Time Day")
@@ -1357,15 +1357,23 @@ router.post("/testing", async (req, res) => {
     }
   });
   var result = _.groupBy(result, "EmployeeId.Name");
-  result = _.forEach(result, function (value, key) {
-    result[key] = _.groupBy(result[key], function (item) {
-      return item.Status;
-    });
-  });
+  // result = _.forEach(result, function (value, key) {
+  //   result[key] = _.groupBy(result[key], function (item) {
+  //     return item.Status;
+  //   });
+  // });
   // var res = _.values(result);
   // for (i = 0; i < res.length; i++) {
   //   console.log(res);
   // }
+  for (var key in result) {
+    if (result.hasOwnProperty(key)) {
+      console.log(key);
+      for (var key1 in result[key]) {
+        console.log(result[key][key1].Status);
+      }
+    }
+  }
   res.json(result);
 });
 
