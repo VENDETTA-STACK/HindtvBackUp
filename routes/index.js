@@ -1357,11 +1357,11 @@ router.post("/testing", async (req, res) => {
     }
   });
   var result = _.groupBy(result, "EmployeeId.Name");
-  // result = _.forEach(result, function (value, key) {
-  //   result[key] = _.groupBy(result[key], function (item) {
-  //     return item.Status;
-  //   });
-  // });
+  result = _.forEach(result, function (value, key) {
+    result[key] = _.groupBy(result[key], function (item) {
+      return item.Status;
+    });
+  });
   // var res = _.values(result);
   // for (i = 0; i < res.length; i++) {
   //   console.log(res);
@@ -1370,11 +1370,14 @@ router.post("/testing", async (req, res) => {
     if (result.hasOwnProperty(key)) {
       console.log(key);
       for (var key1 in result[key]) {
-        console.log(result[key][key1].Status);
+        console.log(key1);
+        for (var key2 in result[key][key1]) {
+          console.log(key2);
+        }
       }
     }
   }
-  res.json(result);
+  // res.json(result);
 });
 
 router.post("/getotp", (req, res) => {
