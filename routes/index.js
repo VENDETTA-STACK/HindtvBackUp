@@ -18,6 +18,7 @@ var Excel = require("exceljs");
 const tempfile = require("tempfile");
 const { start } = require("repl");
 const mongoose = require("mongoose");
+var _ = require("lodash");
 
 var attendImg = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -605,7 +606,7 @@ function calculatelocation(name, lat1, long1, lat2, long2) {
     heading = geolib.getDistance(location1, location2);
     if (!isNaN(heading)) {
       var area =
-        heading > 25
+        heading > 75
           ? "http://www.google.com/maps/place/" + lat2 + "," + long2
           : name; // Employee Lat and Long found.
     } else {
@@ -1336,27 +1337,30 @@ router.post("/beforeattendance", (req, res) => {
 });
 
 router.post("/testing", async (req, res) => {
-  // start_date = moment().tz("Asia/Calcutta").format("DD MM YYYY, h:mm:ss");
-  // time = "10:30:00";
-  // end_date = moment()
-  //   .tz("Asia/Calcutta")
-  //   .format("DD MM YYYY" + ", " + time);
-  // console.log(typeof start_date);
-  // console.log(typeof end_date);
-  // var duration = moment.duration(end_date.diff(start_date));
-  // var days = duration.asDays();
-  // console.log(days);
-  // valuestart = "10:30:00";
-  // valuestop = "11:50:00";
-  // var timeStart = new Date("01/01/2007 " + valuestart).getHours();
-  // var timeEnd = new Date("01/01/2007 " + valuestop).getHours();
-  // var difference = timeEnd - timeStart;
-  // console.log(
-  //   record.SubCompany.Timing.StartTime.split(" ")[0] + ":00" - "15:46:30"
-  // );
-  // res.json(
-  //   record.SubCompany.Timing.StartTime.split(" ")[0] + ":00" > "15:46:30"
-  // );
+  record = await attendeanceSchema
+    .find({
+      Date: {
+        $gte: "20/07/2020",
+        $lte: "20/07/2020",
+      },
+    })
+    .select("Status Date Time Day")
+    .populate({
+      path: "EmployeeId",
+      select: "Name",
+      match: { SubCompany: "5ef975ff184d8c2db64b6d79" },
+    });
+  var result = [];
+  record.map((records) => {
+    if (records.EmployeeId != null) {
+      result.push(records);
+    }
+  });
+  var result = _.groupBy(result, "EmployeeId.Name");
+  result = _.mapValues(result, function (key, values) {
+    return _.groupBy(result[values.Status], "Staus");
+  });
+  res.json(result);
   // try {
   //   var workbook = new Excel.Workbook();
   //   var worksheet = workbook.addWorksheet("My Sheet");
