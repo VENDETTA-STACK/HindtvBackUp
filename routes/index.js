@@ -606,7 +606,7 @@ function calculatelocation(name, lat1, long1, lat2, long2) {
     heading = geolib.getDistance(location1, location2);
     if (!isNaN(heading)) {
       var area =
-        heading > 75
+        heading > 10
           ? "http://www.google.com/maps/place/" + lat2 + "," + long2
           : name; // Employee Lat and Long found.
     } else {
@@ -1340,8 +1340,8 @@ router.post("/testing", async (req, res) => {
   record = await attendeanceSchema
     .find({
       Date: {
-        $gte: "20/07/2020",
-        $lte: "20/07/2020",
+        $gte: "01/07/2020",
+        $lte: "31/07/2020",
       },
     })
     .select("Status Date Time Day")
@@ -1357,37 +1357,16 @@ router.post("/testing", async (req, res) => {
     }
   });
   var result = _.groupBy(result, "EmployeeId.Name");
-  result = _.mapValues(result, function (key, values) {
-    return _.groupBy(result[values.Status], "Staus");
+  result = _.forEach(result, function (value, key) {
+    result[key] = _.groupBy(result[key], function (item) {
+      return item.Status;
+    });
   });
-  res.json(result);
-  // try {
-  //   var workbook = new Excel.Workbook();
-  //   var worksheet = workbook.addWorksheet("My Sheet");
-  //   var record = await employeeSchema.find({});
-  //   worksheet.columns = [
-  //     { header: "Id", key: "id", width: 10 },
-  //     { header: "Name", key: "Name", width: 32 },
-  //     { header: "Number", key: "Number", width: 20 },
-  //   ];
-  //   for (i = 0; i < record.length; i++) {
-  //     worksheet.addRow({
-  //       id: i + 1,
-  //       Name: record[i].Name,
-  //       Number: record[i].Mobile,
-  //     });
-  //   }
-  //   var tempFilePath = tempfile(".xlsx");
-  //   console.log(tempFilePath);
-  //   workbook.xlsx.writeFile(tempFilePath).then(function () {
-  //     console.log("file is written");
-  //     res.sendFile(tempFilePath, function (err) {
-  //       console.log("---------- error downloading file: " + err);
-  //     });
-  //   });
-  // } catch (err) {
-  //   console.log("OOOOOOO this is the error: " + err);
+  // var res = _.values(result);
+  // for (i = 0; i < res.length; i++) {
+  //   console.log(res);
   // }
+  res.json(result);
 });
 
 router.post("/getotp", (req, res) => {
