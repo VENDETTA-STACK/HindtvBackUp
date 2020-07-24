@@ -35,7 +35,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-app.use("uploads", express.static(__dirname + "uploads"));
+app.use("/uploads", express.static(__dirname + "/uploads"));
+app.use("/reports", express.static(__dirname + "/reports"));
 app.use(cors());
 
 app.use("/", indexRouter);
