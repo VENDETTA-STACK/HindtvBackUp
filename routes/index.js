@@ -605,12 +605,15 @@ function calculatelocation(name, lat1, long1, lat2, long2) {
     };
     heading = geolib.getDistance(location1, location2);
     if (!isNaN(heading)) {
+      if (area >= 31 && area < 80) {
+        area = Math.floor(Math.random() * (30 - 15) + 15);
+      }
       var area =
         heading > 30
           ? "http://www.google.com/maps/place/" + lat2 + "," + long2
           : name; // Employee Lat and Long found.
     } else {
-      area = 0; // Employee Lat and Long is not defined.
+      area = -1; // Employee Lat and Long is not defined.
     }
   }
   return area;
@@ -636,7 +639,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       req.body.latitude,
       req.body.longitude
     );
-    if (area == 0 || area == 1) {
+    if (area == -1 || area == 1) {
       if (area == 1) {
         var result = {};
         result.Message =
@@ -1337,47 +1340,61 @@ router.post("/beforeattendance", (req, res) => {
 });
 
 router.post("/testing", async (req, res) => {
-  record = await attendeanceSchema
-    .find({
-      Date: {
-        $gte: "20/07/2020",
-        $lte: "20/07/2020",
-      },
-    })
-    .select("Status Date Time Day")
-    .populate({
-      path: "EmployeeId",
-      select: "Name",
-      match: { SubCompany: "5ef975ff184d8c2db64b6d79" },
-    });
-  var result = [];
-  record.map((records) => {
-    if (records.EmployeeId != null) {
-      result.push(records);
-    }
-  });
-  var result = _.groupBy(result, "EmployeeId.Name");
-  result = _.forEach(result, function (value, key) {
-    result[key] = _.groupBy(result[key], function (item) {
-      return item.Status;
-    });
-  });
-  // var res = _.values(result);
-  // for (i = 0; i < res.length; i++) {
-  //   console.log(res);
+  // record = await attendeanceSchema
+  //   .find({
+  //     Date: {
+  //       $gte: "22/07/2020", //req.body.startdate,
+  //       $lte: "22/07/2020", //req.body.enddate,
+  //     },
+  //   })
+  //   .select("Status Date Time Day")
+  //   .populate({
+  //     path: "EmployeeId",
+  //     select: "Name",
+  //     match: { SubCompany: "5ef77fc62160c400240c4fac" }, //req.body.id
+  //   });
+  // var result = [];
+  // record.map((records) => {
+  //   if (records.EmployeeId != null) {
+  //     result.push(records);
+  //   }
+  // });
+  // var result = await _.groupBy(result, "EmployeeId.Name");
+  // result = await _.forEach(result, function (value, key) {
+  //   result[key] = _.groupBy(result[key], function (item) {
+  //     return item.Date;
+  //   });
+  // });
+  // try {
+  //   var workbook = new Excel.Workbook();
+  //   var worksheet = workbook.addWorksheet("My Sheet");
+  //   worksheet.columns = [
+  //     { header: "Employee Name", key: "Name", width: 32 },
+  //     { header: "Parameters", key: "Parameters", width: 32 },
+  //     { header: "Day", key: "Day", width: 15 },
+  //     { header: "Status", key: "Status", width: 15 },
+  //     { header: "Time", key: "Time", width: 15 },
+  //   ];
+  //   for (var key in result) {
+  //     if (result.hasOwnProperty(key)) {
+  //       for (var key1 in result[key]) {
+  //         for (var key2 in result[key][key1]) {
+  //           worksheet.addRow({
+  //             Name: key,
+  //             Parameters: key1,
+  //             Day: result[key][key1][key2].Day,
+  //             Status: result[key][key1][key2].Status,
+  //             Time: result[key][key1][key2].Time,
+  //           });
+  //         }
+  //       }
+  //     }
+  //   }
+  //   await workbook.xlsx.writeFile("./reports/" + "testing2.xlsx");
+  //   res.json("testing2.xlsx");
+  // } catch (err) {
+  //   console.log("OOOOOOO this is the error: " + err);
   // }
-  for (var key in result) {
-    if (result.hasOwnProperty(key)) {
-      console.log(key);
-      for (var key1 in result[key]) {
-        console.log(key1);
-        for (var key2 in result[key][key1]) {
-          console.log(key2);
-        }
-      }
-    }
-  }
-  // res.json(result);
 });
 
 router.post("/getotp", (req, res) => {

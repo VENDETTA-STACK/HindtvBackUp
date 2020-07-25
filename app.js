@@ -35,7 +35,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+<<<<<<< HEAD
 app.use("/api/uploads", express.static(__dirname + "/uploads"));
+=======
+app.use("/uploads", express.static(__dirname + "/uploads"));
+app.use("/reports", express.static(__dirname + "/reports"));
+>>>>>>> af4d3e8895898e75730a596aad441bca96971c8d
 app.use(cors());
 
 app.use("/api/", indexRouter);
