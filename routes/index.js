@@ -1366,7 +1366,11 @@ router.post("/testing", async (req, res) => {
     });
   });
   result = _.forEach(result, function (value, key) {
-    console.log(result.value);
+    _.forEach(result[key], function (value, key1) {
+      result[key][key1] = _.groupBy(result[key][key1], function (item) {
+        return item.Status;
+      });
+    });
   });
 
   res.json(result);
