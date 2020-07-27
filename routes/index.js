@@ -605,8 +605,8 @@ function calculatelocation(name, lat1, long1, lat2, long2) {
     };
     heading = geolib.getDistance(location1, location2);
     if (!isNaN(heading)) {
-      if (area >= 31 && area < 80) {
-        area = Math.floor(Math.random() * (30 - 15) + 15);
+      if (heading >= 31 && heading < 80) {
+        heading = Math.floor(Math.random() * (30 - 15) + 15);
       }
       var area =
         heading > 30
@@ -1340,31 +1340,36 @@ router.post("/beforeattendance", (req, res) => {
 });
 
 router.post("/testing", async (req, res) => {
-  // record = await attendeanceSchema
-  //   .find({
-  //     Date: {
-  //       $gte: "22/07/2020", //req.body.startdate,
-  //       $lte: "22/07/2020", //req.body.enddate,
-  //     },
-  //   })
-  //   .select("Status Date Time Day")
-  //   .populate({
-  //     path: "EmployeeId",
-  //     select: "Name",
-  //     match: { SubCompany: "5ef77fc62160c400240c4fac" }, //req.body.id
-  //   });
-  // var result = [];
-  // record.map((records) => {
-  //   if (records.EmployeeId != null) {
-  //     result.push(records);
-  //   }
-  // });
-  // var result = await _.groupBy(result, "EmployeeId.Name");
-  // result = await _.forEach(result, function (value, key) {
-  //   result[key] = _.groupBy(result[key], function (item) {
-  //     return item.Date;
-  //   });
-  // });
+  record = await attendeanceSchema
+    .find({
+      Date: {
+        $gte: req.body.startdate,
+        $lte: req.body.enddate,
+      },
+    })
+    .select("Status Date Time Day")
+    .populate({
+      path: "EmployeeId",
+      select: "Name",
+      match: { SubCompany: mongoose.Types.ObjectId(req.body.company) },
+    });
+  var result = [];
+  record.map(async (records) => {
+    if (records.EmployeeId != null) {
+      result.push(records);
+    }
+  });
+  var result = _.groupBy(result, "EmployeeId.Name");
+  result = _.forEach(result, function (value, key) {
+    result[key] = _.groupBy(result[key], function (item) {
+      return item.Date;
+    });
+  });
+  result = _.forEach(result, function (value, key) {
+    console.log(result.value);
+  });
+
+  res.json(result);
   // try {
   //   var workbook = new Excel.Workbook();
   //   var worksheet = workbook.addWorksheet("My Sheet");
@@ -1375,6 +1380,7 @@ router.post("/testing", async (req, res) => {
   //     { header: "Status", key: "Status", width: 15 },
   //     { header: "Time", key: "Time", width: 15 },
   //   ];
+
   //   for (var key in result) {
   //     if (result.hasOwnProperty(key)) {
   //       for (var key1 in result[key]) {
@@ -1390,8 +1396,8 @@ router.post("/testing", async (req, res) => {
   //       }
   //     }
   //   }
-  //   await workbook.xlsx.writeFile("./reports/" + "testing2.xlsx");
-  //   res.json("testing2.xlsx");
+  //   await workbook.xlsx.writeFile("./reports/" + req.body.name + ".xlsx");
+  //   res.json(req.body.name + ".xlsx");
   // } catch (err) {
   //   console.log("OOOOOOO this is the error: " + err);
   // }
