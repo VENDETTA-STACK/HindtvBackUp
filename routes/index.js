@@ -158,7 +158,6 @@ router.post("/subcompany", function (req, res, next) {
       lat: parseFloat(req.body.lat),
       long: parseFloat(req.body.long),
       Link: req.body.googlelink,
-      Timing: req.body.timing,
     });
     record.save({}, function (err, record) {
       console.log(err);
@@ -274,7 +273,6 @@ router.post("/subcompany", function (req, res, next) {
         lat: parseFloat(req.body.lat),
         long: parseFloat(req.body.long),
         Link: req.body.googlelink,
-        Timing: req.body.timing,
       },
       (err, record) => {
         var result = {};
@@ -1340,61 +1338,110 @@ router.post("/beforeattendance", (req, res) => {
 });
 
 router.post("/testing", async (req, res) => {
-  // record = await attendeanceSchema
-  //   .find({
-  //     Date: {
-  //       $gte: "22/07/2020", //req.body.startdate,
-  //       $lte: "22/07/2020", //req.body.enddate,
-  //     },
-  //   })
-  //   .select("Status Date Time Day")
-  //   .populate({
-  //     path: "EmployeeId",
-  //     select: "Name",
-  //     match: { SubCompany: "5ef77fc62160c400240c4fac" }, //req.body.id
-  //   });
-  // var result = [];
-  // record.map((records) => {
-  //   if (records.EmployeeId != null) {
-  //     result.push(records);
-  //   }
-  // });
-  // var result = await _.groupBy(result, "EmployeeId.Name");
-  // result = await _.forEach(result, function (value, key) {
-  //   result[key] = _.groupBy(result[key], function (item) {
-  //     return item.Date;
-  //   });
-  // });
-  // try {
-  //   var workbook = new Excel.Workbook();
-  //   var worksheet = workbook.addWorksheet("My Sheet");
-  //   worksheet.columns = [
-  //     { header: "Employee Name", key: "Name", width: 32 },
-  //     { header: "Parameters", key: "Parameters", width: 32 },
-  //     { header: "Day", key: "Day", width: 15 },
-  //     { header: "Status", key: "Status", width: 15 },
-  //     { header: "Time", key: "Time", width: 15 },
-  //   ];
-  //   for (var key in result) {
-  //     if (result.hasOwnProperty(key)) {
-  //       for (var key1 in result[key]) {
-  //         for (var key2 in result[key][key1]) {
-  //           worksheet.addRow({
-  //             Name: key,
-  //             Parameters: key1,
-  //             Day: result[key][key1][key2].Day,
-  //             Status: result[key][key1][key2].Status,
-  //             Time: result[key][key1][key2].Time,
-  //           });
-  //         }
-  //       }
-  //     }
-  //   }
-  //   await workbook.xlsx.writeFile("./reports/" + "testing2.xlsx");
-  //   res.json("testing2.xlsx");
-  // } catch (err) {
-  //   console.log("OOOOOOO this is the error: " + err);
-  // }
+  record = await attendeanceSchema
+    .find({
+      Date: {
+        $gte: req.body.startdate,
+        $lte: req.body.enddate,
+      },
+    })
+    .select("Status Date Time Day")
+    .populate({
+      path: "EmployeeId",
+      select: "Name",
+      match: {
+        SubCompany: mongoose.Types.ObjectId(req.body.company),
+      },
+    });
+  if (record.length >= 0) {
+    var result = [];
+    record.map(async (records) => {
+      if (records.EmployeeId != null) {
+        result.push(records);
+      }
+    });
+    if (result.length >= 0) {
+      var result = _.groupBy(result, "EmployeeId.Name");
+      result = _.forEach(result, function (value, key) {
+        result[key] = _.groupBy(result[key], function (item) {
+          return item.Date;
+        });
+      });
+      result = _.forEach(result, function (value, key) {
+        _.forEach(result[key], function (value, key1) {
+          result[key][key1] = _.groupBy(result[key][key1], function (item) {
+            return item.Status;
+          });
+        });
+      });
+      try {
+        var workbook = new Excel.Workbook();
+        var worksheet = workbook.addWorksheet("My Sheet");
+        worksheet.columns = [
+          { header: "Employee Name", key: "Name", width: 32 },
+          { header: "Date", key: "Date", width: 32 },
+          { header: "Day", key: "Day", width: 15 },
+          { header: "Status", key: "Status", width: 15 },
+          { header: "In Time", key: "InTime", width: 15 },
+          { header: "Out Time", key: "OutTime", width: 15 },
+          {
+            header: "Total Working Hour(In Seconds)",
+            key: "DifferenceTime",
+            width: 28,
+          },
+        ];
+
+        for (var key in result) {
+          for (var key1 in result[key]) {
+            var i = 0;
+            for (var key2 in result[key][key1]) {
+              if (key2 == "in") {
+                worksheet.addRow({
+                  Name: key,
+                  Date: key1,
+                  Day: result[key][key1][key2][i].Day,
+                  Status: "P",
+                  InTime: result[key][key1][key2][i].Time,
+                  OutTime: result[key][key1]["out"][i].Time,
+                  DifferenceTime: moment(
+                    result[key][key1]["out"][i].Time,
+                    "H:mm:ss"
+                  ).diff(
+                    moment(result[key][key1][key2][i].Time, "H:mm:ss"),
+                    "seconds"
+                  ),
+                });
+              }
+            }
+            i++;
+          }
+        }
+        await workbook.xlsx.writeFile("./reports/" + req.body.name + ".xlsx");
+        var result = {
+          Message: "Excel Sheet Created",
+          Data: req.body.name + ".xlsx",
+          isSuccess: true,
+        };
+        res.json(result);
+      } catch (err) {
+        console.log("OOOOOOO this is the error: " + err);
+      }
+    } else {
+      var result = {
+        Message: "Excel Sheet Not Created",
+        Data: "No Data Found",
+        isSuccess: false,
+      };
+      res.json(result);
+    }
+  } else {
+    var result = {
+      Message: "Excel Sheet Not Created",
+      Data: "No Data Found",
+      isSuccess: false,
+    };
+    res.json(result);
+  }
 });
 
 router.post("/getotp", (req, res) => {

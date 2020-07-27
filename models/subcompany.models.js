@@ -16,11 +16,6 @@ var newSchema = mongoose.Schema({
   lat: Number,
   long: Number,
   Link: String,
-  Timing: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "timing",
-    required: true,
-  },
 });
 
 const admin = mongoose.model("subcompany", newSchema);
