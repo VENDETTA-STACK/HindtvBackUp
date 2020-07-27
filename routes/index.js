@@ -605,8 +605,8 @@ function calculatelocation(name, lat1, long1, lat2, long2) {
     };
     heading = geolib.getDistance(location1, location2);
     if (!isNaN(heading)) {
-      if (area >= 31 && area < 80) {
-        area = Math.floor(Math.random() * (30 - 15) + 15);
+      if (heading >= 31 && heading < 80) {
+        heading = Math.floor(Math.random() * (30 - 15) + 15);
       }
       var area =
         heading > 30
