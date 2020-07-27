@@ -518,9 +518,9 @@ function getdate() {
   return attendance;
 }
 
-async function entrymemo(id, timing, period) {
+async function entrymemo(id, timing, buffertime, period) {
   var message;
-  var startTime = moment(timing, "HH:mm:ss a");
+  var startTime = moment(timing, "HH:mm:ss a").add(buffertime, "m");
   var endTime = moment(period.time, "HH:mm:ss a");
   var duration = moment.duration(endTime.diff(startTime));
   var hours = parseInt(duration.asHours());
@@ -553,7 +553,7 @@ async function entrymemo(id, timing, period) {
   return message;
 }
 
-async function exitmemo(id, timing, period) {
+async function exitmemo(id, timing, buffertime, period) {
   var message;
   var startTime = moment(timing, "HH:mm:ss a");
   var endTime = moment(period.time, "HH:mm:ss a");
@@ -652,7 +652,8 @@ router.post("/attendance", upload.single("attendance"), async function (
     } else {
       memo = await entrymemo(
         req.body.employeeid,
-        longlat.SubCompany.StartTime,
+        longlat.Timing.StartTime,
+        longlat.SubCompany.BufferTime,
         period
       );
       var record = attendeanceSchema({
@@ -719,6 +720,7 @@ router.post("/attendance", upload.single("attendance"), async function (
       memo = await exitmemo(
         req.body.employeeid,
         longlat.Timing.EndTime,
+        longlat.SubCompany.BufferTime,
         period
       );
       var record = attendeanceSchema({
