@@ -16,6 +16,7 @@ var newSchema = mongoose.Schema({
   lat: Number,
   long: Number,
   Link: String,
+  BufferTime: Number,
 });
 
 const admin = mongoose.model("subcompany", newSchema);

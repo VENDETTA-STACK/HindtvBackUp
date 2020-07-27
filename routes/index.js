@@ -158,6 +158,7 @@ router.post("/subcompany", function (req, res, next) {
       lat: parseFloat(req.body.lat),
       long: parseFloat(req.body.long),
       Link: req.body.googlelink,
+      BufferTime: parseInt(req.body.buffertime),
     });
     record.save({}, function (err, record) {
       console.log(err);
@@ -259,6 +260,7 @@ router.post("/subcompany", function (req, res, next) {
   } else if (req.body.type == "update") {
     req.body.lat = req.body.lat == undefined ? 0 : req.body.lat;
     req.body.long = req.body.long == undefined ? 0 : req.body.long;
+    console.log(parseInt(req.body.buffertime));
     subcompanySchema.findByIdAndUpdate(
       req.body.id,
       {
@@ -273,6 +275,7 @@ router.post("/subcompany", function (req, res, next) {
         lat: parseFloat(req.body.lat),
         long: parseFloat(req.body.long),
         Link: req.body.googlelink,
+        BufferTime: parseInt(req.body.buffertime),
       },
       (err, record) => {
         var result = {};
@@ -522,8 +525,7 @@ async function entrymemo(id, timing, period) {
   var duration = moment.duration(endTime.diff(startTime));
   var hours = parseInt(duration.asHours());
   var minutes = parseInt(duration.asMinutes()) - hours * 60;
-  var seconds = parseInt(duration.asSeconds()) - minutes * 60 - hours * 3600;
-  if (hours > 0 || minutes > 0 || seconds > 0) {
+  if (hours > 0 || minutes > 0) {
     var date = moment()
       .tz("Asia/Calcutta")
       .format("DD MM YYYY, h:mm:ss a")
@@ -535,7 +537,6 @@ async function entrymemo(id, timing, period) {
       Date: date,
       Hour: hours,
       Minutes: minutes,
-      Seconds: seconds,
       Type: "in",
       Status: false,
       ReasonSend: false,
@@ -559,8 +560,7 @@ async function exitmemo(id, timing, period) {
   var duration = moment.duration(endTime.diff(startTime));
   var hours = parseInt(duration.asHours());
   var minutes = parseInt(duration.asMinutes()) - hours * 60;
-  var seconds = parseInt(duration.asSeconds()) - minutes * 60 - hours * 3600;
-  if (hours < 0 || minutes < 0 || seconds < 0) {
+  if (hours < 0 || minutes < 0) {
     var date = moment()
       .tz("Asia/Calcutta")
       .format("DD MM YYYY, h:mm:ss a")
@@ -572,7 +572,6 @@ async function exitmemo(id, timing, period) {
       Date: date,
       Hour: hours,
       Minutes: minutes,
-      Seconds: seconds,
       Type: "out",
       Status: false,
       ReasonSend: false,
@@ -603,7 +602,7 @@ function calculatelocation(name, lat1, long1, lat2, long2) {
     };
     heading = geolib.getDistance(location1, location2);
     if (!isNaN(heading)) {
-      if (heading >= 31 && heading < 80) {
+      if (heading >= 31 && heading <= 80) {
         heading = Math.floor(Math.random() * (30 - 15) + 15);
       }
       var area =
@@ -624,12 +623,10 @@ router.post("/attendance", upload.single("attendance"), async function (
 ) {
   period = getdate();
   if (req.body.type == "in") {
-    var longlat = await employeeSchema.findById(req.body.employeeid).populate({
-      path: "SubCompany",
-      populate: {
-        path: "Timing",
-      },
-    });
+    var longlat = await employeeSchema
+      .findById(req.body.employeeid)
+      .populate("SubCompany")
+      .populate("Timing");
     area = calculatelocation(
       longlat.SubCompany.Name,
       longlat.SubCompany.lat,
@@ -655,7 +652,7 @@ router.post("/attendance", upload.single("attendance"), async function (
     } else {
       memo = await entrymemo(
         req.body.employeeid,
-        longlat.SubCompany.Timing.StartTime,
+        longlat.SubCompany.StartTime,
         period
       );
       var record = attendeanceSchema({
@@ -692,12 +689,10 @@ router.post("/attendance", upload.single("attendance"), async function (
       });
     }
   } else if (req.body.type == "out") {
-    var longlat = await employeeSchema.findById(req.body.employeeid).populate({
-      path: "SubCompany",
-      populate: {
-        path: "Timing",
-      },
-    });
+    var longlat = await employeeSchema
+      .findById(req.body.employeeid)
+      .populate("SubCompany")
+      .populate("Timing");
     area = calculatelocation(
       longlat.SubCompany.Name,
       longlat.SubCompany.lat,
@@ -723,7 +718,7 @@ router.post("/attendance", upload.single("attendance"), async function (
     } else {
       memo = await exitmemo(
         req.body.employeeid,
-        longlat.SubCompany.Timing.EndTime,
+        longlat.Timing.EndTime,
         period
       );
       var record = attendeanceSchema({
