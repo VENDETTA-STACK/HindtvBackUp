@@ -260,7 +260,8 @@ router.post("/subcompany", function (req, res, next) {
   } else if (req.body.type == "update") {
     req.body.lat = req.body.lat == undefined ? 0 : req.body.lat;
     req.body.long = req.body.long == undefined ? 0 : req.body.long;
-    console.log(parseInt(req.body.buffertime));
+    req.body.buffertime =
+      req.body.buffertime == undefined ? 0 : req.body.buffertime;
     subcompanySchema.findByIdAndUpdate(
       req.body.id,
       {
