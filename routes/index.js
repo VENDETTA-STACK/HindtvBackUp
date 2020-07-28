@@ -520,6 +520,9 @@ function getdate() {
 
 async function entrymemo(id, timing, buffertime, period) {
   var message;
+  if (buffertime == undefined || buffertime == null) {
+    buffertime = 0;
+  }
   var startTime = moment(timing, "HH:mm:ss a").add(buffertime, "m");
   var endTime = moment(period.time, "HH:mm:ss a");
   var duration = moment.duration(endTime.diff(startTime));
