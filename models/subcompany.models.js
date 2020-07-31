@@ -17,6 +17,7 @@ var newSchema = mongoose.Schema({
   long: Number,
   Link: String,
   BufferTime: Number,
+  wifiName: String,
 });
 
 const admin = mongoose.model("subcompany", newSchema);
