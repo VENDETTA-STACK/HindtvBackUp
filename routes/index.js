@@ -19,6 +19,8 @@ const tempfile = require("tempfile");
 const { start } = require("repl");
 const mongoose = require("mongoose");
 var _ = require("lodash");
+const { group } = require("console");
+const { app } = require("firebase-admin");
 
 var attendImg = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -1362,6 +1364,8 @@ router.post("/testing", async (req, res) => {
         result.push(records);
       }
     });
+    var memoresult = result;
+
     if (result.length >= 0) {
       var result = _.groupBy(result, "EmployeeId.Name");
       result = _.forEach(result, function (value, key) {
@@ -1378,7 +1382,8 @@ router.post("/testing", async (req, res) => {
       });
       try {
         var workbook = new Excel.Workbook();
-        var worksheet = workbook.addWorksheet("My Sheet");
+        var worksheet = workbook.addWorksheet("Attendance Report");
+        var worksheet1 = workbook.addWorksheet("Memo Report");
         worksheet.columns = [
           { header: "Employee Name", key: "Name", width: 32 },
           { header: "Date", key: "Date", width: 32 },
@@ -1387,10 +1392,18 @@ router.post("/testing", async (req, res) => {
           { header: "In Time", key: "InTime", width: 15 },
           { header: "Out Time", key: "OutTime", width: 15 },
           {
-            header: "Total Working Hour(In Seconds)",
+            header: "Total Working Hour",
             key: "DifferenceTime",
             width: 28,
           },
+        ];
+
+        worksheet1.columns = [
+          { header: "Employee Name", key: "Name", width: 32 },
+          { header: "Memo Type", key: "Type", width: 15 },
+          { header: "Start and End Date", key: "Date", width: 30 },
+          { header: "Memo Accepted", key: "Accepted", width: 15 },
+          { header: "Memo Disapproved", key: "Disapproved", width: 15 },
         ];
 
         for (var key in result) {
@@ -1405,12 +1418,9 @@ router.post("/testing", async (req, res) => {
                   Status: "P",
                   InTime: result[key][key1][key2][i].Time,
                   OutTime: result[key][key1]["out"][i].Time,
-                  DifferenceTime: moment(
-                    result[key][key1]["out"][i].Time,
-                    "H:mm:ss"
-                  ).diff(
-                    moment(result[key][key1][key2][i].Time, "H:mm:ss"),
-                    "seconds"
+                  DifferenceTime: calculateTime(
+                    result[key][key1][key2][i].Time,
+                    result[key][key1]["out"][i].Time
                   ),
                 });
               }
@@ -1418,6 +1428,39 @@ router.post("/testing", async (req, res) => {
             i++;
           }
         }
+        for (i = 0; i < memoresult.length; i++) {
+          var memoData = await memoSchema
+            .find({
+              Eid: memoresult[i].EmployeeId._id,
+              Type: memoresult[i].Status,
+              Date: {
+                $gte: req.body.startdate,
+                $lte: req.body.enddate,
+              },
+            })
+            .populate("Eid", "Name");
+          var groupmemo = _.groupBy(memoData, "Eid.Name");
+          var approved = 0,
+            disapproved = 0;
+          console.log(groupmemo);
+          for (var key in groupmemo) {
+            for (j = 0; j < groupmemo[key].length; j++) {
+              if (groupmemo[key][j].Status == true) {
+                approved++;
+              } else {
+                disapproved++;
+              }
+            }
+            worksheet1.addRow({
+              Name: key,
+              Type: groupmemo[key][0].Type,
+              Date: req.body.startdate + " - " + req.body.enddate,
+              Accepted: approved,
+              Disapproved: disapproved,
+            });
+          }
+        }
+
         await workbook.xlsx.writeFile("./reports/" + req.body.name + ".xlsx");
         var result = {
           Message: "Excel Sheet Created",
@@ -1445,6 +1488,15 @@ router.post("/testing", async (req, res) => {
     res.json(result);
   }
 });
+
+function calculateTime(inTime, outTime) {
+  var startTime = moment(inTime, "HH:mm:ss a");
+  var endTime = moment(outTime, "HH:mm:ss a");
+  var duration = moment.duration(endTime.diff(startTime));
+  var hours = parseInt(duration.asHours());
+  var minutes = parseInt(duration.asMinutes()) % 60;
+  return hours + " hour and " + minutes + " minutes.";
+}
 
 router.post("/getotp", (req, res) => {
   var result = {};
