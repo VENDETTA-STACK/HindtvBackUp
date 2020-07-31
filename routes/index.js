@@ -636,6 +636,8 @@ router.post("/attendance", upload.single("attendance"), async function (
       .findById(req.body.employeeid)
       .populate("SubCompany")
       .populate("Timing");
+    console.log(req.body.wifiname);
+    console.log(longlat.SubCompany.wifiName);
     if (req.body.wifiname == longlat.SubCompany.wifiName) {
       memo = await entrymemo(
         req.body.employeeid,
@@ -650,7 +652,7 @@ router.post("/attendance", upload.single("attendance"), async function (
         Time: period.time,
         Day: period.day,
         Image: req.file.filename,
-        Area: area,
+        Area: longlat.SubCompany.Name,
         Elat: req.body.latitude,
         Elong: req.body.longitude,
         Distance: 0,
