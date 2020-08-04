@@ -8,8 +8,6 @@ var attendeanceSchema = require("../models/attendance.models");
 var memoSchema = require("../models/memo.model");
 const geolib = require("geolib");
 
-var upload = multer({ storage: attendImg });
-
 var attendImg = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads");
@@ -26,6 +24,8 @@ var attendImg = multer.diskStorage({
     );
   },
 });
+
+var upload = multer({ storage: attendImg });
 
 function getdate() {
   moment.locale("en-in");
