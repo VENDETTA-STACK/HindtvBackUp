@@ -2,7 +2,6 @@
 var express = require("express");
 var router = express.Router();
 var adminSchema = require("../models/admin.model");
-const axios = require("axios");
 
 /*Importing Modules */
 
