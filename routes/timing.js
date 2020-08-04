@@ -1,6 +1,15 @@
+/*Importing Modules */
 var express = require("express");
 var router = express.Router();
 var timingSchema = require("../models/timing.models");
+/*Importing Modules */
+
+/* Post request for timing
+  type = insert : To insert new timing
+  type = getdata : To display all timing
+  type = getsingletimedata : To get an individual time for edit
+  type = update :  To update an existing timing
+*/
 
 router.post("/", async (req, res) => {
   if (req.body.type == "insert") {

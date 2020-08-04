@@ -1,7 +1,12 @@
+/*Importing Modules */
 var express = require("express");
 var router = express.Router();
 var employeeSchema = require("../models/employee.model");
+/*Importing Modules */
 
+/* Post request for login
+  type = login : Login into mobile application
+*/
 router.post("/", function (req, res, next) {
   if (req.body.type == "login") {
     employeeSchema.find({ Mobile: req.body.number }, function (err, record) {

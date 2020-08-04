@@ -1,8 +1,15 @@
+/*Importing Modules */
 var express = require("express");
 var router = express.Router();
 var employeeSchema = require("../models/employee.model");
 var subcompanySchema = require("../models/subcompany.models");
+/*Importing Modules */
 
+/*Post request for company 
+  There are different type use for various activities
+  type = insert : Insert a new employee,  
+  type = update : Update an individual employee
+*/
 router.post("/", async function (req, res, next) {
   if (req.body.type == "insert") {
     var record = new employeeSchema({

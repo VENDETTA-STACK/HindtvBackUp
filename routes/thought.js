@@ -1,6 +1,17 @@
+/*Importing Modules */
 var express = require("express");
 var router = express.Router();
 var thoughtSchema = require("../models/thoughts.model");
+/*Importing Modules */
+
+/* Post request for thought
+  type = insert :
+  type = getalldata :
+  type = getsingledata :
+  type = getdata :
+  type = update :
+  type = statusupdate :
+*/
 
 router.post("/", async (req, res) => {
   if (req.body.type == "insert") {

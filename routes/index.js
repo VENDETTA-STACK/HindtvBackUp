@@ -1,3 +1,4 @@
+/*Importing Modules */
 var express = require("express");
 var router = express.Router();
 var moment = require("moment-timezone");
@@ -7,6 +8,14 @@ var memoSchema = require("../models/memo.model");
 var Excel = require("exceljs");
 const mongoose = require("mongoose");
 var _ = require("lodash");
+/*Importing Modules */
+
+/*Post request for different routes
+  Different POST request
+  /birthday - to give birthday display on app page
+  /beforeattendaance - to display whether to duty in or duty out buuton should come
+  /testing - report genereatin (beta)  
+*/
 
 router.post("/birthday", async (req, res) => {
   var date = moment()

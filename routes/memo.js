@@ -1,7 +1,15 @@
+/*Importing Modules */
 var express = require("express");
 var router = express.Router();
 var memoSchema = require("../models/memo.model");
+/*Importing Modules */
 
+/* Post request for memo
+  type = singlememo : Get data of an indivaidual memo
+  type = datememo : Get data of  memo between specific date.
+  type = getsinglememodetails : Admin panel specific memo of an employee to find out the reason
+  type = verifymemo : Verifying the memo from admin panel
+*/
 router.post("/", async (req, res) => {
   if (req.body.type == "singlememo") {
     memoSchema.find(

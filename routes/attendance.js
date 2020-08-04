@@ -1,3 +1,4 @@
+/*Importing Modules */
 var express = require("express");
 var router = express.Router();
 const multer = require("multer");
@@ -7,7 +8,9 @@ var employeeSchema = require("../models/employee.model");
 var attendeanceSchema = require("../models/attendance.models");
 var memoSchema = require("../models/memo.model");
 const geolib = require("geolib");
+/*Importing Modules */
 
+/*Multer Image Upload*/
 var attendImg = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads");
@@ -26,7 +29,9 @@ var attendImg = multer.diskStorage({
 });
 
 var upload = multer({ storage: attendImg });
+/*Multer Image Upload*/
 
+/*Fetching date*/
 function getdate() {
   moment.locale("en-in");
   var attendance = {};
@@ -46,7 +51,9 @@ function getdate() {
   attendance.day = day;
   return attendance;
 }
+/*Fetching date*/
 
+/*Calculating whether entry memo should created for late attendance*/
 async function entrymemo(id, timing, buffertime, period) {
   var message;
   // if(buffertime==undefined || buffertime==null){
@@ -85,7 +92,9 @@ async function entrymemo(id, timing, buffertime, period) {
   }
   return message;
 }
+/*Calculating whether entry memo should created for late attendance*/
 
+/*Calculating whether exit memo should created for early attendance*/
 async function exitmemo(id, timing, buffertime, period) {
   var message;
   var startTime = moment(timing, "HH:mm:ss a");
@@ -120,7 +129,9 @@ async function exitmemo(id, timing, buffertime, period) {
   }
   return message;
 }
+/*Calculating whether exit memo should created for early attendance*/
 
+/*Calculating distance between two lat and long*/
 function calculatelocation(name, lat1, long1, lat2, long2) {
   if (lat1 == 0 || long1 == 0) {
     area = 1; // Company Lat and Long is not defined.
@@ -148,16 +159,17 @@ function calculatelocation(name, lat1, long1, lat2, long2) {
   }
   return area;
 }
+/*Calculating distance between two lat and long*/
 
+/*Post request for attendance */
 router.post("/", upload.single("attendance"), async function (req, res, next) {
-  period = getdate();
+  period = getdate(); //Function calling
+  //Attendance In Function
   if (req.body.type == "in") {
-    var longlat = await employeeSchema
+    var longlat = await employeeSchema // Fetching employee data with employeeid
       .findById(req.body.employeeid)
       .populate("SubCompany")
       .populate("Timing");
-    console.log(req.body.wifiname);
-    console.log(longlat.SubCompany.wifiName);
     if (req.body.wifiname == longlat.SubCompany.wifiName) {
       memo = await entrymemo(
         req.body.employeeid,
@@ -263,7 +275,9 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         });
       }
     }
-  } else if (req.body.type == "out") {
+  }
+  //Attendance Out Function
+  else if (req.body.type == "out") {
     var date = moment()
       .tz("Asia/Calcutta")
       .format("DD MM YYYY, h:mm:ss a")
@@ -352,7 +366,9 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         });
       }
     }
-  } else if (req.body.type == "getdata") {
+  }
+  //Admin Panel fetching data to see attendance in and out records
+  else if (req.body.type == "getdata") {
     const day = req.body.day;
     const sdate = req.body.sd == "" ? undefined : req.body.sd;
     const edate = req.body.ed == "" ? undefined : req.body.ed;
@@ -400,7 +416,9 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
       result.isSuccess = true;
     }
     res.json(result);
-  } else if (req.body.type == "getsingle") {
+  }
+  //Individual Employee Data
+  else if (req.body.type == "getsingle") {
     if (req.body.afilter == 0) {
       var record = await attendeanceSchema
         .find({ EmployeeId: req.body.EmployeeId })
@@ -425,7 +443,9 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
       result.isSuccess = true;
     }
     res.json(result);
-  } else if (req.body.type == "getareafilter") {
+  }
+  //Attendance filter in admin panel
+  else if (req.body.type == "getareafilter") {
     subcompanySchema.find({}, (err, record) => {
       var result = {};
       if (err) {
@@ -447,5 +467,6 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
     });
   }
 });
+/*Post request for attendance */
 
 module.exports = router;
