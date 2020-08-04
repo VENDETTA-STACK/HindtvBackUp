@@ -16,6 +16,7 @@ var newSchema = mongoose.Schema({
   Elong: String,
   Distance: String,
   Memo: Number,
+  wifiName: String,
 });
 
 const admin = mongoose.model("attendance", newSchema);

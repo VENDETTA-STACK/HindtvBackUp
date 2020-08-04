@@ -177,6 +177,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         Elong: req.body.longitude,
         Distance: 0,
         Memo: memo,
+        wifiName: req.body.wifiname,
       });
       record.save({}, function (err, record) {
         var result = {};
@@ -239,6 +240,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           Elong: req.body.longitude,
           Distance: heading,
           Memo: memo,
+          wifiName: req.body.wifiname,
         });
         record.save({}, function (err, record) {
           var result = {};
