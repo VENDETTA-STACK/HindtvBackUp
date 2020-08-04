@@ -149,11 +149,7 @@ function calculatelocation(name, lat1, long1, lat2, long2) {
   return area;
 }
 
-router.post("/attendance", upload.single("attendance"), async function (
-  req,
-  res,
-  next
-) {
+router.post("/", upload.single("attendance"), async function (req, res, next) {
   period = getdate();
   if (req.body.type == "in") {
     var longlat = await employeeSchema
