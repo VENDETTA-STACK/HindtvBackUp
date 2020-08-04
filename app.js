@@ -11,7 +11,14 @@ var firebase = require("firebase-admin");
 var serviceAccount = require("./firebasekey.json");
 
 var indexRouter = require("./routes/index");
-/*var usersRouter = require("./routes/users");*/
+var companyRouter = require("./routes/company");
+var thoughtRouter = require("./routes/thought");
+var subcompanyRouter = require("./routes/subcompany");
+var employeeRouter = require("./routes/employee");
+var timingRouter = require("./routes/timing");
+var locationRouter = require("./routes/location");
+var memoRouter = require("./routes/memo");
+var attendanceRouter = require("./routes/attendance");
 
 var app = express();
 
@@ -35,11 +42,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-app.use("uploads", express.static(__dirname + "uploads"));
+app.use("/api/uploads", express.static(__dirname + "/uploads"));
+app.use("/api/uploads", express.static(__dirname + "uploads"));
 app.use(cors());
 
-app.use("/", indexRouter);
-
+app.use("/api/", indexRouter);
+app.use("/api/company", companyRouter);
+app.use("/api/subcompany", subcompanyRouter);
+app.use("/api/thought", thoughtRouter);
+app.use("/api/employee", employeeRouter);
+app.use("/api/timing", timingRouter);
+app.use("/api/location", locationRouter);
+app.use("/api/memo", memoRouter);
+app.use("/api/attendance", attendanceRouter);
+// app.use("/memo", memoRouter);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
