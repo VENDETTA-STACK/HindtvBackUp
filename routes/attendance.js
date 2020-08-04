@@ -149,36 +149,20 @@ function calculatelocation(name, lat1, long1, lat2, long2) {
   return area;
 }
 
-router.post("/", upload.single("attendance"), async function (req, res, next) {
+router.post("/attendance", upload.single("attendance"), async function (
+  req,
+  res,
+  next
+) {
   period = getdate();
   if (req.body.type == "in") {
     var longlat = await employeeSchema
       .findById(req.body.employeeid)
       .populate("SubCompany")
       .populate("Timing");
-    area = calculatelocation(
-      longlat.SubCompany.Name,
-      longlat.SubCompany.lat,
-      longlat.SubCompany.long,
-      req.body.latitude,
-      req.body.longitude
-    );
-    if (area == -1 || area == 1) {
-      if (area == 1) {
-        var result = {};
-        result.Message =
-          "Attendance Not Marked, Latitude and Longitude Not Found of Company";
-        result.Data = [];
-        result.isSuccess = false;
-      } else {
-        var result = {};
-        result.Message =
-          "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
-        result.Data = [];
-        result.isSuccess = false;
-      }
-      res.json(result);
-    } else {
+    console.log(req.body.wifiname);
+    console.log(longlat.SubCompany.wifiName);
+    if (req.body.wifiname == longlat.SubCompany.wifiName) {
       memo = await entrymemo(
         req.body.employeeid,
         longlat.Timing.StartTime,
@@ -192,10 +176,10 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         Time: period.time,
         Day: period.day,
         Image: req.file.filename,
-        Area: area,
+        Area: longlat.SubCompany.Name,
         Elat: req.body.latitude,
         Elong: req.body.longitude,
-        Distance: heading,
+        Distance: 0,
         Memo: memo,
       });
       record.save({}, function (err, record) {
@@ -217,74 +201,158 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         }
         res.json(result);
       });
-    }
-  } else if (req.body.type == "out") {
-    var longlat = await employeeSchema
-      .findById(req.body.employeeid)
-      .populate("SubCompany")
-      .populate("Timing");
-    area = calculatelocation(
-      longlat.SubCompany.Name,
-      longlat.SubCompany.lat,
-      longlat.SubCompany.long,
-      req.body.latitude,
-      req.body.longitude
-    );
-    if (area == 0 || area == 1) {
-      if (area == 1) {
-        var result = {};
-        result.Message =
-          "Attendance Not Marked, Latitude and Longitude Not Found of Company";
-        result.Data = [];
-        result.isSuccess = false;
-      } else {
-        var result = {};
-        result.Message =
-          "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
-        result.Data = [];
-        result.isSuccess = false;
-      }
-      res.json(result);
     } else {
-      memo = await exitmemo(
-        req.body.employeeid,
-        longlat.Timing.EndTime,
-        longlat.SubCompany.BufferTime,
-        period
+      area = calculatelocation(
+        longlat.SubCompany.Name,
+        longlat.SubCompany.lat,
+        longlat.SubCompany.long,
+        req.body.latitude,
+        req.body.longitude
       );
-      var record = attendeanceSchema({
-        EmployeeId: req.body.employeeid,
-        Status: req.body.type,
-        Date: period.date,
-        Time: period.time,
-        Day: period.day,
-        Image: req.file.filename,
-        Area: area,
-        Elat: req.body.latitude,
-        Elong: req.body.longitude,
-        Distance: heading,
-        Memo: parseInt(memo),
-      });
-      record.save({}, function (err, record) {
-        console.log(record);
-        var result = {};
-        if (err) {
-          result.Message = "Attendance Not Marked";
-          result.Data = err;
+      if (area == -1 || area == 1) {
+        if (area == 1) {
+          var result = {};
+          result.Message =
+            "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+          result.Data = [];
           result.isSuccess = false;
         } else {
-          if (record.length == 0) {
-            result.Message = "Attendance Not Marked";
-            result.Data = [];
-            result.isSuccess = false;
-          } else {
-            result.Message = "Attendance Marked";
-            result.Data = [record];
-            result.isSuccess = true;
-          }
+          var result = {};
+          result.Message =
+            "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+          result.Data = [];
+          result.isSuccess = false;
         }
         res.json(result);
-      });
+      } else {
+        memo = await entrymemo(
+          req.body.employeeid,
+          longlat.Timing.StartTime,
+          longlat.SubCompany.BufferTime,
+          period
+        );
+        var record = attendeanceSchema({
+          EmployeeId: req.body.employeeid,
+          Status: req.body.type,
+          Date: period.date,
+          Time: period.time,
+          Day: period.day,
+          Image: req.file.filename,
+          Area: area,
+          Elat: req.body.latitude,
+          Elong: req.body.longitude,
+          Distance: heading,
+          Memo: memo,
+        });
+        record.save({}, function (err, record) {
+          var result = {};
+          if (err) {
+            result.Message = "Attendance Not Marked";
+            result.Data = err;
+            result.isSuccess = false;
+          } else {
+            if (record.length == 0) {
+              result.Message = "Attendance Not Marked";
+              result.Data = [];
+              result.isSuccess = false;
+            } else {
+              result.Message = "Attendance Marked";
+              result.Data = [record];
+              result.isSuccess = true;
+            }
+          }
+          res.json(result);
+        });
+      }
+    }
+  } else if (req.body.type == "out") {
+    var date = moment()
+      .tz("Asia/Calcutta")
+      .format("DD MM YYYY, h:mm:ss a")
+      .split(",")[0];
+    date = date.split(" ");
+    date = date[0] + "/" + date[1] + "/" + date[2];
+    ouput = await attendeanceSchema.find({
+      EmployeeId: req.body.id,
+      Date: date,
+      Status: "out",
+    });
+    if (record.length != 0) {
+      result.Message = "Out Attendance already mark for the day.";
+      result.Data = [
+        {
+          message: "Out Attendance already mark for the day.",
+        },
+      ];
+      result.isSuccess = false;
+    } else {
+      var longlat = await employeeSchema
+        .findById(req.body.employeeid)
+        .populate("SubCompany")
+        .populate("Timing");
+      area = calculatelocation(
+        longlat.SubCompany.Name,
+        longlat.SubCompany.lat,
+        longlat.SubCompany.long,
+        req.body.latitude,
+        req.body.longitude
+      );
+      if (area == 0 || area == 1) {
+        if (area == 1) {
+          var result = {};
+          result.Message =
+            "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+          result.Data = [];
+          result.isSuccess = false;
+        } else {
+          var result = {};
+          result.Message =
+            "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+          result.Data = [];
+          result.isSuccess = false;
+        }
+        res.json(result);
+      } else {
+        memo = await exitmemo(
+          req.body.employeeid,
+          longlat.Timing.EndTime,
+          longlat.SubCompany.BufferTime,
+          period
+        );
+        var record = attendeanceSchema({
+          EmployeeId: req.body.employeeid,
+          Status: req.body.type,
+          Date: period.date,
+          Time: period.time,
+          Day: period.day,
+          Image: req.file.filename,
+          Area: area,
+          Elat: req.body.latitude,
+          Elong: req.body.longitude,
+          Distance: heading,
+          Memo: parseInt(memo),
+        });
+        record.save({}, function (err, record) {
+          console.log(record);
+          var result = {};
+          if (err) {
+            result.Message = "Attendance Not Marked";
+            result.Data = err;
+            result.isSuccess = false;
+          } else {
+            if (record.length == 0) {
+              result.Message = "Attendance Not Marked";
+              result.Data = [];
+              result.isSuccess = false;
+            } else {
+              result.Message = "Attendance Marked";
+              result.Data = [record];
+              result.isSuccess = true;
+            }
+          }
+          res.json(result);
+        });
+      }
     }
   } else if (req.body.type == "getdata") {
     const day = req.body.day;
