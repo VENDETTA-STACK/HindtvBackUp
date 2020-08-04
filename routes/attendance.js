@@ -284,7 +284,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
       .split(",")[0];
     date = date.split(" ");
     date = date[0] + "/" + date[1] + "/" + date[2];
-    ouput = await attendeanceSchema.find({
+    record = await attendeanceSchema.find({
       EmployeeId: req.body.id,
       Date: date,
       Status: "out",

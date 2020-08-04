@@ -22,6 +22,7 @@ var timingRouter = require("./routes/timing");
 var locationRouter = require("./routes/location");
 var memoRouter = require("./routes/memo");
 var attendanceRouter = require("./routes/attendance");
+var adminRouter = require("./routes/admin");
 /*Creating Routers*/
 
 /*Initilizaing the app*/
@@ -68,6 +69,7 @@ app.use("/api/timing", timingRouter);
 app.use("/api/location", locationRouter);
 app.use("/api/memo", memoRouter);
 app.use("/api/attendance", attendanceRouter);
+app.use("/api/admin", adminRouter);
 /*Calling routers*/
 
 // catch 404 and forward to error handler

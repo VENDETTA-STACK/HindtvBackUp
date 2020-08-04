@@ -1,8 +1,10 @@
 var mongoose = require("mongoose");
 
 var newSchema = mongoose.Schema({
-  userName: String,
+  name: String,
   password: String,
+  mobilenumber: Number,
+  email: String,
 });
 
 const admin = mongoose.model("admin", newSchema);
