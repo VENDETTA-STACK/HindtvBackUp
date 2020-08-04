@@ -56,6 +56,12 @@ app.use("/api/location", locationRouter);
 app.use("/api/memo", memoRouter);
 app.use("/api/attendance", attendanceRouter);
 // app.use("/memo", memoRouter);
+
+app.use("/api/reports", express.static(__dirname + "/reports"));
+app.use(cors());
+
+app.use("/api/", indexRouter);
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
