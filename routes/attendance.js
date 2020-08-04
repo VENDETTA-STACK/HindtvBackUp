@@ -8,6 +8,7 @@ var employeeSchema = require("../models/employee.model");
 var attendeanceSchema = require("../models/attendance.models");
 var memoSchema = require("../models/memo.model");
 const geolib = require("geolib");
+const { mongoose } = require("mongoose");
 /*Importing Modules */
 
 /*Multer Image Upload*/
@@ -285,10 +286,11 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
     date = date.split(" ");
     date = date[0] + "/" + date[1] + "/" + date[2];
     record = await attendeanceSchema.find({
-      EmployeeId: req.body.id,
+      EmployeeId: req.body.employeeid,
       Date: date,
       Status: "out",
     });
+    var result = {};
     if (record.length != 0) {
       result.Message = "Out Attendance already mark for the day.";
       result.Data = [
@@ -297,37 +299,16 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         },
       ];
       result.isSuccess = false;
+      res.json(result);
     } else {
       var longlat = await employeeSchema
         .findById(req.body.employeeid)
         .populate("SubCompany")
         .populate("Timing");
-      area = calculatelocation(
-        longlat.SubCompany.Name,
-        longlat.SubCompany.lat,
-        longlat.SubCompany.long,
-        req.body.latitude,
-        req.body.longitude
-      );
-      if (area == 0 || area == 1) {
-        if (area == 1) {
-          var result = {};
-          result.Message =
-            "Attendance Not Marked, Latitude and Longitude Not Found of Company";
-          result.Data = [];
-          result.isSuccess = false;
-        } else {
-          var result = {};
-          result.Message =
-            "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
-          result.Data = [];
-          result.isSuccess = false;
-        }
-        res.json(result);
-      } else {
-        memo = await exitmemo(
+      if (req.body.wifiname == longlat.SubCompany.wifiName) {
+        memo = await entrymemo(
           req.body.employeeid,
-          longlat.Timing.EndTime,
+          longlat.Timing.StartTime,
           longlat.SubCompany.BufferTime,
           period
         );
@@ -338,14 +319,14 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           Time: period.time,
           Day: period.day,
           Image: req.file.filename,
-          Area: area,
+          Area: longlat.SubCompany.Name,
           Elat: req.body.latitude,
           Elong: req.body.longitude,
-          Distance: heading,
-          Memo: parseInt(memo),
+          Distance: 0,
+          Memo: memo,
+          wifiName: req.body.wifiname,
         });
         record.save({}, function (err, record) {
-          console.log(record);
           var result = {};
           if (err) {
             result.Message = "Attendance Not Marked";
@@ -364,6 +345,69 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           }
           res.json(result);
         });
+      } else {
+        area = calculatelocation(
+          longlat.SubCompany.Name,
+          longlat.SubCompany.lat,
+          longlat.SubCompany.long,
+          req.body.latitude,
+          req.body.longitude
+        );
+        if (area == 0 || area == 1) {
+          if (area == 1) {
+            var result = {};
+            result.Message =
+              "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+            result.Data = [];
+            result.isSuccess = false;
+          } else {
+            var result = {};
+            result.Message =
+              "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+            result.Data = [];
+            result.isSuccess = false;
+          }
+          res.json(result);
+        } else {
+          memo = await exitmemo(
+            req.body.employeeid,
+            longlat.Timing.EndTime,
+            longlat.SubCompany.BufferTime,
+            period
+          );
+          var record = attendeanceSchema({
+            EmployeeId: req.body.employeeid,
+            Status: req.body.type,
+            Date: period.date,
+            Time: period.time,
+            Day: period.day,
+            Image: req.file.filename,
+            Area: area,
+            Elat: req.body.latitude,
+            Elong: req.body.longitude,
+            Distance: heading,
+            Memo: parseInt(memo),
+          });
+          record.save({}, function (err, record) {
+            var result = {};
+            if (err) {
+              result.Message = "Attendance Not Marked";
+              result.Data = err;
+              result.isSuccess = false;
+            } else {
+              if (record.length == 0) {
+                result.Message = "Attendance Not Marked";
+                result.Data = [];
+                result.isSuccess = false;
+              } else {
+                result.Message = "Attendance Marked";
+                result.Data = [record];
+                result.isSuccess = true;
+              }
+            }
+            res.json(result);
+          });
+        }
       }
     }
   }
