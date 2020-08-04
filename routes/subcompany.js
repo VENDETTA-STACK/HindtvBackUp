@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var subcompanySchema = require("../models/subcompany.models");
+var companySchema = require("../models/company.models");
 
 router.post("/", function (req, res, next) {
   if (req.body.type == "insert") {
