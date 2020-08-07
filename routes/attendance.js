@@ -7,9 +7,21 @@ var subcompanySchema = require("../models/subcompany.models");
 var employeeSchema = require("../models/employee.model");
 var attendeanceSchema = require("../models/attendance.models");
 var memoSchema = require("../models/memo.model");
+var adminSchema = require("../models/admin.model");
 const geolib = require("geolib");
 const { mongoose } = require("mongoose");
 /*Importing Modules */
+
+/* All Post request for attendace are handle over here 
+
+  attendImg - Use for storing image.
+  function getdate() - Return today date,day and time of IST
+  function entrymemo() - Checks whether the user entered is on time or should be issue an memo
+  function exitmemo() - Checks whether the user entered went on time or should be issue an memo
+  function calculatelocation() - Calculate the lat and long of an user to specify, how much feet he/she is away from the office.
+  type = "in" : It's a request send from mobile device for duty in.
+  type = "out" : It's a request send from mobile device for duty out.
+*/
 
 /*Multer Image Upload*/
 var attendImg = multer.diskStorage({
@@ -413,96 +425,106 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
   }
   //Admin Panel fetching data to see attendance in and out records
   else if (req.body.type == "getdata") {
-    const day = req.body.day;
-    const sdate = req.body.sd == "" ? undefined : req.body.sd;
-    const edate = req.body.ed == "" ? undefined : req.body.ed;
-    const area = req.body.afilter;
-    const status = req.body.status;
-    let query = {};
-    if (req.body.rm == 0) {
-      if (day) {
-        if (day != "All") {
-          query.Day = day;
+    var permission = await checkpermission(req.body.type, req.body.token);
+    if (permission.isSuccess == true) {
+      const day = req.body.day;
+      const sdate = req.body.sd == "" ? undefined : req.body.sd;
+      const edate = req.body.ed == "" ? undefined : req.body.ed;
+      const area = req.body.afilter;
+      const status = req.body.status;
+      let query = {};
+      if (req.body.rm == 0) {
+        if (day) {
+          if (day != "All") {
+            query.Day = day;
+          }
+        }
+        if (sdate != undefined || edate != undefined) {
+          query.Date = {
+            $gte: sdate,
+            $lte: edate,
+          };
+        }
+        if (area) {
+          if (area == 0) {
+          } else if (area == 2) {
+            query.Area = { $regex: "http://www.google.com/maps/place/" };
+          } else {
+            query.Area = area;
+          }
+        }
+        if (status) {
+          if (status == 0) {
+          } else if (status == 1) {
+            query.Status = "in";
+          } else if (status == 2) {
+            query.Status = "out";
+          }
         }
       }
-      if (sdate != undefined || edate != undefined) {
-        query.Date = {
-          $gte: sdate,
-          $lte: edate,
-        };
+      var record = await attendeanceSchema.find(query).populate("EmployeeId");
+      var result = {};
+      if (record.length == 0) {
+        result.Message = "Attendance Not Found";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        result.Message = "Attendance Found";
+        result.Data = record;
+        result.isSuccess = true;
       }
-      if (area) {
-        if (area == 0) {
-        } else if (area == 2) {
-          query.Area = { $regex: "http://www.google.com/maps/place/" };
-        } else {
-          query.Area = area;
-        }
-      }
-      if (status) {
-        if (status == 0) {
-        } else if (status == 1) {
-          query.Status = "in";
-        } else if (status == 2) {
-          query.Status = "out";
-        }
-      }
-    }
-    var record = await attendeanceSchema.find(query).populate("EmployeeId");
-    var result = {};
-    if (record.length == 0) {
-      result.Message = "Attendance Not Found";
-      result.Data = [];
-      result.isSuccess = false;
+      res.json(result);
     } else {
-      result.Message = "Attendance Found";
-      result.Data = record;
-      result.isSuccess = true;
+      res.json(permission);
     }
-    res.json(result);
   }
   //Individual Employee Data
   else if (req.body.type == "getsingle") {
-    if (req.body.afilter == 0) {
-      var record = await attendeanceSchema
-        .find({ EmployeeId: req.body.EmployeeId })
-        .populate("EmployeeId");
-    } else if (req.body.afilter == 1) {
-      var record = await attendeanceSchema
-        .find({ EmployeeId: req.body.EmployeeId, Area: "Inside Area" })
-        .populate("EmployeeId");
+    var permission = await checkpermission(req.body.type, req.body.token);
+    if (permission.isSuccess == true) {
+      if (req.body.afilter == 0) {
+        var record = await attendeanceSchema
+          .find({ EmployeeId: req.body.EmployeeId })
+          .populate("EmployeeId");
+      } else if (req.body.afilter == 1) {
+        var record = await attendeanceSchema
+          .find({ EmployeeId: req.body.EmployeeId, Area: "Inside Area" })
+          .populate("EmployeeId");
+      } else {
+        var record = await attendeanceSchema
+          .find({ EmployeeId: req.body.EmployeeId, Area: "Outside Area" })
+          .populate("EmployeeId");
+      }
+      var result = {};
+      if (record.length == 0) {
+        result.Message = "Employee Not Found";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        result.Message = "Employee Found";
+        result.Data = record;
+        result.isSuccess = true;
+      }
+      res.json(result);
     } else {
-      var record = await attendeanceSchema
-        .find({ EmployeeId: req.body.EmployeeId, Area: "Outside Area" })
-        .populate("EmployeeId");
+      res.json(permission);
     }
-    var result = {};
-    if (record.length == 0) {
-      result.Message = "Employee Not Found";
-      result.Data = [];
-      result.isSuccess = false;
-    } else {
-      result.Message = "Employee Found";
-      result.Data = record;
-      result.isSuccess = true;
-    }
-    res.json(result);
   }
   //Attendance filter in admin panel
   else if (req.body.type == "getareafilter") {
     subcompanySchema.find({}, (err, record) => {
       var result = {};
       if (err) {
-        result.Message = "SubComapny Not Found";
+        result.Message = "Attendance Not Found";
         result.Data = [];
         result.isSuccess = false;
       } else {
         if (record.length == 0) {
-          result.Message = "SubComapny Not Found";
+          result.Message = "Attendance Not Found";
           result.Data = [];
           result.isSuccess = false;
         } else {
-          result.Message = "SubComapny Found";
+          result.Message = "Attendance Found";
           result.Data = record;
           result.isSuccess = true;
         }
@@ -512,5 +534,34 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
   }
 });
 /*Post request for attendance */
+
+async function checkpermission(type, token) {
+  var result = {};
+  if (token != undefined) {
+    var admindetails;
+    if (type == "insert") {
+      admindetails = await adminSchema.find({ _id: token, "Attendance.A": 1 });
+    } else if (type == "getdata" || type == "getsingle") {
+      admindetails = await adminSchema.find({ _id: token, "Attendance.V": 1 });
+    } else if (type == "update") {
+      admindetails = await adminSchema.find({ _id: token, "Attendance.U": 1 });
+    }
+
+    if (admindetails.length != 0) {
+      result.Message = "";
+      result.Data = [];
+      result.isSuccess = true;
+    } else {
+      result.Message = "You don't have access.";
+      result.Data = [];
+      result.isSuccess = false;
+    }
+  } else {
+    result.Message = "You don't have a valid token.";
+    result.Data = [];
+    result.isSuccess = false;
+  }
+  return result;
+}
 
 module.exports = router;

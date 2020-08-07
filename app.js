@@ -23,6 +23,9 @@ var locationRouter = require("./routes/location");
 var memoRouter = require("./routes/memo");
 var attendanceRouter = require("./routes/attendance");
 var adminRouter = require("./routes/admin");
+var bulkRouter = require("./routes/bulk");
+var reportRouter = require("./routes/report");
+var loginRouter = require("./routes/login");
 /*Creating Routers*/
 
 /*Initilizaing the app*/
@@ -56,6 +59,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/uploads", express.static(__dirname + "/uploads"));
 app.use("/api/reports", express.static(__dirname + "/reports"));
+app.use("/api/bulk", express.static(__dirname + "/bulk"));
 app.use(cors());
 /*Initializing dependencies*/
 
@@ -69,7 +73,10 @@ app.use("/api/timing", timingRouter);
 app.use("/api/location", locationRouter);
 app.use("/api/memo", memoRouter);
 app.use("/api/attendance", attendanceRouter);
+app.use("/api/bulk", bulkRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/generatereport", reportRouter);
+app.use("/api/login", loginRouter);
 /*Calling routers*/
 
 // catch 404 and forward to error handler

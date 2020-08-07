@@ -14,7 +14,7 @@ var newSchema = mongoose.Schema({
   ConfirmationDate: String,
   TerminationDate: String,
   Prohibition: String,
-  IDtype: String,
+  Idtype: String,
   IDNumber: String,
   Department: String,
   Designation: String,

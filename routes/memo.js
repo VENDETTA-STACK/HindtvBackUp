@@ -2,13 +2,16 @@
 var express = require("express");
 var router = express.Router();
 var memoSchema = require("../models/memo.model");
+var adminSchema = require("../models/admin.model");
+const mongoose = require("mongoose");
 /*Importing Modules */
 
 /* Post request for memo
-  type = singlememo : Get data of an indivaidual memo
-  type = datememo : Get data of  memo between specific date.
+  type = singlememo : Get data of an indivaidual employee memo,works on mobile platform
+  type = requestmemo : A employee sends a reason for his/her mobile to request to terminate that particular memo(Mobile)
+  type = datememo : Get data of  memo between specific date, works on admin panel.
   type = getsinglememodetails : Admin panel specific memo of an employee to find out the reason
-  type = verifymemo : Verifying the memo from admin panel
+  type = verifymemo : Admin panel specific, verifying the memo from admin panel
 */
 router.post("/", async (req, res) => {
   if (req.body.type == "singlememo") {
@@ -41,41 +44,51 @@ router.post("/", async (req, res) => {
       }
     );
   } else if (req.body.type == "datememo") {
-    record = await memoSchema
-      .find({
-        Eid: req.body.employee,
-        Date: { $gte: req.body.startdate, $lte: req.body.enddate },
-      })
-      .populate({
-        path: "Eid",
-        select: "Name",
-      });
-    var result = {};
-    if (record.length == 0) {
-      result.Message = "No Memo Found";
-      result.Data = [];
-      result.isSuccess = false;
+    var permission = await checkpermission(req.body.type, req.body.token);
+    if (permission.isSuccess == true) {
+      record = await memoSchema
+        .find({
+          Eid: mongoose.Types.ObjectId(req.body.employee),
+          Date: { $gte: req.body.startdate, $lte: req.body.enddate },
+        })
+        .populate({
+          path: "Eid",
+          select: "Name",
+        });
+      var result = {};
+      if (record.length == 0) {
+        result.Message = "No Memo Found";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        result.Message = "Memo Found";
+        result.Data = record;
+        result.isSuccess = true;
+      }
+      res.json(result);
     } else {
-      result.Message = "Memo Found";
-      result.Data = record;
-      result.isSuccess = true;
+      res.json(permission);
     }
-    res.json(result);
   } else if (req.body.type == "getsinglememodetails") {
-    record = await memoSchema
-      .find({ _id: req.body.id })
-      .populate("Eid", "Name");
-    var result = {};
-    if (record.length == 0) {
-      result.Message = "No Memo Found";
-      result.Data = [];
-      result.isSuccess = false;
+    var permission = await checkpermission(req.body.type, req.body.token);
+    if (permission.isSuccess == true) {
+      record = await memoSchema
+        .find({ _id: req.body.id })
+        .populate("Eid", "Name");
+      var result = {};
+      if (record.length == 0) {
+        result.Message = "No Memo Found";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        result.Message = "Memo Found";
+        result.Data = record;
+        result.isSuccess = true;
+      }
+      res.json(result);
     } else {
-      result.Message = "Memo Found";
-      result.Data = record;
-      result.isSuccess = true;
+      res.json(permission);
     }
-    res.json(result);
   } else if (req.body.type == "requestmemo") {
     memoSchema.findByIdAndUpdate(
       req.body.id,
@@ -106,32 +119,66 @@ router.post("/", async (req, res) => {
       }
     );
   } else if (req.body.type == "verifymemo") {
-    memoSchema.findByIdAndUpdate(
-      req.body.id,
-      {
-        Status: req.body.status,
-      },
-      (err, record) => {
-        var result = {};
-        if (err) {
-          result.Message = "No Memo Found";
-          result.Data = [];
-          result.isSuccess = false;
-        } else {
-          if (record.length == 0) {
+    var permission = await checkpermission(req.body.type, req.body.token);
+    if (permission.isSuccess == true) {
+      memoSchema.findByIdAndUpdate(
+        req.body.id,
+        {
+          Status: req.body.status,
+        },
+        (err, record) => {
+          var result = {};
+          if (err) {
             result.Message = "No Memo Found";
             result.Data = [];
             result.isSuccess = false;
           } else {
-            result.Message = "Memo Found";
-            result.Data = record;
-            result.isSuccess = true;
+            if (record.length == 0) {
+              result.Message = "No Memo Found";
+              result.Data = [];
+              result.isSuccess = false;
+            } else {
+              result.Message = "Memo Found";
+              result.Data = record;
+              result.isSuccess = true;
+            }
           }
+          res.json(result);
         }
-        res.json(result);
-      }
-    );
+      );
+    } else {
+      res.json(permission);
+    }
   }
 });
+
+async function checkpermission(type, token) {
+  var result = {};
+  if (token != undefined) {
+    var admindetails;
+    if (type == "insert") {
+      admindetails = await adminSchema.find({ _id: token, "Memo.A": 1 });
+    } else if (type == "datememo" || type == "getsinglememodetails") {
+      admindetails = await adminSchema.find({ _id: token, "Memo.V": 1 });
+    } else if (type == "verifymemo") {
+      admindetails = await adminSchema.find({ _id: token, "Memo.U": 1 });
+    }
+
+    if (admindetails.length != 0) {
+      result.Message = "";
+      result.Data = [];
+      result.isSuccess = true;
+    } else {
+      result.Message = "You don't have access.";
+      result.Data = [];
+      result.isSuccess = false;
+    }
+  } else {
+    result.Message = "You don't have a valid token.";
+    result.Data = [];
+    result.isSuccess = false;
+  }
+  return result;
+}
 
 module.exports = router;
