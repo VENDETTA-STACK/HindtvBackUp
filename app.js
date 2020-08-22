@@ -26,6 +26,7 @@ var adminRouter = require("./routes/admin");
 var bulkRouter = require("./routes/bulk");
 var reportRouter = require("./routes/report");
 var loginRouter = require("./routes/login");
+var leaveform = require("./routes/leaveform")
 /*Creating Routers*/
 
 /*Initilizaing the app*/
@@ -77,6 +78,7 @@ app.use("/api/bulk", bulkRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/generatereport", reportRouter);
 app.use("/api/login", loginRouter);
+//app.use("/api/leaveform",leaveform)
 /*Calling routers*/
 
 // catch 404 and forward to error handler

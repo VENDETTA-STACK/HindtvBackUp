@@ -109,23 +109,24 @@ router.post("/", async function (req, res, next) {
   } else if (req.body.type == "getsingledata") {
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
-      var record = await employeeSchema
-        .find({ _id: req.body.id })
-        .populate("SubCompany");
-      var result = {};
-      if (record.length == 0) {
-        result.Message = "Employee Not Found";
-        result.Data = [];
-        result.isSuccess = false;
-      } else {
-        result.Message = "Employee Found";
-        result.Data = record;
-        result.isSuccess = true;
-      }
-      res.json(result);
+        var record = await employeeSchema
+        .find({ _id: req.body.id },(err,record)=>{
+          var result = {};
+          if (record.length == 0) {
+            result.Message = "Employee Not Found";
+            result.Data = [];
+            result.isSuccess = false;
+          } else {
+            result.Message = "Employee Found";
+            result.Data = record;
+            result.isSuccess = true;
+          }
+          res.json(result);
+        });
     } else {
       res.json(permission);
     }
+
   } else if (req.body.type == "getsubcompanyemployee") {
     employeeSchema.find({ SubCompany: req.body.SubCompany }, (err, record) => {
       var result = {};
