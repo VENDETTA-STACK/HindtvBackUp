@@ -12,7 +12,7 @@ const geolib = require("geolib");
 const { mongoose } = require("mongoose");
 /*Importing Modules */
 
-/* All Post request for attendace are handle over here 
+/* All Post request for attendace are handle over here
 
   attendImg - Use for storing image.
   function getdate() - Return today date,day and time of IST
@@ -183,7 +183,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
       .findById(req.body.employeeid)
       .populate("SubCompany")
       .populate("Timing");
-    if (req.body.wifiname == longlat.SubCompany.wifiName) {
+    if (req.body.wifiname == longlat.WifiName) {
       memo = await entrymemo(
         req.body.employeeid,
         longlat.Timing.StartTime,
@@ -317,7 +317,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         .findById(req.body.employeeid)
         .populate("SubCompany")
         .populate("Timing");
-      if (req.body.wifiname == longlat.SubCompany.wifiName) {
+      if (req.body.wifiname == longlat.WifiName) {
         memo = await entrymemo(
           req.body.employeeid,
           longlat.Timing.StartTime,

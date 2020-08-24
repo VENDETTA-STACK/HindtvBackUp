@@ -7,9 +7,9 @@ var adminSchema = require("../models/admin.model");
 var timingSchema = require("../models/timing.models");
 /*Importing Modules */
 
-/*Post request for employee 
+/*Post request for employee
   There are different type use for various activities
-  type = insert : Insert a new employee,  
+  type = insert : Insert a new employee,
   type = update : Update an individual employee
   type = getdata : Returns data of all employee
   type = gettiming : Returns data of all timing store for employee
@@ -61,9 +61,8 @@ router.post('/',async function(req, res, next){
         res.json(permission);
         }
     }
-    
-});
 
+});
 
 async function checkpermission(type, token) {
     var result = {};
@@ -71,8 +70,8 @@ async function checkpermission(type, token) {
       var admindetails;
       if (type == "getdata") {
         admindetails = await adminSchema.find({ _id: token, "Employee.V": 1 });
-      } 
-  
+      }
+
       if (admindetails.length != 0) {
         result.Message = "";
         result.Data = [];
@@ -89,6 +88,6 @@ async function checkpermission(type, token) {
     }
     return result;
   }
-  
+
+
   module.exports = router;
-  

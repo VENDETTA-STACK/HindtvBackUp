@@ -7,9 +7,9 @@ var adminSchema = require("../models/admin.model");
 var timingSchema = require("../models/timing.models");
 /*Importing Modules */
 
-/*Post request for employee 
+/*Post request for employee
   There are different type use for various activities
-  type = insert : Insert a new employee,  
+  type = insert : Insert a new employee,
   type = update : Update an individual employee
   type = getdata : Returns data of all employee
   type = gettiming : Returns data of all timing store for employee
@@ -47,6 +47,7 @@ router.post("/", async function (req, res, next) {
         Designation: req.body.designation,
         SubCompany: req.body.subcompany,
         Timing: req.body.timing,
+        WifiName: req.body.wifiname,
       });
       record.save({}, function (err, record) {
         var result = {};
@@ -195,6 +196,7 @@ router.post("/", async function (req, res, next) {
           Designation: req.body.designation,
           SubCompany: req.body.subcompany,
           Timing: req.body.timing,
+          WifiName: req.body.wifiname,
         },
         (err, record) => {
           var result = {};

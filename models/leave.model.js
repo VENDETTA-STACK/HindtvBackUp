@@ -1,20 +1,22 @@
 var mongoose = require("mongoose");
 
 var newSchema = mongoose.Schema({
-  MasterName:{
+  Name:{
     type:String,
     required:true,
   },
-  MasterType:{
+  SubCompany:{
     type:String,
     required:true,
   },
-  Status:{
-    type:Boolean,
+  Company:{
+    type:String,
     required:true,
-    default:false,
+  },
+  Descriptionn:{
+
   }
 });
 
-const admin = mongoose.model("masterLeaveLevel", newSchema);
+const admin = mongoose.model("leave", newSchema);
 module.exports = admin;
