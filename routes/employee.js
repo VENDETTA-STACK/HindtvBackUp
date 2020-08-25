@@ -22,6 +22,7 @@ router.post("/", async function (req, res, next) {
   if (req.body.type == "insert") {
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
+      console.log(req.body);
       var record = new employeeSchema({
         FirstName: req.body.firstname,
         MiddleName: req.body.middlename,
@@ -48,6 +49,8 @@ router.post("/", async function (req, res, next) {
         SubCompany: req.body.subcompany,
         Timing: req.body.timing,
         WifiName: req.body.wifiname,
+        WeekName: req.body.weekdayname,
+        WeekDay: req.body.numofday,
       });
       record.save({}, function (err, record) {
         var result = {};
@@ -111,7 +114,7 @@ router.post("/", async function (req, res, next) {
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
         var record = await employeeSchema
-        .find({ _id: req.body.id },(err,record)=>{
+        .findById(req.body.id,(err,record)=>{
           var result = {};
           if (record.length == 0) {
             result.Message = "Employee Not Found";
@@ -151,7 +154,7 @@ router.post("/", async function (req, res, next) {
   } else if (req.body.type == "getemployee") {
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
-      var record = await employeeSchema.find({ _id: req.body.id });
+      var record = await employeeSchema.findById(req.body.id);
       var result = {};
       if (record.length == 0) {
         result.Message = "Employee Not Found";
@@ -197,6 +200,8 @@ router.post("/", async function (req, res, next) {
           SubCompany: req.body.subcompany,
           Timing: req.body.timing,
           WifiName: req.body.wifiname,
+          WeekName: req.body.weekdayname,
+          WeekDay: req.body.numofday,
         },
         (err, record) => {
           var result = {};
@@ -245,7 +250,7 @@ async function checkpermission(type, token) {
       admindetails = await adminSchema.find({ _id: token, "Employee.A": 1 });
     } else if (type == "getdata") {
       admindetails = await adminSchema.find({ _id: token, "Employee.V": 1 });
-    } else if (type == "getemployee" || type == "update") {
+    } else if (type == "getemployee" || type == "update" || type == "getsingledata") {
       admindetails = await adminSchema.find({ _id: token, "Employee.U": 1 });
     }
 

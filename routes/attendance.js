@@ -183,6 +183,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
       .findById(req.body.employeeid)
       .populate("SubCompany")
       .populate("Timing");
+      console.log(req.body.wifiname, longlat.WifiName);
     if (req.body.wifiname == longlat.WifiName) {
       memo = await entrymemo(
         req.body.employeeid,
@@ -441,8 +442,8 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         }
         if (sdate != undefined || edate != undefined) {
           query.Date = {
-            $gte: sdate,
-            $lte: edate,
+            $gte : sdate,
+            $lte : edate
           };
         }
         if (area) {
@@ -461,6 +462,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
             query.Status = "out";
           }
         }
+
       }
       var record = await attendeanceSchema.find(query).populate("EmployeeId");
       var result = {};
