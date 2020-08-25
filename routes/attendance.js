@@ -183,8 +183,8 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
       .findById(req.body.employeeid)
       .populate("SubCompany")
       .populate("Timing");
-      console.log(req.body.wifiname, longlat.WifiName, req.body);
     if (req.body.wifiname == longlat.WifiName) {
+      console.log(req.body.wifiname, longlat.WifiName);
       memo = await entrymemo(
         req.body.employeeid,
         longlat.Timing.StartTime,
