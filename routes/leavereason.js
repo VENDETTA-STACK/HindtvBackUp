@@ -60,7 +60,7 @@ router.post("/", async (req, res) => {
             }
             res.json(result);
           });
-        } else {
+        }else {
           res.json(permission);
         }
     }
@@ -68,11 +68,12 @@ router.post("/", async (req, res) => {
     else if(req.body.type == "statusupdate"){
       var permission = await checkpermission(req.body.type, req.body.token);
       if(permission.isSuccess==true){
-        if(req.body.sts == "true"){
+        if(req.body.sts == 'true'){
           masterLeaveLevelSchema.findByIdAndUpdate(
             req.body.id,
-            { Status: false },
+            { Status: true },
             (err, record) => {
+              console.log(record);
               var result = {};
               if (err) {
                 result.Message = "Error Occurred";
@@ -84,7 +85,7 @@ router.post("/", async (req, res) => {
                   result.Data = [];
                   result.isSuccess = false;
                 } else {
-                  result.Message = "Status updated to block";
+                  result.Message = "Status updated to unblock";
                   result.Data = record;
                   result.isSuccess = true;
                 }
@@ -95,7 +96,7 @@ router.post("/", async (req, res) => {
         else {
          masterLeaveLevelSchema.findByIdAndUpdate(
            req.body.id,
-           { Status: true },
+           { Status: false },
            (err, record) => {
              var result = {};
              if (err) {
