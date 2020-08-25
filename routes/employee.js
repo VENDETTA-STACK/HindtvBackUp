@@ -156,7 +156,8 @@ router.post("/", async function (req, res, next) {
     if (permission.isSuccess == true) {
       var record = await employeeSchema.findById(req.body.id);
       var result = {};
-      if (record.length == 0) {
+      console.log(record);
+      if (record !== null && record.length == 0) {
         result.Message = "Employee Not Found";
         result.Data = [];
         result.isSuccess = false;
