@@ -8,7 +8,7 @@ var newSchema = mongoose.Schema({
   },
   Day: String,
   Time: String,
-  Date: Date,
+  Date: String,
   Image: String,
   Status: String,
   Area: String,
