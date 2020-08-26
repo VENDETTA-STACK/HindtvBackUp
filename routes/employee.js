@@ -5,6 +5,8 @@ var employeeSchema = require("../models/employee.model");
 var subcompanySchema = require("../models/subcompany.models");
 var adminSchema = require("../models/admin.model");
 var timingSchema = require("../models/timing.models");
+const multer = require("multer");
+
 /*Importing Modules */
 
 /*Post request for employee
@@ -18,11 +20,30 @@ var timingSchema = require("../models/timing.models");
 
   function checkpermission() : It checks whether you have a correct token to access data and also checks whether you have the rights to Add,View,Update the data.
 */
-router.post("/", async function (req, res, next) {
+
+var attendImg = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(
+      null,
+      file.fieldname +
+        "-" +
+        uniqueSuffix +
+        "." +
+        file.originalname.split(".")[1]
+    );
+  },
+});
+
+var upload = multer({ storage: attendImg });
+
+router.post("/", upload.single("employeeimage"),upload.single("employecertificate"), async function (req, res, next) {
   if (req.body.type == "insert") {
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
-      console.log(req.body);
       var record = new employeeSchema({
         FirstName: req.body.firstname,
         MiddleName: req.body.middlename,
@@ -51,6 +72,8 @@ router.post("/", async function (req, res, next) {
         WifiName: req.body.wifiname,
         WeekName: req.body.weekdayname,
         WeekDay: req.body.numofday,
+        ProfileImage:req.body.employeeimage,
+        CertificateImage:req.body.employeecertificate,
       });
       record.save({}, function (err, record) {
         var result = {};
@@ -156,7 +179,6 @@ router.post("/", async function (req, res, next) {
     if (permission.isSuccess == true) {
       var record = await employeeSchema.findById(req.body.id);
       var result = {};
-      console.log(record);
       if (record !== null && record.length == 0) {
         result.Message = "Employee Not Found";
         result.Data = [];
@@ -203,6 +225,8 @@ router.post("/", async function (req, res, next) {
           WifiName: req.body.wifiname,
           WeekName: req.body.weekdayname,
           WeekDay: req.body.numofday,
+          ProfileImage:req.body.employeeimage,
+          CertificateImage:req.body.employeecertificate
         },
         (err, record) => {
           var result = {};

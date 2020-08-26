@@ -31,6 +31,8 @@ var newSchema = mongoose.Schema({
   WifiName: String,
   WeekName:String,
   WeekDay:Number,
+  ProfileImage:String,
+  CertificateImage:String,
 });
 
 const admin = mongoose.model("employee", newSchema);

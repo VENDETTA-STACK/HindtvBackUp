@@ -3,6 +3,7 @@ var express = require("express");
 var router = express.Router();
 const multer = require("multer");
 var moment = require("moment-timezone");
+var momentNew = require('moment');
 var subcompanySchema = require("../models/subcompany.models");
 var employeeSchema = require("../models/employee.model");
 var attendeanceSchema = require("../models/attendance.models");
@@ -462,7 +463,6 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
             query.Status = "out";
           }
         }
-
       }
       var record = await attendeanceSchema.find(query).populate("EmployeeId");
       var result = {};

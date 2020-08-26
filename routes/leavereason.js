@@ -3,7 +3,6 @@ var express = require("express");
 var router = express.Router();
 var masterLeaveLevelSchema = require("../models/masterLeaveLevel.model");
 var adminSchema = require("../models/admin.model");
-
 /*Importing Modules */
 
 /* Function for curd operation master leave-reason*/
@@ -36,7 +35,7 @@ router.post("/", async (req, res) => {
       } else {
         res.json(permission);
       }
-  }
+    }
     //Fetch all Reason from database
     else if(req.body.type == "getalldata"){
         var permission = await checkpermission(req.body.type, req.body.token);
@@ -73,7 +72,6 @@ router.post("/", async (req, res) => {
             req.body.id,
             { Status: true },
             (err, record) => {
-              console.log(record);
               var result = {};
               if (err) {
                 result.Message = "Error Occurred";
@@ -161,7 +159,7 @@ router.post("/", async (req, res) => {
               result.Data = [];
               result.isSuccess = false;
             } else{
-              if(record.length == 0){
+              if( record == null ||record.length == 0){
                 result.Message = "Name Not Found";
                 result.Data = [];
                 result.isSuccess = false;
@@ -210,7 +208,7 @@ async function checkpermission(type, token) {
   }
   return result;
 }
-
-//updated 24.08 by dhanpal
-
 module.exports = router;
+
+//updated 24.08 
+

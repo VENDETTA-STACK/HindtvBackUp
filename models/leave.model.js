@@ -1,21 +1,33 @@
 var mongoose = require("mongoose");
 
 var newSchema = mongoose.Schema({
-  Name:{
-    type:String,
-    required:true,
+  EmployeeId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "employees",
+    required: true,
   },
   SubCompany:{
-    type:String,
-    required:true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "subcompanies",
+    required: true,
   },
   Company:{
-    type:String,
-    required:true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "companies",
+    required: true,
   },
-  Descriptionn:{
+  Reason:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "masterleavelevels",
+    required: true,
+  },
+  Description: String,
+  DOL: Date, 
+  RTime:{
+    type: Date, 
+    default: Date.now()
+  }   
 
-  }
 });
 
 const admin = mongoose.model("leave", newSchema);
