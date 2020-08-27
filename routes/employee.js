@@ -44,7 +44,7 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
  
   if (req.body.type == "insert") {
     var permission = await checkpermission(req.body.type, req.body.token);
-    var employeecode = req.body.subcompany.substr(0,4)+ req.body.firstname.substr(0,4) + req.body.lastname.substr(0,4) + req.body.mobile.substr(0,4);
+    var employeecode = 'DL' + req.body.subcompany.substr(0,4)+ req.body.firstname.substr(0,4) + req.body.lastname.substr(0,4) + req.body.mobile.substr(0,4);
     if (permission.isSuccess == true) {
       console.log(req.body);
       var record = new employeeSchema({
