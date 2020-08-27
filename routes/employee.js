@@ -40,10 +40,13 @@ var attendImg = multer.diskStorage({
 
 var upload = multer({ storage: attendImg });
 
-router.post("/", upload.single("employeeimage"),upload.single("employecertificate"), async function (req, res, next) {
+router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocument"}]), async function (req, res, next) {
+ 
   if (req.body.type == "insert") {
     var permission = await checkpermission(req.body.type, req.body.token);
+    var employeecode = req.body.subcompany.substr(0,4)+ req.body.firstname.substr(0,4) + req.body.lastname.substr(0,4) + req.body.mobile.substr(0,4);
     if (permission.isSuccess == true) {
+      console.log(req.body);
       var record = new employeeSchema({
         FirstName: req.body.firstname,
         MiddleName: req.body.middlename,
@@ -72,8 +75,17 @@ router.post("/", upload.single("employeeimage"),upload.single("employecertificat
         WifiName: req.body.wifiname,
         WeekName: req.body.weekdayname,
         WeekDay: req.body.numofday,
-        ProfileImage:req.body.employeeimage,
-        CertificateImage:req.body.employeecertificate,
+        GpsTrack: req.body.gpstrack,
+        AccountName:req.body.accountname,
+        BankName:req.body.bankname,
+        AccountNumber:req.body.accountnumber,
+        IFSCCode:req.body.ifsccode,
+        BranchName:req.body.branchname,
+        MICRCode:req.body.micrcode,
+        UPICode:req.body.upicode,
+        ProfileImage: req.files.employeeimage[0].filename,
+        CertificateImage: req.files.employeedocument[0].filename,
+        EmployeeCode:employeecode,
       });
       record.save({}, function (err, record) {
         var result = {};
@@ -193,7 +205,10 @@ router.post("/", upload.single("employeeimage"),upload.single("employecertificat
       res.json(permission);
     }
   } else if (req.body.type == "update") {
+   
     var permission = await checkpermission(req.body.type, req.body.token);
+   
+    console.log(employeecode);
     if (permission.isSuccess == true) {
       employeeSchema.findByIdAndUpdate(
         req.body.id,
@@ -225,8 +240,17 @@ router.post("/", upload.single("employeeimage"),upload.single("employecertificat
           WifiName: req.body.wifiname,
           WeekName: req.body.weekdayname,
           WeekDay: req.body.numofday,
-          ProfileImage:req.body.employeeimage,
-          CertificateImage:req.body.employeecertificate
+
+          GpsTrack: req.body.gpstrack,
+          AccountName:req.body.accountname,
+          BankName:req.body.bankname,
+          AccountNumber:req.body.accountnumber,
+          IFSCCode:req.body.ifsccode,
+          BranchName:req.body.branchname,
+          MICRCode:req.body.micrcode,
+          UPICode:req.body.upicode,
+          ProfileImage: req.files.employeeimage[0].filename,
+        CertificateImage: req.files.employeedocument[0].filename,
         },
         (err, record) => {
           var result = {};

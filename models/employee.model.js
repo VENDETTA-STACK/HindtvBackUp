@@ -33,6 +33,15 @@ var newSchema = mongoose.Schema({
   WeekDay:Number,
   ProfileImage:String,
   CertificateImage:String,
+  GpsTrack:Boolean,
+  AccountName:String,
+  BankName:String,
+  AccountNumber:Number,
+  IFSCCode:String,
+  BranchName:String,
+  MICRCode:String,
+  UPICode:String,
+  EmployeeCode:String,
 });
 
 const admin = mongoose.model("employee", newSchema);
