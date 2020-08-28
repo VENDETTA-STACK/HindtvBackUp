@@ -124,7 +124,7 @@ router.post("/", async(req, res) => {
                                     var groupmemo = _.groupBy(memoData, "Eid.Name");
                                     var approved = 0,
                                         disapproved = 0;
-                                    console.log(groupmemo);
+                                    // console.log(groupmemo);
                                     for (var key in groupmemo) {
                                         for (j = 0; j < groupmemo[key].length; j++) {
                                             if (groupmemo[key][j].Status == true) {
