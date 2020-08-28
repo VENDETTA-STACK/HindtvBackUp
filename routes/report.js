@@ -120,7 +120,7 @@ router.post("/", async(req, res) => {
                                         },
                                     })
                                     .populate("Eid", "Name");
-                                if (memoData !== undefined && memoData.length > 0) {
+                                if (memoData !== undefined && memoData.length >= 0) {
                                     var groupmemo = _.groupBy(memoData, "Eid.Name");
                                     var approved = 0,
                                         disapproved = 0;
