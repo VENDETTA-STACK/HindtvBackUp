@@ -185,7 +185,6 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
       .populate("SubCompany")
       .populate("Timing");
     if (req.body.wifiname == longlat.WifiName) {
-      console.log(req.body);
       memo = await entrymemo(
         req.body.employeeid,
         longlat.Timing.StartTime,

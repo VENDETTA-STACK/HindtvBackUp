@@ -21,10 +21,10 @@ router.post("/", async function (req, res, next) {
       long: parseFloat(req.body.long),
       Link: req.body.googlelink,
       BufferTime: parseInt(req.body.buffertime),
-      wifiName: req.body.wifiname,
+      MemoNumber: req.body.memonumber,
+      SalaryDate: req.body.salarydate,
     });
     record.save({}, function (err, record) {
-      console.log(err);
       var result = {};
       if (err) {
         result.Message = "Record Not Inserted";
@@ -174,7 +174,7 @@ router.post("/", async function (req, res, next) {
     req.body.long = req.body.long == undefined ? 0 : req.body.long;
     req.body.buffertime =
       req.body.buffertime == undefined ? 0 : req.body.buffertime;
-    subcompanySchema.findByIdAndUpdate(
+      subcompanySchema.findByIdAndUpdate(
       req.body.id,
       {
         Name: req.body.name,
@@ -189,7 +189,8 @@ router.post("/", async function (req, res, next) {
         long: parseFloat(req.body.long),
         Link: req.body.googlelink,
         BufferTime: parseInt(req.body.buffertime),
-        wifiName: req.body.wifiname,
+        MemoNumber: req.body.memonumber,
+        SalaryDate: req.body.salarydate,
       },
       (err, record) => {
         var result = {};

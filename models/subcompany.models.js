@@ -18,6 +18,8 @@ var newSchema = mongoose.Schema({
   Link: String,
   BufferTime: Number,
   //wifiName: String,
+  SalaryDate: Number,
+  MemoNumber: Number,
 });
 
 const admin = mongoose.model("subcompany", newSchema);

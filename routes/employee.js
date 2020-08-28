@@ -5,6 +5,8 @@ var employeeSchema = require("../models/employee.model");
 var subcompanySchema = require("../models/subcompany.models");
 var adminSchema = require("../models/admin.model");
 var timingSchema = require("../models/timing.models");
+var companySchema = require("../models/company.models");
+var STRING = require('string');
 const multer = require("multer");
 
 /*Importing Modules */
@@ -41,12 +43,21 @@ var attendImg = multer.diskStorage({
 var upload = multer({ storage: attendImg });
 
 router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocument"}]), async function (req, res, next) {
- 
   if (req.body.type == "insert") {
     var permission = await checkpermission(req.body.type, req.body.token);
-    var employeecode = 'DL' + req.body.subcompany.substr(0,4)+ req.body.firstname.substr(0,4) + req.body.lastname.substr(0,4) + req.body.mobile.substr(0,4);
+
+    //auto generate employeecode
+    var subcompanyID = await subcompanySchema.findById(req.body.subcompany);
+    var companyID = await companySchema.findById(subcompanyID.CompanyId);
+    var companyname = companyID.Name;
+    companyname = companyname.replace(/\s/gi, "").toUpperCase();
+    var subcompanyname = subcompanyID.Name;
+    subcompanyname = subcompanyname.replace(/\s/gi, "").toUpperCase();
+    var employeename = req.body.firstname;
+    employeename = employeename.toUpperCase();
+    var employeecode = companyname.substr(0,3) +subcompanyname.substr(0,3)+ employeename.substr(0,3) + req.body.mobile.substr(0,3);
+    
     if (permission.isSuccess == true) {
-      console.log(req.body);
       var record = new employeeSchema({
         FirstName: req.body.firstname,
         MiddleName: req.body.middlename,
@@ -205,10 +216,7 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
       res.json(permission);
     }
   } else if (req.body.type == "update") {
-   
     var permission = await checkpermission(req.body.type, req.body.token);
-   
-    console.log(employeecode);
     if (permission.isSuccess == true) {
       employeeSchema.findByIdAndUpdate(
         req.body.id,
@@ -289,6 +297,7 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
     }
     res.json(result);
   }
+  
 });
 
 async function checkpermission(type, token) {

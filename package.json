@@ -27,6 +27,7 @@
     "multer": "^1.4.2",
     "nodemon": "^2.0.4",
     "radians": "^1.0.0",
+    "string": "^3.3.3",
     "tempfile": "^3.0.0"
   }
 }
