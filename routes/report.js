@@ -86,16 +86,22 @@ router.post("/", async(req, res) => {
                                     var i = 0;
                                     for (var key2 in result[key][key1]) {
                                         if (key2 == "in") {
+                                            // check outTime data exists or not
+                                            if (result[key][key1]["out"] == undefined) {
+                                                var outTime = "11:00:00 pm";
+                                            } else {
+                                                var outTime = result[key][key1]["out"][i].Time;
+                                            }
                                             worksheet.addRow({
                                                 Name: key,
                                                 Date: key1,
                                                 Day: result[key][key1][key2][i].Day,
                                                 Status: "P",
                                                 InTime: result[key][key1][key2][i].Time,
-                                                OutTime: result[key][key1]["out"][i].Time,
+                                                OutTime: outTime,
                                                 DifferenceTime: calculateTime(
                                                     result[key][key1][key2][i].Time,
-                                                    result[key][key1]["out"][i].Time
+                                                    outTime
                                                 ),
                                             });
                                         }
@@ -114,25 +120,27 @@ router.post("/", async(req, res) => {
                                         },
                                     })
                                     .populate("Eid", "Name");
-                                var groupmemo = _.groupBy(memoData, "Eid.Name");
-                                var approved = 0,
-                                    disapproved = 0;
-                                console.log(groupmemo);
-                                for (var key in groupmemo) {
-                                    for (j = 0; j < groupmemo[key].length; j++) {
-                                        if (groupmemo[key][j].Status == true) {
-                                            approved++;
-                                        } else {
-                                            disapproved++;
+                                if (memoData !== undefined && memoData.length > 0) {
+                                    var groupmemo = _.groupBy(memoData, "Eid.Name");
+                                    var approved = 0,
+                                        disapproved = 0;
+                                    console.log(groupmemo);
+                                    for (var key in groupmemo) {
+                                        for (j = 0; j < groupmemo[key].length; j++) {
+                                            if (groupmemo[key][j].Status == true) {
+                                                approved++;
+                                            } else {
+                                                disapproved++;
+                                            }
                                         }
+                                        worksheet1.addRow({
+                                            Name: key,
+                                            Type: groupmemo[key][0].Type,
+                                            Date: req.body.startdate + " - " + req.body.enddate,
+                                            Accepted: approved,
+                                            Disapproved: disapproved,
+                                        });
                                     }
-                                    worksheet1.addRow({
-                                        Name: key,
-                                        Type: groupmemo[key][0].Type,
-                                        Date: req.body.startdate + " - " + req.body.enddate,
-                                        Accepted: approved,
-                                        Disapproved: disapproved,
-                                    });
                                 }
                             }
 
