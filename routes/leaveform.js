@@ -8,10 +8,10 @@ router.post("/", async(req, res) => {
     //Insert data in Leave Collection
     if (req.body.type == "insert") {
         var record = new leaveSchema({
-            EmployeeId: req.body.employeename,
-            SubCompany: req.body.subcompanyname,
-            Company: req.body.companyname,
-            Reason: req.body.leavereasonname,
+            EmployeeId: req.body.EmployeeId,
+            SubCompany: req.body.SubCompanyId,
+            Company: req.body.CompanyId,
+            Reason: req.body.ReasonId,
             DOL: req.body.ldate,
             Description: req.body.description
         });
