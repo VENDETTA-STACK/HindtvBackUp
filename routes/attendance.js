@@ -178,6 +178,7 @@ function calculatelocation(name, lat1, long1, lat2, long2) {
 /*Post request for attendance */
 router.post("/", upload.single("attendance"), async function (req, res, next) {
   period = getdate(); //Function calling
+  var attendancetype;
   //Attendance In Function
   if (req.body.type == "in") {
     var longlat = await employeeSchema // Fetching employee data with employeeid
@@ -191,6 +192,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         longlat.SubCompany.BufferTime,
         period
       );
+      attendancetype = "WIFI";
       var record = attendeanceSchema({
         EmployeeId: req.body.employeeid,
         Status: req.body.type,
@@ -203,7 +205,8 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         Elong: req.body.longitude,
         Distance: 0,
         Memo: memo,
-        wifiName: req.body.wifiname,
+        WifiName: req.body.wifiname,
+        AttendanceType:attendancetype,
       });
       record.save({}, function (err, record) {
         var result = {};
@@ -254,6 +257,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           longlat.SubCompany.BufferTime,
           period
         );
+        attendancetype = "GPS";
         var record = attendeanceSchema({
           EmployeeId: req.body.employeeid,
           Status: req.body.type,
@@ -266,7 +270,8 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           Elong: req.body.longitude,
           Distance: heading,
           Memo: memo,
-          wifiName: req.body.wifiname,
+          WifiName: req.body.wifiname,
+          AttendanceType:attendancetype,
         });
         record.save({}, function (err, record) {
           var result = {};

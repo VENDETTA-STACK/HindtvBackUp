@@ -63,6 +63,29 @@ router.post("/", async (req, res) => {
           res.json(permission);
         }
     }
+    //Fetch all Reason from database for app
+    else if(req.body.type == "getdata"){
+        masterLeaveLevelSchema.find({},(err, record)=>{
+          var result = {};
+          if (err) {
+            result.Message = "Reasons Not Found";
+            result.Data = [];
+            result.isSuccess = false;
+          } else {
+            if (record.length == 0) {
+              result.Message = "Reasons Not Found";
+              result.Data = [];
+              result.isSuccess = false;
+            } else {
+              result.Message = "Reasons Found.";
+              result.Data = record;
+              result.isSuccess = true;
+            }
+          }
+          res.json(result);
+        });
+       
+    }
     //updating status block and unblock
     else if(req.body.type == "statusupdate"){
       var permission = await checkpermission(req.body.type, req.body.token);
