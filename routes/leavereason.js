@@ -252,9 +252,3 @@ async function checkpermission(type, token) {
     return result;
 }
 module.exports = router;
-
-<<<<<<< HEAD
-//updated 24.08
-=======
-//updated 24.08
->>>>>>> 469bdac9900f41cd50fe5fbc7952661a59ec108c
