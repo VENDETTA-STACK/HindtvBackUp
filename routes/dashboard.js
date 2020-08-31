@@ -29,33 +29,35 @@ var convertedDate = function () {
 };
 
 router.post("/", async (req, res) => {
-  if ((req.body.type = "getdata")) {
+  if (req.body.type = "getdata") {
+    var result = {};
     //convertedDate();
-    var date = "20/07/2020";
-    var attendance  = await attendeanceSchema.find({ Date: date}).populate("EmployeeId");
-    for (var index = 0; index < attendance.length; index++) {
-      var SubCompany = await subcompanySchema.findById(attendance[index].EmployeeId["SubCompany"]);
-      console.count(SubCompany.Name);
-    }
-    /*await attendeanceSchema.find({ Date: date }, (err, record) => {
-      var result = {};
-      if (err) {
-        result.Message = "Record Not Found";
-        result.Data = [];
-        result.isSuccess = false;
-      } else {
-        if (record.length == 0) {
-          result.Message = "Record Not Found";
-          result.Data = [];
-          result.isSuccess = false;
-        } else {
-          result.Message = "Record Found";
-          result.Data = record;
-          result.isSuccess = true;
+    try{
+        var date = convertedDate();
+        var data = [];
+        var Attendance;
+        var SubCompanyName;
+        var subcompany = await subcompanySchema.find();
+        for (var index = 0; index < subcompany.length; index++) {
+          SubCompanyName = subcompany[index].Name;
+          var employee = await employeeSchema.find({SubCompany: subcompany[index]._id,});
+          for (var employeeIndex = 0;employeeIndex < employee.length;employeeIndex++) {
+              attendance = await attendeanceSchema.find({Date: date,EmployeeId: employee[employeeIndex]._id});
+              Attendance = attendance.length;
+          }
+          data[index] = { Attendance, SubCompanyName };
         }
-        res.json(result);
-      }
-    });*/
+        console.log(data.length);
+        result.Message = "Record Found";
+        result.Data = data;
+        result.isSuccess  = true;
+    }
+    catch(err){
+      result.Message = "Record Not Found";
+      result.Data = [];
+      result.isSuccess  = false;
+    }
+    res.json(result);
   }
 });
 
