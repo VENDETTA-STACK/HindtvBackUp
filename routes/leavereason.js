@@ -6,169 +6,6 @@ var adminSchema = require("../models/admin.model");
 /*Importing Modules */
 
 /* Function for curd operation master leave-reason*/
-<<<<<<< HEAD
-router.post("/", async (req, res) => {
-  //Insert Reason Method
-  if (req.body.type == "insert") {
-    var permission = await checkpermission(req.body.type, req.body.token);
-    if (permission.isSuccess == true) {
-      var record = new masterLeaveLevelSchema({
-        MasterName: req.body.name,
-        MasterType: req.body.mastertype,
-      });
-      record.save({}, function (err, record) {
-        var result = {};
-        if (err) {
-          result.Message = "Record Not Inserted";
-          result.Data = err;
-          result.isSuccess = false;
-        } else if (record.length == 0) {
-          result.Message = "Record Not Inserted";
-          result.Data = [];
-          result.isSuccess = false;
-        } else {
-          result.Message = "Record Inserted";
-          result.Data = record;
-          result.isSuccess = true;
-        }
-        res.json(result);
-      });
-    } else {
-      res.json(permission);
-    }
-  }
-  //Fetch all Reason from database
-  else if (req.body.type == "getalldata") {
-    var permission = await checkpermission(req.body.type, req.body.token);
-    if (permission.isSuccess == true) {
-      masterLeaveLevelSchema.find({}, (err, record) => {
-        var result = {};
-        if (err) {
-          result.Message = "Reasons Not Found";
-          result.Data = [];
-          result.isSuccess = false;
-        } else {
-          if (record.length == 0) {
-            result.Message = "Reasons Not Found";
-            result.Data = [];
-            result.isSuccess = false;
-          } else {
-            result.Message = "Reasons Found.";
-            result.Data = record;
-            result.isSuccess = true;
-          }
-        }
-        res.json(result);
-      });
-    } else {
-      res.json(permission);
-    }
-  }
-  //Fetch all Reason from database for app
-  else if (req.body.type == "getdata") {
-    masterLeaveLevelSchema.find({}, (err, record) => {
-      var result = {};
-      if (err) {
-        result.Message = "Reasons Not Found";
-        result.Data = [];
-        result.isSuccess = false;
-      } else {
-        if (record.length == 0) {
-          result.Message = "Reasons Not Found";
-          result.Data = [];
-          result.isSuccess = false;
-        } else {
-          result.Message = "Reasons Found.";
-          result.Data = record;
-          result.isSuccess = true;
-        }
-      }
-      res.json(result);
-    });
-  }
-  //updating status block and unblock
-  else if (req.body.type == "statusupdate") {
-    var permission = await checkpermission(req.body.type, req.body.token);
-    if (permission.isSuccess == true) {
-      if (req.body.sts == "true") {
-        masterLeaveLevelSchema.findByIdAndUpdate(
-          req.body.id,
-          { Status: true },
-          (err, record) => {
-            var result = {};
-            if (err) {
-              result.Message = "Error Occurred";
-              result.Data = [];
-              result.isSuccess = false;
-            } else {
-              if (record.length == 0) {
-                result.Message = "Error Occurred";
-                result.Data = [];
-                result.isSuccess = false;
-              } else {
-                result.Message = "Status updated to unblock";
-                result.Data = record;
-                result.isSuccess = true;
-              }
-            }
-            res.json(result);
-          }
-        );
-      } else {
-        masterLeaveLevelSchema.findByIdAndUpdate(
-          req.body.id,
-          { Status: false },
-          (err, record) => {
-            var result = {};
-            if (err) {
-              result.Message = "Error Occurred";
-              result.Data = [];
-              result.isSuccess = false;
-            } else {
-              if (record.length == 0) {
-                result.Message = "Error Occurred";
-                result.Data = [];
-                result.isSuccess = false;
-              } else {
-                result.Message = "Status updated to block";
-                result.Data = record;
-                result.isSuccess = true;
-              }
-            }
-            res.json(result);
-          }
-        );
-      }
-    }
-  }
-  //update method for update leave reason
-  else if (req.body.type == "update") {
-    var permission = await checkpermission(req.body.type, req.body.token);
-    if (permission.isSuccess == true) {
-      masterLeaveLevelSchema.findByIdAndUpdate(
-        req.body.id,
-        { MasterName: req.body.name },
-        (err, record) => {
-          var result = {};
-          if (err) {
-            result.Message = "Name Not Updated";
-            result.Data = [];
-            result.isSuccess = false;
-          } else {
-            if (record.length == 0) {
-              result.Message = "Name Not Updated";
-              result.Data = [];
-              result.isSuccess = false;
-            } else {
-              result.Message = "Name Updated";
-              result.Data = record;
-              result.isSuccess = true;
-            }
-          }
-          res.json(result);
-        }
-      );
-=======
 router.post("/", async(req, res) => {
     //Insert Reason Method
     if (req.body.type == "insert") {
@@ -200,7 +37,7 @@ router.post("/", async(req, res) => {
         }
     }
     //Fetch all Reason from database
-    else if (req.body.type == "getalldata") {
+    /*else if (req.body.type == "getalldata") {
         var permission = await checkpermission(req.body.type, req.body.token);
         if (permission.isSuccess == true) {
             masterLeaveLevelSchema.find({}, (err, record) => {
@@ -225,9 +62,9 @@ router.post("/", async(req, res) => {
         } else {
             res.json(permission);
         }
-    }
+    }*/
     //Fetch all Reason from database for app
-    else if (req.body.type == "getdata") {
+    else if (req.body.type == "getalldata") {
         masterLeaveLevelSchema.find({}, (err, record) => {
             var result = {};
             if (err) {
@@ -353,9 +190,8 @@ router.post("/", async(req, res) => {
                     res.json(result);
                 });
         }
->>>>>>> 469bdac9900f41cd50fe5fbc7952661a59ec108c
     }
-  }
+  
   //get value single reason value
   else if (req.body.type == "getdata") {
     var permission = await checkpermission(req.body.type, req.body.token);
