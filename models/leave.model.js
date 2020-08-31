@@ -23,10 +23,6 @@ var newSchema = mongoose.Schema({
   },
   Description: String,
   DOL: Date, 
-  RTime:{
-    type: Date, 
-    default: Date.now()
-  }   
 
 });
 

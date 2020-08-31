@@ -97,6 +97,7 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
         ProfileImage: req.files.employeeimage[0].filename,
         CertificateImage: req.files.employeedocument[0].filename,
         EmployeeCode:employeecode,
+        CompanyId:companyID.id,
       });
       record.save({}, function (err, record) {
         var result = {};

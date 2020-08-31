@@ -42,6 +42,11 @@ var newSchema = mongoose.Schema({
   MICRCode:String,
   UPICode:String,
   EmployeeCode:String,
+  CompanyId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "company",
+    required: true,
+  }
 });
 
 const admin = mongoose.model("employee", newSchema);

@@ -13,7 +13,7 @@ router.post("/", async(req, res) => {
             Company: req.body.CompanyId,
             Reason: req.body.ReasonId,
             DOL: req.body.ldate,
-            Description: req.body.description
+            Description: req.body.description,
         });
         record.save({}, function(err, record) {
             var result = {};
