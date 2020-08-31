@@ -328,7 +328,7 @@ router.post("/", async(req, res) => {
         }
     }
     //get value single reason value
-    else if (req.body.type == "getdata") {
+    else if (req.body.type == "getsingledata") {
         var permission = await checkpermission(req.body.type, req.body.token);
         if (permission.isSuccess == true) {
             masterLeaveLevelSchema.findById(
