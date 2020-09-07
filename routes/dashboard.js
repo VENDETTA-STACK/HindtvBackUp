@@ -31,12 +31,18 @@ var convertedDate = function () {
 router.post("/", async (req, res) => {
   if (req.body.type = "getdata") {
     var result = {};
-    //convertedDate();
+    convertedDate(); //fetch date
+    
     try{
         var date = convertedDate();
         var data = [];
         var Attendance;
         var SubCompanyName;
+        let test =  await attendeanceSchema.find().populate({
+          path: 'EmployeeId',
+          populate:'SubCompany'
+        });
+        //console.log(JSON.stringify(test));
         var subcompany = await subcompanySchema.find();
         for (var index = 0; index < subcompany.length; index++) {
           SubCompanyName = subcompany[index].Name;
@@ -47,7 +53,7 @@ router.post("/", async (req, res) => {
           }
           data[index] = { Attendance, SubCompanyName };
         }
-        console.log(data.length);
+        //console.log(data.length);
         result.Message = "Record Found";
         result.Data = data;
         result.isSuccess  = true;
@@ -58,6 +64,7 @@ router.post("/", async (req, res) => {
       result.isSuccess  = false;
     }
     res.json(result);
+    
   }
 });
 

@@ -58,6 +58,15 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
     var employeecode = companyname.substr(0,3) +subcompanyname.substr(0,3)+ employeename.substr(0,3) + req.body.mobile.substr(0,3);
     
     if (permission.isSuccess == true) {
+      var image,document;
+      if(req.files.employeeimage== undefined || req.files.employeedocument == undefined){
+        image = "";
+        document = "";
+      }
+      else{
+        image =req.files.employeeimage[0].filename;
+        document = req.files.employeedocument[0].filename;
+      }
       var record = new employeeSchema({
         FirstName: req.body.firstname,
         MiddleName: req.body.middlename,
@@ -94,8 +103,8 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
         BranchName:req.body.branchname,
         MICRCode:req.body.micrcode,
         UPICode:req.body.upicode,
-        ProfileImage: req.files.employeeimage[0].filename,
-        CertificateImage: req.files.employeedocument[0].filename,
+        ProfileImage: image,
+        CertificateImage: document,
         EmployeeCode:employeecode,
         CompanyId:companyID.id,
       });
@@ -219,6 +228,15 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
   } else if (req.body.type == "update") {
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
+      var image,document;
+      if(req.files.employeeimage== undefined || req.files.employeedocument == undefined){
+        image = "";
+        document = "";
+      }
+      else{
+        image =req.files.employeeimage[0].filename;
+        document = req.files.employeedocument[0].filename;
+      }
       employeeSchema.findByIdAndUpdate(
         req.body.id,
         {
@@ -258,8 +276,8 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
           BranchName:req.body.branchname,
           MICRCode:req.body.micrcode,
           UPICode:req.body.upicode,
-          ProfileImage: req.files.employeeimage[0].filename,
-        CertificateImage: req.files.employeedocument[0].filename,
+          ProfileImage: image,
+        CertificateImage: document,
         },
         (err, record) => {
           var result = {};
