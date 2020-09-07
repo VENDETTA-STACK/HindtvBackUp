@@ -59,7 +59,8 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
     
     if (permission.isSuccess == true) {
       var image,document;
-      if(req.files.employeeimage== undefined || req.files.employeedocument == undefined){
+      console.log(req.files);
+      if(req.files.employeeimage == undefined || req.files.employeedocument == undefined){
         image = "";
         document = "";
       }
@@ -226,10 +227,11 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
       res.json(permission);
     }
   } else if (req.body.type == "update") {
+    console.log(req.files.length);
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
       var image,document;
-      if(req.files.employeeimage== undefined || req.files.employeedocument == undefined){
+      if(req.files.length == undefined || req.files.length == undefined){
         image = "";
         document = "";
       }

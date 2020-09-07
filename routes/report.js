@@ -101,6 +101,7 @@ for(var i=0;i<27*27;i++){
 
 
 router.post("/", async(req, res) => {
+    
     if (req.body.type == "attendancereport") {
         var permission = await checkpermission(req.body.type, req.body.token);
         if (permission.isSuccess == true) {
@@ -114,22 +115,21 @@ router.post("/", async(req, res) => {
                         Date: {
                             $gte:startdate,
                             $lte:enddate
-                            //$gte: req.body.startdate,
-                            //$lte: req.body.enddate,
                         },
                     })
                     .select("Status Date Time Day")
                     .populate({
                         path: "EmployeeId",
-                        select: "Name",
+                        select: "EmployeeId Name",
                         match: {
                             SubCompany: mongoose.Types.ObjectId(req.body.company),
                         },
                     });
-                /**
+                /*
                  * Reason memorecord-> Fetch memo record of employee particular date wise and performing groupby using EmployeeName.
                  * Updated By: Dhanpal 7-09-2020
                  */
+                
                 memorecord  = await memoSchema
                     .find({
                         Date:{
@@ -145,13 +145,14 @@ router.post("/", async(req, res) => {
                             SubCompany: mongoose.Types.ObjectId(req.body.company),
                         },
                     });
-                
+                    
                 var mresult = [];
                 memorecord.map(async(memorecords) => {
                     if(memorecords.Eid != null){
                         mresult.push(memorecords);
                     }
                 });
+                
                 if(mresult.length >= 0){
                     var mresult = _.groupBy(mresult, "Eid.Name");
                     mresult = _.forEach(mresult, function(value, key){
@@ -160,12 +161,11 @@ router.post("/", async(req, res) => {
                         })
                     });
                 }
-
                 /**
                  * Reason record-> Fetch attendance record of employee on particular date wise and performing groupby using EmployeeName.
                  * Updated By: 
                  */
-                
+                console.log(record);
                 if (record.length >= 0) {
                     var result = [];
                     record.map(async(records) => {
@@ -173,7 +173,9 @@ router.post("/", async(req, res) => {
                             result.push(records);
                         }
                     });
+                    console.log(result);
                     var memoresult = result;
+                    console.log(result);
                     if (result.length >= 0) {
                         var result = _.groupBy(result, "EmployeeId.Name");
                         result = _.forEach(result, function(value, key) {
@@ -191,7 +193,6 @@ router.post("/", async(req, res) => {
                                 });
                             });
                         });
-                        
                         /*
                         * Start the designing of excelsheet.
                         */
@@ -210,23 +211,10 @@ router.post("/", async(req, res) => {
                             worksheet.getCell('A5').value = "L => Late";
                             worksheet.getCell('A6').value = "HD => Half-Day";
                             worksheet.getCell('A8').value = "Employee Name";
-                            /**
+                            /*
                              * Reason:Code for pattern of the header desing of excel sheet.
                              * Updated By Dhanpal 07-09-2020
                              */
-                           
-                            /*worksheet.columns = [
-                                {key: "Name", width: 32},
-                                {key: "Date", width: 32},
-                                {key: "Day", width: 32},
-                                {key: "Status", width: 32},
-                                {key: "InTime", width: 32},
-                                {key: "OutTime", width: 32},
-                                {key: "DifferenceTime",width: 28}
-                            ];*/
-                            /*for(var index=1;index<=26;index++){
-                                worksheet.getCell(String.fromCharCode(index+64)+9).value = index;
-                            }*/
 
                             /*
                             worksheet.columns = [
@@ -258,7 +246,6 @@ router.post("/", async(req, res) => {
                                 worksheet.getCell(cellArray[colindex+1]+rowindex).value = dateArray[datecol];
                                 colindex++;
                             }
-                            
                             for (var key in result){
                                 var tempIndex = 0;
                                 var lemployee = []; //store data of late comer employee
@@ -266,12 +253,14 @@ router.post("/", async(req, res) => {
                                     lemployee[tempIndex] = key1;
                                     tempIndex++;
                                 }
+                                
                                 var employeedate  = [];
                                 tempIndex = 0;
                                 for (var key1 in result[key]){
                                     employeedate[tempIndex] = key1; //store data of present employee
                                     tempIndex++;
                                 }
+                               
                                 worksheet.addRow({Name: key});
                                 colindex = 0;
                                 for(var datecol=1;datecol<=dateArray.length-1;datecol++){
@@ -406,7 +395,8 @@ router.post("/", async(req, res) => {
             };
             res.json(result);
         }
-    } else if (req.body.type == "employeeattendancereport") {
+    } /*else if (req.body.type == "employeeattendancereport") {
+        alert("work");
         var permission = await checkpermission(req.body.type, req.body.token);
         if (permission.isSuccess == true) {
             try {
@@ -587,7 +577,7 @@ router.post("/", async(req, res) => {
             };
             res.json(result);
         }
-    }
+    }*/
 });
 
 function calculateTime(inTime, outTime) {
