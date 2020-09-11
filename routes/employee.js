@@ -59,7 +59,6 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
     
     if (permission.isSuccess == true) {
       var image,document;
-      console.log(req.files);
       if(req.files.employeeimage == undefined || req.files.employeedocument == undefined){
         image = "";
         document = "";
@@ -135,7 +134,10 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
       var companyselection = await adminSchema.findById(req.body.token);
+      console.log("companyselection");
+      console.log(companyselection);
       if (companyselection.allaccessubcompany == true) {
+        console.log(companyselection.allaccessubcompany);
         var record = await employeeSchema.find({}).populate("SubCompany");
         var result = {};
         if (record.length == 0) {
@@ -168,10 +170,13 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
       res.json(permission);
     }
   } else if (req.body.type == "getsingledata") {
+    console.log("getsingledata");
     var permission = await checkpermission(req.body.type, req.body.token);
+    console.log(permission);
     if (permission.isSuccess == true) {
         var record = await employeeSchema
         .findById(req.body.id,(err,record)=>{
+          console.log(record);
           var result = {};
           if (record.length == 0) {
             result.Message = "Employee Not Found";
@@ -227,7 +232,6 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
       res.json(permission);
     }
   } else if (req.body.type == "update") {
-    console.log(req.files.length);
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
       var image,document;

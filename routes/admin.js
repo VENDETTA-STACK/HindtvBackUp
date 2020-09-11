@@ -180,6 +180,7 @@ router.post("/", async (req, res, next) => {
     adminSchema.find(
       { mobilenumber: req.body.mobile, password: req.body.password },
       async (err, record) => {
+        //console.log(record);
         var result = {};
         if (err) {
           result.Message = err;

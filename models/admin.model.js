@@ -64,3 +64,9 @@ var newSchema = mongoose.Schema({
 const admin = mongoose.model("admin", newSchema);
 
 module.exports = admin;
+/**
+ * A -> All Permission 
+ * U -> Only Update
+ * V -> Only View
+ * D -> Delete
+ */

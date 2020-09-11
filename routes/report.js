@@ -110,6 +110,8 @@ router.post("/", async(req, res) => {
                 var startdate,enddate;
                 startdate = dateArray[1];
                 enddate = dateArray[dateArray.length-1];
+                //startdate = req.body.startdate;
+                //enddate = req.body.enddate;
                 record = await attendeanceSchema
                     .find({
                         Date: {
@@ -137,35 +139,75 @@ router.post("/", async(req, res) => {
                             $lte:enddate,
                         }
                     })
-                    .select("Date")
+                    .select("Date Hours Minutes Seconds")
                     .populate({
                         path: "Eid",
-                        select : "Name",
+                        select : "Name SubCompany",
                         match: {
                             SubCompany: mongoose.Types.ObjectId(req.body.company),
                         },
                     });
-                    
+
+               memorecord = await attendeanceSchema.aggregate([
+                    { 
+                        $lookup: { 
+                        from: "employees", 
+                        localField: "EmployeeId", 
+                        foreignField: "_id", 
+                        as: "Employee"} 
+                    },
+                    { 
+                        $unwind: "$Employee" 
+                    },
+                    { 
+                        $lookup: { 
+                        from: "subcompanies", 
+                        localField: "Employee.SubCompany", 
+                        foreignField: "_id", 
+                        as: "SubCompany"} 
+                    },
+                    {
+                        $unwind: "$SubCompany" 
+                    },
+                    {
+                        $lookup: { 
+                            from: "timings", 
+                            localField: "Employee.Timing", 
+                            foreignField: "_id", 
+                            as: "Timing"
+                        } 
+                    },
+                    {
+                        $unwind: "$Timing" 
+                    },
+               ]);
+               var bufferTime;
+               testrecord = _.forEach(memorecord,function(key,value){
+                   if(key.SubCompany._id == req.body.company){
+                     bufferTime = key.SubCompany.BufferTime;
+                   }
+               });
                 var mresult = [];
                 memorecord.map(async(memorecords) => {
-                    if(memorecords.Eid != null){
+                    if(memorecords.EmployeeId != null && memorecords.SubCompany._id == req.body.company){
                         mresult.push(memorecords);
                     }
                 });
                 
                 if(mresult.length >= 0){
-                    var mresult = _.groupBy(mresult, "Eid.Name");
+                    var mresult = _.groupBy(mresult, "Employee.Name");
                     mresult = _.forEach(mresult, function(value, key){
                         mresult[key] = _.groupBy(mresult[key], function(item){
                             return item.Date;
                         })
                     });
+                   
                 }
+               
                 /**
                  * Reason record-> Fetch attendance record of employee on particular date wise and performing groupby using EmployeeName.
                  * Updated By: 
                  */
-                console.log(record);
                 if (record.length >= 0) {
                     var result = [];
                     record.map(async(records) => {
@@ -173,9 +215,7 @@ router.post("/", async(req, res) => {
                             result.push(records);
                         }
                     });
-                    console.log(result);
                     var memoresult = result;
-                    console.log(result);
                     if (result.length >= 0) {
                         var result = _.groupBy(result, "EmployeeId.Name");
                         result = _.forEach(result, function(value, key) {
@@ -193,6 +233,7 @@ router.post("/", async(req, res) => {
                                 });
                             });
                         });
+                        
                         /*
                         * Start the designing of excelsheet.
                         */
@@ -205,11 +246,13 @@ router.post("/", async(req, res) => {
                             worksheet.getCell('C1').value = "Performance Report";
                             worksheet.getCell('C2').value = "SubCompany Name";
                             worksheet.getCell('C2').width = "32";
+                            worksheet.mergeCells('B4:D4');
+                            worksheet.getCell('B4').value =  req.body.monthname+" Report";
                             worksheet.getCell('D2').value = req.body.name;
                             worksheet.getCell('A3').value = "P => Present";
                             worksheet.getCell('A4').value = "A => Absent";
                             worksheet.getCell('A5').value = "L => Late";
-                            worksheet.getCell('A6').value = "HD => Half-Day";
+                            worksheet.getCell('A6').value = "M => Memo Issue";
                             worksheet.getCell('A8').value = "Employee Name";
                             /*
                              * Reason:Code for pattern of the header desing of excel sheet.
@@ -245,7 +288,94 @@ router.post("/", async(req, res) => {
                             for(var datecol=1;datecol<=dateArray.length-1;datecol++){
                                 worksheet.getCell(cellArray[colindex+1]+rowindex).value = dateArray[datecol];
                                 colindex++;
+
                             }
+                            
+                            for(var key1 in mresult){
+                                worksheet.addRow({Name: key1});
+                                var employeedate  = [];
+                                var tempIndex = 0;
+                                for (var tempkey in mresult[key1]){
+                                    employeedate[tempIndex] = tempkey; //store data of present employee
+                                    tempIndex++;
+                                }
+                                var count = 1;
+                                for(var key2 in mresult[key1]){
+                                    colindex = 0;
+                                    var indexChecker=1;
+                                    for(var datecol=1;datecol<=dateArray.length-1;datecol++){
+                                        
+                                        if(employeedate.findIndex(item => item == dateArray[datecol])!=-1){
+                                            
+                                            var starttime=0,employeetime=0,cobufferTime=0;
+                                            var st=0,et=0,bt=0;
+                                            var i = 1;
+                                            for(var key3 in mresult[key1][key2]){
+                                                st = mresult[key1][key2][key3]['Timing']['StartTime'];
+                                                et = mresult[key1][key2][key3]['Time'];
+                                                starttime = convertSecond(mresult[key1][key2][key3]['Timing']['StartTime']);
+                                                employeetime = convertSecond(mresult[key1][key2][key3]['Time']);
+                                                if(i==indexChecker){
+                                                    break;
+                                                }
+                                                i++;
+                                            }
+                                            st = st.split(":"); 
+                                            cobufferTime = st[0]+":"+parseInt(st[1]+(bufferTime))+":"+st[2];
+                                            cobufferTime = convertSecond(cobufferTime);
+                                           
+                                            
+                                            if(employeetime <= starttime){
+                                                worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value ="P";
+                                            }
+                                            else if(employeetime < cobufferTime){
+                                                worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value ="L";
+                                            }
+                                            else {
+                                                worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value ="M";
+                                            }  
+                                            indexChecker++;  
+                                        }
+                                        
+                                        else{
+                                            worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value = "A";
+                                        }
+                                        
+                                        //}
+                                        
+                                        colindex++;    
+                                    }
+                                    count++;
+                                }
+                               
+                                //bufferTime = parseInt(parseInt(starttime)+(bufferTime*60));
+                                //colindex = 0;
+                                /*for(var datecol=1;datecol<=dateArray.length-1;datecol++){
+                                    if(employeedate.findIndex(item => item == dateArray[datecol])!=-1){
+                                        //console.log(employeetime,starttime,bufferTime);
+                                        if(employeetime<=starttime){
+                                            //console.log("P");
+                                            worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value = "P";
+                                        }
+                                        else if(employeetime > starttime || employeetime < bufferTime){
+                                            //console.log("L");
+                                            worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value = "L";
+                                        }
+                                        else if(employeetime>bufferTime){
+                                            //console.log("M");
+                                            worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value = "M";
+                                        }
+                                    }
+                                    else{
+                                        //console.log("A");
+                                        worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value = "A";
+                                    }
+                                    colindex++;
+                                }*/
+                                rowindex = parseInt(rowindex)+1;
+                                
+                            }
+                            /*
                             for (var key in result){
                                 var tempIndex = 0;
                                 var lemployee = []; //store data of late comer employee
@@ -253,7 +383,7 @@ router.post("/", async(req, res) => {
                                     lemployee[tempIndex] = key1;
                                     tempIndex++;
                                 }
-                                
+
                                 var employeedate  = [];
                                 tempIndex = 0;
                                 for (var key1 in result[key]){
@@ -276,7 +406,7 @@ router.post("/", async(req, res) => {
                                     colindex++;
                                 }
                                 rowindex = parseInt(rowindex+1);
-                            }
+                            }*/
                             
                             /*
                             for (var key in result) {
@@ -301,6 +431,7 @@ router.post("/", async(req, res) => {
                                                     result[key][key1][key2][i].Time,
                                                     outTime
                                                 ),
+                                                
                                             });
                                         }
                                     }
@@ -579,6 +710,20 @@ router.post("/", async(req, res) => {
         }
     }*/
 });
+
+function convertSecond(time){
+    time = time.toLowerCase();
+    time = time.replace(/:/g,"");
+    if(time.includes("pm")){
+        time = parseInt(time + 120000);
+
+    }
+    else if(time.includes("am")){
+        time = time.replace(/am/g,"");
+    }
+    time = parseInt(time*3600);
+    return time;
+}
 
 function calculateTime(inTime, outTime) {
     var startTime = moment(inTime, "HH:mm:ss a");

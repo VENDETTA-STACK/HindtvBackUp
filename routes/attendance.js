@@ -518,25 +518,56 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
   }
   //Attendance filter in admin panel
   else if (req.body.type == "getareafilter") {
-    subcompanySchema.find({}, (err, record) => {
-      var result = {};
-      if (err) {
-        result.Message = "Attendance Not Found";
-        result.Data = [];
-        result.isSuccess = false;
+    var permission = await checkpermission(req.body.type, req.body.token);
+    if(permission.isSuccess == true){
+      var companyselection = await adminSchema.findById(req.body.token);
+      if(companyselection.allaccessubcompany == true){
+        subcompanySchema.find({}, (err, record) => {
+          var result = {};
+          if (err) {
+            result.Message = "SubCompany Not Found.";
+            result.Data = [];
+            result.isSuccess = false;
+          } else {
+            if (record.length == 0) {
+              result.Message = "SubCompany Not Found.";
+              result.Data = [];
+              result.isSuccess = false;
+            } else {
+              result.Message = "SubCompany Found.";
+              result.Data = record;
+              result.isSuccess = true;
+            }
+          }
+          res.json(result);
+        });
       } else {
-        if (record.length == 0) {
-          result.Message = "Attendance Not Found";
-          result.Data = [];
-          result.isSuccess = false;
-        } else {
-          result.Message = "Attendance Found";
-          result.Data = record;
-          result.isSuccess = true;
-        }
+        await subcompanySchema.find({_id:companyselection.accessCompany},function(err,record){
+          var result = {};
+          if(err){
+            result.Message = "SubCompany Not Found.";
+            result.Data = [];
+            result.isSuccess = false;
+          }
+          else{
+            if(record.length == 0){
+              result.Message = "SubCompany Not Found.";
+              result.Data = [];
+              result.isSuccess = false;
+            }else{
+              result.Message = "SubCompany Not Found";
+              result.Data = record;
+              result.isSuccess = true;
+            } 
+          }
+          res.json(result);
+        });
       }
-      res.json(result);
-    });
+      
+    }
+    else{
+      res.json(permission);
+    }
   }
 });
 /*Post request for attendance */
@@ -547,7 +578,7 @@ async function checkpermission(type, token) {
     var admindetails;
     if (type == "insert") {
       admindetails = await adminSchema.find({ _id: token, "Attendance.A": 1 });
-    } else if (type == "getdata" || type == "getsingle") {
+    } else if (type == "getdata" || type == "getsingle" || type == "getareafilter") {
       admindetails = await adminSchema.find({ _id: token, "Attendance.V": 1 });
     } else if (type == "update") {
       admindetails = await adminSchema.find({ _id: token, "Attendance.U": 1 });

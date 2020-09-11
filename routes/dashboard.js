@@ -42,7 +42,6 @@ router.post("/", async (req, res) => {
           path: 'EmployeeId',
           populate:'SubCompany'
         });
-        //console.log(JSON.stringify(test));
         var subcompany = await subcompanySchema.find();
         for (var index = 0; index < subcompany.length; index++) {
           SubCompanyName = subcompany[index].Name;
@@ -53,7 +52,6 @@ router.post("/", async (req, res) => {
           }
           data[index] = { Attendance, SubCompanyName };
         }
-        //console.log(data.length);
         result.Message = "Record Found";
         result.Data = data;
         result.isSuccess  = true;
