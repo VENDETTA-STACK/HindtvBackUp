@@ -106,6 +106,7 @@ router.post("/", async(req, res) => {
         var permission = await checkpermission(req.body.type, req.body.token);
         if (permission.isSuccess == true) {
             try {
+                dateArray = [];
                 countDate(req.body.month,req.body.year);
                 var startdate,enddate;
                 startdate = dateArray[1];
