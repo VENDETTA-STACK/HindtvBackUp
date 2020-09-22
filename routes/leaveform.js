@@ -5,14 +5,18 @@ var leaveSchema = require("../models/leave.model")
     /*Importing Modules */
 
 router.post("/", async(req, res) => {
-    //Insert data in Leave Collection
+    //Insert data in Leave Collection    
     if (req.body.type == "insert") {
         var record = new leaveSchema({
             EmployeeId: req.body.EmployeeId,
             SubCompany: req.body.SubCompanyId,
             Company: req.body.CompanyId,
             Reason: req.body.ReasonId,
-            DOL: req.body.ldate,
+            ApplyDate : Date.now(),
+            StartDate : req.body.startdate,
+            EndDate : req.body.enddate,
+            LeaveType : req.body.leavetype,
+            LeavePeriod : req.body.leaveperiod,
             Description: req.body.description,
         });
         record.save({}, function(err, record) {

@@ -22,8 +22,11 @@ var newSchema = mongoose.Schema({
     required: true,
   },
   Description: String,
-  DOL: Date, 
-
+  ApplyDate: Date, 
+  StartDate:Date,
+  EndDate:Date,
+  LeaveType : String,
+  LeavePeriod:Number
 });
 
 const admin = mongoose.model("leave", newSchema);

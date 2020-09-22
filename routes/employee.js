@@ -170,7 +170,6 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
       res.json(permission);
     }
   } else if (req.body.type == "getsingledata") {
-    console.log("getsingledata");
     var permission = await checkpermission(req.body.type, req.body.token);
     console.log(permission);
     if (permission.isSuccess == true) {
@@ -232,6 +231,7 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
       res.json(permission);
     }
   } else if (req.body.type == "update") {
+    console.log(req.body);
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
       var image,document;
