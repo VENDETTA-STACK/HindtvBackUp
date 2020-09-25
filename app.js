@@ -28,7 +28,14 @@ var reportRouter = require("./routes/report");
 var loginRouter = require("./routes/login");
 var leavereasonRouter = require("./routes/leavereason");
 var leaveformRouter = require("./routes/leaveform");
+var defineleaveRouter = require("./routes/defineleave");
 var dashboardRouter = require("./routes/dashboard");
+
+
+// tnd 
+// var tndindexRouter = require("./routes/tnd");
+// var tndpersonRouter = require("./routes/tnd1");
+// var tndloginRouter = require("./routes/tnd2");
 /*Creating Routers*/
 
 /*Initilizaing the app*/
@@ -82,7 +89,14 @@ app.use("/api/generatereport", reportRouter);
 app.use("/api/login", loginRouter);
 app.use("/api/leavereason",leavereasonRouter);
 app.use("/api/leaveform",leaveformRouter);
+app.use("/api/defineleave",defineleaveRouter);
 app.use("/api/dashboard",dashboardRouter);
+
+// tnd 
+// app.use('/api/tnd/tnd', tndindexRouter);
+// app.use('/api/tnd/tnd_login', tndpersonRouter);
+// app.use('/api/tnd/tnd_personal', tndloginRouter);
+
 /*Calling routers*/
 
 // catch 404 and forward to error handler

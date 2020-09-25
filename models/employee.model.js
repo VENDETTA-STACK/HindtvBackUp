@@ -33,6 +33,8 @@ var newSchema = mongoose.Schema({
   WeekDay:Number,
   ProfileImage:String,
   CertificateImage:String,
+  CertificateImage1:String,
+  CertificateImage2:String,
   GpsTrack:Boolean,
   AccountName:String,
   BankName:String,

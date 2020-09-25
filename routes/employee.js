@@ -8,7 +8,6 @@ var timingSchema = require("../models/timing.models");
 var companySchema = require("../models/company.models");
 var STRING = require('string');
 const multer = require("multer");
-
 /*Importing Modules */
 
 /*Post request for employee
@@ -42,7 +41,7 @@ var attendImg = multer.diskStorage({
 
 var upload = multer({ storage: attendImg });
 
-router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocument"}]), async function (req, res, next) {
+router.post("/", upload.fields([{ name:"employeeimage"}, {name:"employeedocument"},{name:"employeedocument2"},{name:"employeedocument3"}]), async function (req, res, next) {
   if (req.body.type == "insert") {
     var permission = await checkpermission(req.body.type, req.body.token);
 
@@ -60,73 +59,136 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
     if (permission.isSuccess == true) {
       var image,document;
       if(req.files.employeeimage == undefined || req.files.employeedocument == undefined){
-        image = "";
-        document = "";
-      }
-      else{
-        image =req.files.employeeimage[0].filename;
-        document = req.files.employeedocument[0].filename;
-      }
-      var record = new employeeSchema({
-        FirstName: req.body.firstname,
-        MiddleName: req.body.middlename,
-        LastName: req.body.lastname,
-        Name:
-          req.body.firstname +
-          " " +
-          req.body.middlename +
-          " " +
-          req.body.lastname,
-        Gender: req.body.gender,
-        DOB: req.body.dob,
-        MartialStatus: req.body.martialstatus,
-        Mobile: req.body.mobile,
-        Mail: req.body.mail,
-        JoinDate: req.body.joindate,
-        ConfirmationDate: req.body.confirmationdate,
-        TerminationDate: req.body.terminationdate,
-        Prohibition: req.body.prohibition,
-        Idtype: req.body.idtype,
-        IDNumber: req.body.idnumber,
-        Department: req.body.department,
-        Designation: req.body.designation,
-        SubCompany: req.body.subcompany,
-        Timing: req.body.timing,
-        WifiName: req.body.wifiname,
-        WeekName: req.body.weekdayname,
-        WeekDay: req.body.numofday,
-        GpsTrack: req.body.gpstrack,
-        AccountName:req.body.accountname,
-        BankName:req.body.bankname,
-        AccountNumber:req.body.accountnumber,
-        IFSCCode:req.body.ifsccode,
-        BranchName:req.body.branchname,
-        MICRCode:req.body.micrcode,
-        UPICode:req.body.upicode,
-        ProfileImage: image,
-        CertificateImage: document,
-        EmployeeCode:employeecode,
-        CompanyId:companyID.id,
-      });
-      record.save({}, function (err, record) {
-        var result = {};
-        if (err) {
-          result.Message = "Record Not Inserted";
-          result.Data = err;
-          result.isSuccess = false;
-        } else {
-          if (record.length == 0) {
+        var record = new employeeSchema({
+          FirstName: req.body.firstname,
+          MiddleName: req.body.middlename,
+          LastName: req.body.lastname,
+          Name:
+            req.body.firstname +
+            " " +
+            req.body.middlename +
+            " " +
+            req.body.lastname,
+          Gender: req.body.gender,
+          DOB: req.body.dob,
+          MartialStatus: req.body.married,
+          Mobile: req.body.mobile,
+          Mail: req.body.mail,
+          JoinDate: req.body.joindate,
+          ConfirmationDate: req.body.confirmationdate,
+          TerminationDate: req.body.terminationdate,
+          Prohibition: req.body.prohibition,
+          Idtype: req.body.idtype,
+          IDNumber: req.body.idnumber,
+          Department: req.body.department,
+          Designation: req.body.designation,
+          SubCompany: req.body.subcompany,
+          Timing: req.body.timing,
+          WifiName: req.body.wifiname,
+          WeekName: req.body.weekdayname,
+          WeekDay: req.body.numofday,
+          GpsTrack: req.body.gpstrack,
+          AccountName:req.body.accountname,
+          BankName:req.body.bankname,
+          AccountNumber:req.body.accountnumber,
+          IFSCCode:req.body.ifsccode,
+          BranchName:req.body.branchname,
+          MICRCode:req.body.micrcode,
+          UPICode:req.body.upicode,
+          EmployeeCode:employeecode,
+          CompanyId:companyID.id,
+        });
+
+        record.save({}, function (err, record) {
+          var result = {};
+          if (err) {
             result.Message = "Record Not Inserted";
-            result.Data = [];
+            result.Data = err;
             result.isSuccess = false;
           } else {
-            result.Message = "Record Inserted";
-            result.Data = record;
-            result.isSuccess = true;
+            if (record.length == 0) {
+              result.Message = "Record Not Inserted";
+              result.Data = [];
+              result.isSuccess = false;
+            } else {
+              result.Message = "Record Inserted";
+              result.Data = record;
+              result.isSuccess = true;
+            }
           }
-        }
-        res.json(result);
-      });
+          res.json(result);
+        });
+      }
+      else if(req.files.employeeimage != undefined && req.files.employeedocument != undefined && req.files.employeedocument2 != undefined && req.files.employeedocument3 != undefined ){
+        image =req.files.employeeimage[0].filename;
+        document = req.files.employeedocument[0].filename;
+        document1 = req.files.employeedocument2[0].filename;
+        document2 = req.files.employeedocument3[0].filename;
+
+        var record = new employeeSchema({
+          FirstName: req.body.firstname,
+          MiddleName: req.body.middlename,
+          LastName: req.body.lastname,
+          Name:
+            req.body.firstname +
+            " " +
+            req.body.middlename +
+            " " +
+            req.body.lastname,
+          Gender: req.body.gender,
+          DOB: req.body.dob,
+          MartialStatus: req.body.married,
+          Mobile: req.body.mobile,
+          Mail: req.body.mail,
+          JoinDate: req.body.joindate,
+          ConfirmationDate: req.body.confirmationdate,
+          TerminationDate: req.body.terminationdate,
+          Prohibition: req.body.prohibition,
+          Idtype: req.body.idtype,
+          IDNumber: req.body.idnumber,
+          Department: req.body.department,
+          Designation: req.body.designation,
+          SubCompany: req.body.subcompany,
+          Timing: req.body.timing,
+          WifiName: req.body.wifiname,
+          WeekName: req.body.weekdayname,
+          WeekDay: req.body.numofday,
+          GpsTrack: req.body.gpstrack,
+          AccountName:req.body.accountname,
+          BankName:req.body.bankname,
+          AccountNumber:req.body.accountnumber,
+          IFSCCode:req.body.ifsccode,
+          BranchName:req.body.branchname,
+          MICRCode:req.body.micrcode,
+          UPICode:req.body.upicode,
+          ProfileImage: image,
+          CertificateImage: document,
+          CertificateImage1: document1,
+          CertificateImage2: document2,
+          EmployeeCode:employeecode,
+          CompanyId:companyID.id,
+        });
+
+        record.save({}, function (err, record) {
+          var result = {};
+          if (err) {
+            result.Message = "Record Not Inserted";
+            result.Data = err;
+            result.isSuccess = false;
+          } else {
+            if (record.length == 0) {
+              result.Message = "Record Not Inserted";
+              result.Data = [];
+              result.isSuccess = false;
+            } else {
+              result.Message = "Record Inserted";
+              result.Data = record;
+              result.isSuccess = true;
+            }
+          }
+          res.json(result);
+        });
+      }
     } else {
       res.json(permission);
     }
@@ -134,8 +196,6 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
       var companyselection = await adminSchema.findById(req.body.token);
-      console.log("companyselection");
-      console.log(companyselection);
       if (companyselection.allaccessubcompany == true) {
         console.log(companyselection.allaccessubcompany);
         var record = await employeeSchema.find({}).populate("SubCompany");
@@ -171,11 +231,10 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
     }
   } else if (req.body.type == "getsingledata") {
     var permission = await checkpermission(req.body.type, req.body.token);
-    console.log(permission);
     if (permission.isSuccess == true) {
+       
         var record = await employeeSchema
         .findById(req.body.id,(err,record)=>{
-          console.log(record);
           var result = {};
           if (record.length == 0) {
             result.Message = "Employee Not Found";
@@ -188,6 +247,7 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
           }
           res.json(result);
         });
+        
     } else {
       res.json(permission);
     }
@@ -215,7 +275,8 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
   } else if (req.body.type == "getemployee") {
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
-      var record = await employeeSchema.findById(req.body.id);
+      var record = await employeeSchema.find({_id:req.body.id}).populate({ path:"SubCompany",
+      select:"Name"});
       var result = {};
       if (record !== null && record.length == 0) {
         result.Message = "Employee Not Found";
@@ -231,96 +292,233 @@ router.post("/", upload.fields([{ name: "employeeimage" }, {name: "employeedocum
       res.json(permission);
     }
   } else if (req.body.type == "update") {
-    console.log(req.body);
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
-      var image,document;
-      if(req.files.length == undefined || req.files.length == undefined){
-        image = "";
-        document = "";
-      }
-      else{
-        image =req.files.employeeimage[0].filename;
-        document = req.files.employeedocument[0].filename;
-      }
-      employeeSchema.findByIdAndUpdate(
-        req.body.id,
-        {
-          FirstName: req.body.firstname,
-          MiddleName: req.body.middlename,
-          LastName: req.body.lastname,
-          Name:
-            req.body.firstname +
-            " " +
-            req.body.middlename +
-            " " +
-            req.body.lastname,
-          Gender: req.body.gender,
-          DOB: req.body.dob,
-          MartialStatus: req.body.martialstatus,
-          Mobile: req.body.mobile,
-          Mail: req.body.mail,
-          JoinDate: req.body.joindate,
-          ConfirmationDate: req.body.confirmationdate,
-          TerminationDate: req.body.terminationdate,
-          Prohibition: req.body.prohibition,
-          Idtype: req.body.idtype,
-          IDNumber: req.body.idnumber,
-          Department: req.body.department,
-          Designation: req.body.designation,
-          SubCompany: req.body.subcompany,
-          Timing: req.body.timing,
-          WifiName: req.body.wifiname,
-          WeekName: req.body.weekdayname,
-          WeekDay: req.body.numofday,
-
-          GpsTrack: req.body.gpstrack,
-          AccountName:req.body.accountname,
-          BankName:req.body.bankname,
-          AccountNumber:req.body.accountnumber,
-          IFSCCode:req.body.ifsccode,
-          BranchName:req.body.branchname,
-          MICRCode:req.body.micrcode,
-          UPICode:req.body.upicode,
-          ProfileImage: image,
-        CertificateImage: document,
-        },
-        (err, record) => {
-          var result = {};
-          if (err) {
-            result.Message = "Employee Not Updated";
-            result.Data = err;
-            result.isSuccess = false;
-          } else {
-            if (record.length == 0) {
+      console.log("updated");
+      //if(req.files.employeeimage == undefined && req.files.employeedocument == undefined && req.files.employeedocument2 != undefined && req.files.employeedocument3 != undefined){
+      if(req.files.employeeimage == undefined && req.files.employeedocument == undefined){  
+        console.log("updated");
+        employeeSchema.findByIdAndUpdate(
+          req.body.id,
+          {
+            FirstName: req.body.firstname,
+            MiddleName: req.body.middlename,
+            LastName: req.body.lastname,
+            Name:
+              req.body.firstname +
+              " " +
+              req.body.middlename +
+              " " +
+              req.body.lastname,
+            Gender: req.body.gender,
+            DOB: req.body.dob,
+            MartialStatus: req.body.married,
+            Mobile: req.body.mobile,
+            Mail: req.body.mail,
+            JoinDate: req.body.joindate,
+            ConfirmationDate: req.body.confirmationdate,
+            TerminationDate: req.body.terminationdate,
+            Prohibition: req.body.prohibition,
+            Idtype: req.body.idtype,
+            IDNumber: req.body.idnumber,
+            Department: req.body.department,
+            Designation: req.body.designation,
+            SubCompany: req.body.subcompany,
+            Timing: req.body.timing,
+            WifiName: req.body.wifiname,
+            WeekName: req.body.weekdayname,
+            WeekDay: req.body.numofday,
+            GpsTrack: req.body.gpstrack,
+            AccountName:req.body.accountname,
+            BankName:req.body.bankname,
+            AccountNumber:req.body.accountnumber,
+            IFSCCode:req.body.ifsccode,
+            BranchName:req.body.branchname,
+            MICRCode:req.body.micrcode,
+            UPICode:req.body.upicode
+          },
+          (err, record) => {
+            var result = {};
+            if (err) {
               result.Message = "Employee Not Updated";
-              result.Data = [];
+              result.Data = err;
               result.isSuccess = false;
             } else {
-              result.Message = "Employee Updated";
-              result.Data = record;
-              result.isSuccess = true;
+              if (record.length == 0) {
+                result.Message = "Employee Not Updated";
+                result.Data = [];
+                result.isSuccess = false;
+              } else {
+                result.Message = "Employee Updated";
+                result.Data = record;
+                result.isSuccess = true;
+              }
             }
+            res.json(result);
           }
-          res.json(result);
-        }
-      );
+        );
+      }
+
+      else if(req.files.employeeimage != undefined && req.files.employeedocument != undefined){
+        employeeSchema.findByIdAndUpdate(
+          req.body.id,
+          {
+            FirstName: req.body.firstname,
+            MiddleName: req.body.middlename,
+            LastName: req.body.lastname,
+            Name:
+              req.body.firstname +
+              " " +
+              req.body.middlename +
+              " " +
+              req.body.lastname,
+            Gender: req.body.gender,
+            DOB: req.body.dob,
+            MartialStatus: req.body.married,
+            Mobile: req.body.mobile,
+            Mail: req.body.mail,
+            JoinDate: req.body.joindate,
+            ConfirmationDate: req.body.confirmationdate,
+            TerminationDate: req.body.terminationdate,
+            Prohibition: req.body.prohibition,
+            Idtype: req.body.idtype,
+            IDNumber: req.body.idnumber,
+            Department: req.body.department,
+            Designation: req.body.designation,
+            SubCompany: req.body.subcompany,
+            Timing: req.body.timing,
+            WifiName: req.body.wifiname,
+            WeekName: req.body.weekdayname,
+            WeekDay: req.body.numofday,
+            GpsTrack: req.body.gpstrack,
+            AccountName:req.body.accountname,
+            BankName:req.body.bankname,
+            AccountNumber:req.body.accountnumber,
+            IFSCCode:req.body.ifsccode,
+            BranchName:req.body.branchname,
+            MICRCode:req.body.micrcode,
+            UPICode:req.body.upicode,
+            ProfileImage: req.files.employeeimage[0].filename,
+            CertificateImage: req.files.employeedocument[0].filename,
+          },
+          (err, record) => {
+            var result = {};
+            if (err) {
+              result.Message = "Employee Not Updated";
+              result.Data = err;
+              result.isSuccess = false;
+            } else {
+              if (record.length == 0) {
+                result.Message = "Employee Not Updated";
+                result.Data = [];
+                result.isSuccess = false;
+              } else {
+                result.Message = "Employee Updated";
+                result.Data = record;
+                result.isSuccess = true;
+              }
+            }
+            res.json(result);
+          }
+        );
+      }
+
+      else if(req.files.employeeimage != undefined && req.files.employeedocument != undefined && req.files.employeedocument2 != undefined && req.files.employeedocument3 != undefined){
+        employeeSchema.findByIdAndUpdate(
+          req.body.id,
+          {
+            FirstName: req.body.firstname,
+            MiddleName: req.body.middlename,
+            LastName: req.body.lastname,
+            Name:
+              req.body.firstname +
+              " " +
+              req.body.middlename +
+              " " +
+              req.body.lastname,
+            Gender: req.body.gender,
+            DOB: req.body.dob,
+            MartialStatus: req.body.married,
+            Mobile: req.body.mobile,
+            Mail: req.body.mail,
+            JoinDate: req.body.joindate,
+            ConfirmationDate: req.body.confirmationdate,
+            TerminationDate: req.body.terminationdate,
+            Prohibition: req.body.prohibition,
+            Idtype: req.body.idtype,
+            IDNumber: req.body.idnumber,
+            Department: req.body.department,
+            Designation: req.body.designation,
+            SubCompany: req.body.subcompany,
+            Timing: req.body.timing,
+            WifiName: req.body.wifiname,
+            WeekName: req.body.weekdayname,
+            WeekDay: req.body.numofday,
+            GpsTrack: req.body.gpstrack,
+            AccountName:req.body.accountname,
+            BankName:req.body.bankname,
+            AccountNumber:req.body.accountnumber,
+            IFSCCode:req.body.ifsccode,
+            BranchName:req.body.branchname,
+            MICRCode:req.body.micrcode,
+            UPICode:req.body.upicode,
+            ProfileImage: req.files.employeeimage[0].filename,
+            CertificateImage: req.files.employeedocument[0].filename,
+            CertificateImage1: req.files.employeedocument2[0].filename,
+            CertificateImage2: req.files.employeedocument3[0].filename,
+          },
+          (err, record) => {
+            var result = {};
+            if (err) {
+              result.Message = "Employee Not Updated";
+              result.Data = err;
+              result.isSuccess = false;
+            } else {
+              if (record.length == 0) {
+                result.Message = "Employee Not Updated";
+                result.Data = [];
+                result.isSuccess = false;
+              } else {
+                result.Message = "Employee Updated";
+                result.Data = record;
+                result.isSuccess = true;
+              }
+            }
+            res.json(result);
+          }
+        );
+      }
     } else {
       res.json(permission);
     }
   } else if (req.body.type == "gettiming") {
-    var record = await timingSchema.find();
-    var result = {};
-    if (record.length == 0) {
-      result.Message = "Employee Not Updated";
-      result.Data = [];
-      result.isSuccess = false;
-    } else {
-      result.Message = "Employee Updated";
-      result.Data = record;
-      result.isSuccess = true;
+    if(req.body.timingID==undefined){
+      var record = await timingSchema.find();
+      var result = {};
+      if (record.length == 0) {
+        result.Message = "Employee Not Updated";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        result.Message = "Employee Updated";
+        result.Data = record;
+        result.isSuccess = true;
+      }
+      res.json(result);
+    } else if(req.body.timingID!=undefined) {
+      var record = await timingSchema.findById(req.body.timingID);
+      var result = {};
+      if (record.length == 0) {
+        result.Message = "Employee Not Updated";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        result.Message = "Employee Updated";
+        result.Data = record;
+        result.isSuccess = true;
+      }
+      res.json(result);
     }
-    res.json(result);
   }
   
 });

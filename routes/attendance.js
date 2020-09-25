@@ -11,6 +11,8 @@ var memoSchema = require("../models/memo.model");
 var adminSchema = require("../models/admin.model");
 const geolib = require("geolib");
 const { mongoose } = require("mongoose");
+const { isEqual, replace } = require("lodash");
+
 /*Importing Modules */
 
 /* All Post request for attendace are handle over here
@@ -185,79 +187,21 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
       .findById(req.body.employeeid)
       .populate("SubCompany")
       .populate("Timing");
-    if (req.body.wifiname == longlat.WifiName) {
-      memo = await entrymemo(
-        req.body.employeeid,
-        longlat.Timing.StartTime,
-        longlat.SubCompany.BufferTime,
-        period
-      );
-      attendancetype = "WIFI";
-      var record = attendeanceSchema({
-        EmployeeId: req.body.employeeid,
-        Status: req.body.type,
-        Date: period.date,
-        Time: period.time,
-        Day: period.day,
-        Image: req.file.filename,
-        Area: longlat.SubCompany.Name,
-        Elat: req.body.latitude,
-        Elong: req.body.longitude,
-        Distance: 0,
-        Memo: memo,
-        WifiName: req.body.wifiname,
-        AttendanceType:attendancetype,
-      });
-      record.save({}, function (err, record) {
-        var result = {};
-        if (err) {
-          result.Message = "Attendance Not Marked";
-          result.Data = err;
-          result.isSuccess = false;
-        } else {
-          if (record.length == 0) {
-            result.Message = "Attendance Not Marked";
-            result.Data = [];
-            result.isSuccess = false;
-          } else {
-            result.Message = "Attendance Marked";
-            result.Data = [record];
-            result.isSuccess = true;
-          }
-        }
-        res.json(result);
-      });
-    } else {
-      area = calculatelocation(
-        longlat.SubCompany.Name,
-        longlat.SubCompany.lat,
-        longlat.SubCompany.long,
-        req.body.latitude,
-        req.body.longitude
-      );
-      if (area == -1 || area == 1) {
-        if (area == 1) {
-          var result = {};
-          result.Message =
-            "Attendance Not Marked, Latitude and Longitude Not Found of Company";
-          result.Data = [];
-          result.isSuccess = false;
-        } else {
-          var result = {};
-          result.Message =
-            "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
-          result.Data = [];
-          result.isSuccess = false;
-        }
-        res.json(result);
-      } else {
+    if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
+     
+      //if (req.body.wifiname == longlat.WifiName) {
+        var empWifi = req.body.wifiName;
+        empWifi = empWifi.split(" ").join("");
+        var comWifi = longlat.WifiName;
+        comWifi =  comWifi.split(" ").join("");
+      if(isEqual(empWifi,comWifi)){
         memo = await entrymemo(
           req.body.employeeid,
           longlat.Timing.StartTime,
           longlat.SubCompany.BufferTime,
           period
         );
-        attendancetype = "GPS";
+        attendancetype = "WIFI";
         var record = attendeanceSchema({
           EmployeeId: req.body.employeeid,
           Status: req.body.type,
@@ -265,10 +209,10 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           Time: period.time,
           Day: period.day,
           Image: req.file.filename,
-          Area: area,
+          Area: longlat.SubCompany.Name,
           Elat: req.body.latitude,
           Elong: req.body.longitude,
-          Distance: heading,
+          Distance: 0,
           Memo: memo,
           WifiName: req.body.wifiname,
           AttendanceType:attendancetype,
@@ -292,7 +236,79 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           }
           res.json(result);
         });
+      } else {
+          var result = { };
+          result.Message = "You can not perform attendance.";
+          result.Data = [];
+          result.isSuccess = false;
+          res.json(result);
       }
+    } else if(longlat.GpsTrack == true) {
+  area = calculatelocation(
+  longlat.SubCompany.Name,
+  longlat.SubCompany.lat,
+  longlat.SubCompany.long,
+  req.body.latitude,
+  req.body.longitude
+  );
+  if (area == -1 || area == 1) {
+  if (area == 1) {
+    var result = {};
+    result.Message =
+      "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+    result.Data = [];
+    result.isSuccess = false;
+  } else {
+    var result = {};
+    result.Message =
+      "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+    result.Data = [];
+    result.isSuccess = false;
+  }
+  res.json(result);
+  } else {
+  memo = await entrymemo(
+    req.body.employeeid,
+    longlat.Timing.StartTime,
+    longlat.SubCompany.BufferTime,
+    period
+  );
+  attendancetype = "GPS";
+  var record = attendeanceSchema({
+    EmployeeId: req.body.employeeid,
+    Status: req.body.type,
+    Date: period.date,
+    Time: period.time,
+    Day: period.day,
+    Image: req.file.filename,
+    Area: area,
+    Elat: req.body.latitude,
+    Elong: req.body.longitude,
+    Distance: heading,
+    Memo: memo,
+    WifiName: req.body.wifiname,
+    AttendanceType:attendancetype,
+  });
+  record.save({}, function (err, record) {
+    var result = {};
+    if (err) {
+      result.Message = "Attendance Not Marked";
+      result.Data = err;
+      result.isSuccess = false;
+    } else {
+      if (record.length == 0) {
+        result.Message = "Attendance Not Marked";
+        result.Data = [];
+        result.isSuccess = false;
+      } else {
+        result.Message = "Attendance Marked";
+        result.Data = [record];
+        result.isSuccess = true;
+      }
+    }
+    res.json(result);
+  });
+  }
     }
   }
   //Attendance Out Function
@@ -323,47 +339,63 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         .findById(req.body.employeeid)
         .populate("SubCompany")
         .populate("Timing");
-      if (req.body.wifiname == longlat.WifiName) {
-        memo = await entrymemo(
-          req.body.employeeid,
-          longlat.Timing.StartTime,
-          longlat.SubCompany.BufferTime,
-          period
-        );
-        var record = attendeanceSchema({
-          EmployeeId: req.body.employeeid,
-          Status: req.body.type,
-          Date: period.date,
-          Time: period.time,
-          Day: period.day,
-          Image: req.file.filename,
-          Area: longlat.SubCompany.Name,
-          Elat: req.body.latitude,
-          Elong: req.body.longitude,
-          Distance: 0,
-          Memo: memo,
-          wifiName: req.body.wifiname,
-        });
-        record.save({}, function (err, record) {
-          var result = {};
-          if (err) {
-            result.Message = "Attendance Not Marked";
-            result.Data = err;
-            result.isSuccess = false;
-          } else {
-            if (record.length == 0) {
+       
+      if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
+        //if (req.body.wifiname == longlat.WifiName) {
+
+            var empWifi = req.body.wifiName;
+          empWifi = empWifi.split(" ").join("");
+          var comWifi = longlat.WifiName;
+          comWifi =  comWifi.split(" ").join("");
+          if(isEqual(empWifi,comWifi)){
+          memo = await entrymemo(
+            req.body.employeeid,
+            longlat.Timing.StartTime,
+            longlat.SubCompany.BufferTime,
+            period
+          );
+          var record = attendeanceSchema({
+            EmployeeId: req.body.employeeid,
+            Status: req.body.type,
+            Date: period.date,
+            Time: period.time,
+            Day: period.day,
+            Image: req.file.filename,
+            Area: longlat.SubCompany.Name,
+            Elat: req.body.latitude,
+            Elong: req.body.longitude,
+            Distance: 0,
+            Memo: memo,
+            wifiName: req.body.wifiname,
+          });
+          record.save({}, function (err, record) {
+            var result = {};
+            if (err) {
               result.Message = "Attendance Not Marked";
-              result.Data = [];
+              result.Data = err;
               result.isSuccess = false;
             } else {
-              result.Message = "Attendance Marked";
-              result.Data = [record];
-              result.isSuccess = true;
+              if (record.length == 0) {
+                result.Message = "Attendance Not Marked";
+                result.Data = [];
+                result.isSuccess = false;
+              } else {
+                result.Message = "Attendance Marked";
+                result.Data = [record];
+                result.isSuccess = true;
+              }
             }
+            res.json(result);
+          });
+          } else {
+            var result = {};
+            result.Message = "You can not perform attendance.";
+            result.Data = [];
+            result.isSuccess = false;
+            res.json(result);
           }
-          res.json(result);
-        });
-      } else {
+      }
+      else {
         area = calculatelocation(
           longlat.SubCompany.Name,
           longlat.SubCompany.lat,

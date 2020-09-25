@@ -46,6 +46,8 @@ router.post("/", async function (req, res, next) {
   } else if (req.body.type == "getdata") {
     var companyselection = await adminSchema.findById(req.body.token);
     if (companyselection.allaccessubcompany == true) {
+      console.log(req.body);
+      if(req.body.subcompanyID == undefined){
       subcompanySchema
         .find()
         .populate("CompanyId")
@@ -62,6 +64,25 @@ router.post("/", async function (req, res, next) {
           }
           res.json(result);
         });
+      }
+      else if(req.body.subcompanyID != undefined){
+        subcompanySchema
+        .findById(req.body.subcompanyID)
+        .populate("CompanyId")
+        .then((record) => {
+          var result = {};
+          if (record.length == 0) {
+            result.Message = "SubCompany Not Found";
+            result.Data = [];
+            result.isSuccess = false;
+          } else {
+            result.Message = "SubCompany Found";
+            result.Data = record;
+            result.isSuccess = true;
+          }
+          res.json(result);
+        });
+      }
     } else {
       subcompanySchema
         .find({ _id: companyselection.accessCompany })
@@ -170,7 +191,6 @@ router.post("/", async function (req, res, next) {
       res.json(result);
     });
   } else if (req.body.type == "update") {
-      console.log(req.body);
     req.body.lat = req.body.lat == undefined ? 0 : req.body.lat;
     req.body.long = req.body.long == undefined ? 0 : req.body.long;
     req.body.buffertime =
