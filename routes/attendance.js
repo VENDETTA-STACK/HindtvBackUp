@@ -369,6 +369,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
             Distance: 0,
             Memo: memo,
             wifiName: req.body.wifiname,
+            AttendanceType:"Wifi",
           });
           record.save({}, function (err, record) {
             var result = {};
