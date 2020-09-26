@@ -187,13 +187,15 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
       .findById(req.body.employeeid)
       .populate("SubCompany")
       .populate("Timing");
+      console.log();
     if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
      
       //if (req.body.wifiname == longlat.WifiName) {
-        var empWifi = req.body.wifiName;
+        var empWifi = req.body.wifiname;
         empWifi = empWifi.split(" ").join("");
         var comWifi = longlat.WifiName;
         comWifi =  comWifi.split(" ").join("");
+        console.log(empWifi,comWifi);
       if(isEqual(empWifi,comWifi)){
         memo = await entrymemo(
           req.body.employeeid,
@@ -237,7 +239,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           res.json(result);
         });
       } else {
-          var result = { };
+          var result = {};
           result.Message = "You can not perform attendance.";
           result.Data = [];
           result.isSuccess = false;
