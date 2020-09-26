@@ -345,7 +345,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
       if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
         //if (req.body.wifiname == longlat.WifiName) {
 
-            var empWifi = req.body.wifiName;
+            var empWifi = req.body.wifiname;
           empWifi = empWifi.split(" ").join("");
           var comWifi = longlat.WifiName;
           comWifi =  comWifi.split(" ").join("");
