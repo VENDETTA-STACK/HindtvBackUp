@@ -345,7 +345,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
       if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
         //if (req.body.wifiname == longlat.WifiName) {
 
-            var empWifi = req.body.wifiname;
+          var empWifi = req.body.wifiname;
           empWifi = empWifi.split(" ").join("");
           var comWifi = longlat.WifiName;
           comWifi =  comWifi.split(" ").join("");
@@ -369,7 +369,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
             Distance: 0,
             Memo: memo,
             wifiName: req.body.wifiname,
-            AttendanceType:"Wifi",
+            AttendanceType:"WIFI",
           });
           record.save({}, function (err, record) {
             var result = {};
