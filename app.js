@@ -30,8 +30,8 @@ var leavereasonRouter = require("./routes/leavereason");
 var leaveformRouter = require("./routes/leaveform");
 var defineleaveRouter = require("./routes/defineleave");
 var dashboardRouter = require("./routes/dashboard");
-
-
+var gpstrackRouter = require("./routes/gpstracking");
+var subcompanylocationRouter = require("./routes/subcompanylocation");
 // tnd 
 // var tndindexRouter = require("./routes/tnd");
 // var tndpersonRouter = require("./routes/tnd1");
@@ -91,7 +91,8 @@ app.use("/api/leavereason",leavereasonRouter);
 app.use("/api/leaveform",leaveformRouter);
 app.use("/api/defineleave",defineleaveRouter);
 app.use("/api/dashboard",dashboardRouter);
-
+app.use("/api/gpstracking",gpstrackRouter);
+app.use("/api/subcompnaylocation",subcompanylocationRouter);
 // tnd 
 // app.use('/api/tnd/tnd', tndindexRouter);
 // app.use('/api/tnd/tnd_login', tndpersonRouter);

@@ -1,17 +1,17 @@
 var mongoose = require("mongoose");
 
 var newSchema = mongoose.Schema({
-    EmployeeId:{
+    Name:String,
+    SubCompanyId:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "employees",
+        ref: "subcompany",
         required: true,
       },
-      Date:Date,
-      Time:String,
       Latitude:Number,
       Longitude:Number,
+      Link:String,
 });
 
 
-const admin = mongoose.model("gpstracking", newSchema);
+const admin = mongoose.model("location", newSchema);
 module.exports = admin;

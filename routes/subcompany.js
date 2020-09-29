@@ -23,6 +23,7 @@ router.post("/", async function (req, res, next) {
       BufferTime: parseInt(req.body.buffertime),
       MemoNumber: req.body.memonumber,
       SalaryDate: req.body.salarydate,
+      LocationId: req.body.location,
     });
     record.save({}, function (err, record) {
       var result = {};
@@ -191,6 +192,7 @@ router.post("/", async function (req, res, next) {
       res.json(result);
     });
   } else if (req.body.type == "update") {
+    console.log(req.body);
     req.body.lat = req.body.lat == undefined ? 0 : req.body.lat;
     req.body.long = req.body.long == undefined ? 0 : req.body.long;
     req.body.buffertime =
@@ -212,6 +214,7 @@ router.post("/", async function (req, res, next) {
         BufferTime: parseInt(req.body.buffertime),
         MemoNumber: req.body.memonumber,
         SalaryDate: req.body.salarydate,
+        LocationId: req.body.location,
       },
       (err, record) => {
         var result = {};

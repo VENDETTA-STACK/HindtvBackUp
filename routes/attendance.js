@@ -183,11 +183,27 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
   var attendancetype;
   //Attendance In Function
   if (req.body.type == "in") {
+    // var temp = await employeeSchema
+    //     .findById(req.body.employeeid)
+    //     .populate({
+    //       path:"SubCompany",
+    //       select:"Name LocationId",
+    //       populate : {
+    //         path:"LocationId"
+    //       }
+    //     });
     var longlat = await employeeSchema // Fetching employee data with employeeid
       .findById(req.body.employeeid)
-      .populate("SubCompany")
-      .populate("Timing");
-      console.log();
+      .populate({
+        path:"SubCompany",
+          select:"Name LocationId",
+          populate : {
+            path:"LocationId",
+            select:"Latitude Longitude"
+          }
+      })
+      .populate("Timing")
+
     if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
      
       //if (req.body.wifiname == longlat.WifiName) {
@@ -240,16 +256,22 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         });
       } else {
           var result = {};
-          result.Message = "You can not perform attendance.";
+          result.Message = "Perform attendance with your registered WiFi.";
           result.Data = [];
           result.isSuccess = false;
           res.json(result);
       }
     } else if(longlat.GpsTrack == true) {
+      console.log('comp lat'+longlat.SubCompany.LocationId.Latitude);
+      console.log('comp long'+longlat.SubCompany.LocationId.Longitude,);
+      console.log('emp lat'+req.body.latitude,);
+      console.log('emp long'+req.body.longitude);
   area = calculatelocation(
   longlat.SubCompany.Name,
-  longlat.SubCompany.lat,
-  longlat.SubCompany.long,
+  //longlat.SubCompany.lat,
+  //longlat.SubCompany.long,
+  longlat.SubCompany.LocationId.Latitude,
+  longlat.SubCompany.LocationId.Longitude,
   req.body.latitude,
   req.body.longitude
   );
@@ -339,7 +361,14 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
     } else {
       var longlat = await employeeSchema
         .findById(req.body.employeeid)
-        .populate("SubCompany")
+        .populate({
+          path:"SubCompany",
+          select:"Name LocationId",
+          populate : {
+            path:"LocationId",
+            select:"Latitude Longitude"
+          }
+        })
         .populate("Timing");
        
       if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
@@ -401,8 +430,10 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
       else {
         area = calculatelocation(
           longlat.SubCompany.Name,
-          longlat.SubCompany.lat,
-          longlat.SubCompany.long,
+          //longlat.SubCompany.lat,
+          //longlat.SubCompany.long,
+          longlat.SubCompany.LocationId.Latitude,
+          longlat.SubCompany.LocationId.Longitude,
           req.body.latitude,
           req.body.longitude
         );

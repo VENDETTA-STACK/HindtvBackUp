@@ -20,6 +20,11 @@ var newSchema = mongoose.Schema({
   //wifiName: String,
   SalaryDate: Number,
   MemoNumber: Number,
+  LocationId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "location",
+    required: true,
+  }
 });
 
 const admin = mongoose.model("subcompany", newSchema);
