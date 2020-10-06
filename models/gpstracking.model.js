@@ -10,6 +10,7 @@ var newSchema = mongoose.Schema({
       Time:String,
       Latitude:Number,
       Longitude:Number,
+      Name:String,
 });
 
 

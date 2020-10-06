@@ -192,10 +192,11 @@ router.post("/", async function (req, res, next) {
       res.json(result);
     });
   } else if (req.body.type == "update") {
+    console.log(req.body);
     req.body.lat = req.body.lat == undefined ? 0 : req.body.lat;
     req.body.long = req.body.long == undefined ? 0 : req.body.long;
     req.body.buffertime =
-      req.body.buffertime == undefined ? 0 : req.body.buffertime;
+      req.body.buffertime == '' ? 0 : req.body.buffertime;
       subcompanySchema.findByIdAndUpdate(
       req.body.id,
       {
@@ -216,6 +217,7 @@ router.post("/", async function (req, res, next) {
         LocationId: req.body.location,
       },
       (err, record) => {
+        console.log(err);
         var result = {};
         if (err) {
           result.Message = "SubCompany Not Updated";

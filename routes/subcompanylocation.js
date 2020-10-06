@@ -5,7 +5,9 @@ var router = express.Router();
 var locationSchema = require("../models/location.model");
 /*Importing Modules */
 
-
+// this api for add subcompany location in map
+// insert api is using in frontend.
+//created by 29.09 dhanpal
 router.post('/',async function(req,res){  
         if(req.body.type=="insert"){
             var record = locationSchema({
@@ -15,7 +17,6 @@ router.post('/',async function(req,res){
                 Longitude:req.body.longitude,
                 Link:req.body.link,
             });
-            console.log(record);
             record.save({},(err,record)=>{
                 var result = {};
                 if(err){

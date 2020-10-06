@@ -651,8 +651,41 @@ router.post("/", upload.fields([{ name:"employeeimage"}, {name:"employeedocument
       }
       res.json(result);
     }
+  } else if (req.body.type == "getgpsemployee") {
+    employeeSchema.find({ GpsTrack:true,SubCompany: req.body.SubCompany }, (err, record) => {
+      var result = {};
+      if (err) {
+        result.Message = "Employee Not Found";
+        result.Data = err;
+        result.isSuccess = false;
+      } else {
+        if (record.length == 0) {
+          result.Message = "Employee Not Found";
+          result.Data = [];
+          result.isSuccess = false;
+        } else {
+          result.Message = "Employee Found";
+          result.Data = record;
+          result.isSuccess = true;
+        }
+      }
+      res.json(result);
+    });
+  } else if(req.body.type=="getfilterdata"){
+    console.log(req.body);
+      var record = await employeeSchema.find({SubCompany:req.body.subcompanyid}).populate("SubCompany");
+      var result = {};
+          if (record.length == 0) {
+          result.Message = "Employee Not Found";
+          result.Data = [];
+          result.isSuccess = false;
+          } else {
+          result.Message = "Employee Found";
+          result.Data = record;
+          result.isSuccess = true;
+          }
+          res.json(result);
   }
-  
 });
 
 async function checkpermission(type, token) {

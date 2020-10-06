@@ -3,22 +3,22 @@ var mongoose = require("mongoose");
 var newSchema = mongoose.Schema({
   EmployeeId:{
     type: mongoose.Schema.Types.ObjectId,
-    ref: "employees",
+    ref: "employee",
     required: true,
   },
   SubCompany:{
     type: mongoose.Schema.Types.ObjectId,
-    ref: "subcompanies",
+    ref: "subcompany",
     required: true,
   },
   Company:{
     type: mongoose.Schema.Types.ObjectId,
-    ref: "companies",
+    ref: "company",
     required: true,
   },
   Reason:{
     type: mongoose.Schema.Types.ObjectId,
-    ref: "masterleavelevels",
+    ref: "masterLeaveLevel",
     required: true,
   },
   Description: String,

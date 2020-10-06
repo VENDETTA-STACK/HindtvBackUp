@@ -51,10 +51,15 @@ mongoose.connect(process.env.MONGO, {
 /*Connecting database with mongodb*/
 
 /*Connecting database with firebase*/
-firebase.initializeApp({
-  credential: firebase.credential.cert(serviceAccount),
-  databaseURL: process.env.FIREBASE,
-});
+//  firebase.initializeApp({
+//    credential: firebase.credential.cert(serviceAccount),
+//    databaseURL: process.env.FIREBASE,
+//  });
+
+//For Fetching Employee Tracking
+// var firedb = firebase.database();
+// var docref = firedb.ref("Database");
+
 /*Connecting database with firebase*/
 
 // view engine setup -- Not been used.
@@ -116,5 +121,4 @@ app.use(function (err, req, res, next) {
   res.send(err.message);
   console.log(err.message)
 });
-
-module.exports = app;
+module.exports =  app;

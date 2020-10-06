@@ -24,6 +24,7 @@ var timingSchema = require("../models/timing.models");
     Editied by Dhanpal
 */
 router.post('/',async function(req, res, next){
+  console.log(req.body);
     if(req.body.type=="getdata"){
         var permission = await checkpermission(req.body.type, req.body.token);
         if (permission.isSuccess == true) {
@@ -60,6 +61,21 @@ router.post('/',async function(req, res, next){
         } else {
         res.json(permission);
         }
+    } else if(req.body.type=="getfilterdata"){
+      console.log(req.body);
+        var record = await employeeSchema.find({SubCompany:req.body.subcompanyid}).populate("SubCompany");
+        var result = {};
+            if (record.length == 0) {
+            result.Message = "Employee Not Found";
+            result.Data = [];
+            result.isSuccess = false;
+            } else {
+            result.Message = "Employee Found";
+            result.Data = record;
+            result.isSuccess = true;
+            }
+            res.json(result);
+      
     }
 
 });
