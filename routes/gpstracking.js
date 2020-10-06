@@ -137,8 +137,8 @@ router.post("/", async function(req,res){
         res.json(result);
     }
 });
-//setInterval(gpstrack,60000);
-setInterval(gpstrack,15000);
+setInterval(gpstrack,1800000);
+//setInterval(gpstrack,15000);
 //function for fetching lat,lng from firebase & store  in mongodb.
 async function gpstrack(){
         var employee;
