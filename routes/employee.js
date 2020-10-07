@@ -41,8 +41,15 @@ var attendImg = multer.diskStorage({
 
 var upload = multer({ storage: attendImg });
 
+function dateformate(date){
+  date = date.split("-");
+  date = date[2]+"/"+date[1]+"/"+date[0];
+  console.log(date);
+  return date;
+}
 router.post("/", upload.fields([{ name:"employeeimage"}, {name:"employeedocument"},{name:"employeedocument2"},{name:"employeedocument3"}]), async function (req, res, next) {
   if (req.body.type == "insert") {
+    console.log(req.body);
     var permission = await checkpermission(req.body.type, req.body.token);
 
     //auto generate employeecode
@@ -135,7 +142,7 @@ router.post("/", upload.fields([{ name:"employeeimage"}, {name:"employeedocument
             " " +
             req.body.lastname,
           Gender: req.body.gender,
-          DOB: req.body.dob,
+          DOB:req.body.dob,
           MartialStatus: req.body.married,
           Mobile: req.body.mobile,
           Mail: req.body.mail,

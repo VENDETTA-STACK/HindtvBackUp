@@ -20,15 +20,27 @@ var Excel = require("exceljs");
 */
 
 router.post("/birthday", async (req, res) => {
+  // var date = moment()
+  //   .tz("Asia/Calcutta")
+  //   .format("DD MM YYYY, h:mm:ss a")
+  //   .split(",")[0];
+  // date = date.split(" ");
+  // date = date[0] + "/" + date[1] + "/" + date[2];
+  // var record = await employeeSchema
+  // .find({ DOB: date })
+  // .populate("SubCompany", "Name");
+
+  //updated after 06.10
   var date = moment()
     .tz("Asia/Calcutta")
     .format("DD MM YYYY, h:mm:ss a")
     .split(",")[0];
   date = date.split(" ");
-  date = date[0] + "/" + date[1] + "/" + date[2];
+  date = date[0] + "/" + date[1];
   var record = await employeeSchema
-    .find({ DOB: date })
+    .find({ DOB:{ $regex:date }})
     .populate("SubCompany", "Name");
+ 
   var result = {};
   if (record.length == 0) {
     result.Message = "Birthday Not Found";
@@ -44,6 +56,7 @@ router.post("/birthday", async (req, res) => {
         Name: record[i].Name,
         Subcompany: record[i].SubCompany.Name,
         Mobile: record[i].Mobile,
+        Image : record[i].ProfileImage
       };
       result.Data.push(data);
     }
