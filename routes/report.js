@@ -113,21 +113,47 @@ router.post("/", async(req, res) => {
                 enddate = dateArray[dateArray.length-1];
                 //startdate = req.body.startdate;
                 //enddate = req.body.enddate;
-                record = await attendeanceSchema
-                    .find({
-                        Date: {
-                            $gte:startdate,
-                            $lte:enddate
+                // record = await attendeanceSchema
+                //     .find({
+                //         Date: {
+                //             $gte:startdate,
+                //             $lte:enddate
+                //         },
+                //     })
+                //     .select("Status Date Time Day")
+                //     .populate({
+                    //     path: "EmployeeId",
+                    //     select: "EmployeeId Name",
+                    //     match: {
+                    //         SubCompany: mongoose.Types.ObjectId(req.body.company),
+                    //     },
+                    // });
+                
+
+                    record = await attendeanceSchema.aggregate([
+                        {
+                            $match : {
+                                Date : {
+                                    "$lte":enddate,
+                                    "$gte":startdate
+                                },
+                            }
                         },
-                    })
-                    .select("Status Date Time Day")
-                    .populate({
-                        path: "EmployeeId",
-                        select: "EmployeeId Name",
-                        match: {
-                            SubCompany: mongoose.Types.ObjectId(req.body.company),
+                        {
+                            $lookup:{
+                                from: "employees",
+                                localField: "EmployeeId",
+                                foreignField: "_id",
+                                as: "EmployeeId"
+                            }
                         },
-                    });
+                        { "$unwind": "$EmployeeId" },
+                        {
+                            $match :{
+                                "EmployeeId.SubCompany":mongoose.Types.ObjectId(req.body.company),
+                            }
+                        }
+                    ]);
                 /*
                  * Reason memorecord-> Fetch memo record of employee particular date wise and performing groupby using EmployeeName.
                  * Updated By: Dhanpal 7-09-2020
@@ -234,6 +260,7 @@ router.post("/", async(req, res) => {
                                 });
                             });
                         });
+                        console.log(result);
                         
                         /*
                         * Start the designing of excelsheet.
@@ -305,7 +332,6 @@ router.post("/", async(req, res) => {
                                     colindex = 0;
                                     var indexChecker=1;
                                     for(var datecol=1;datecol<=dateArray.length-1;datecol++){
-                                        
                                         if(employeedate.findIndex(item => item == dateArray[datecol])!=-1){
                                             
                                             var starttime=0,employeetime=0,cobufferTime=0;

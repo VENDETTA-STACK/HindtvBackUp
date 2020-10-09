@@ -102,6 +102,58 @@ router.post("/", async (req, res) => {
       result.isSuccess = true;
     }
     res.json(result);
+  } else if(req.body.type == "getwifiemp"){
+    var date = moment()
+      .tz("Asia/Calcutta")
+      .format("DD MM YYYY, h:mm:ss a")
+      .split(",")[0];
+    date = date.split(" ");
+    date = date[0] + "/" + date[1] + "/" + date[2];
+    var record = await attendeanceSchema.find({Date:date,AttendanceType:"WIFI"});
+    var result = {};
+    if(record.length == 0){
+      result.Message = "No Data Found.";
+      result.Data = [];
+      result.isSuccess = false;
+    } else{
+      result.Message = "Data Found.";
+      result.Data = record.length;
+      result.isSuccess = true;
+    }
+    res.json(result);
+  } else if(req.body.type == "getgpsemp"){
+    var date = moment()
+      .tz("Asia/Calcutta")
+      .format("DD MM YYYY, h:mm:ss a")
+      .split(",")[0];
+    date = date.split(" ");
+    date = date[0] + "/" + date[1] + "/" + date[2];
+    var record = await attendeanceSchema.find({Date:date,AttendanceType:"GPS"});
+    var result = {};
+    if(record.length == 0){
+      result.Message = "No Data Found.";
+      result.Data = [];
+      result.isSuccess = false;
+    } else{
+      result.Message = "Data Found.";
+      result.Data = record.length;
+      result.isSuccess = true;
+    }
+    res.json(result);
+  }
+  else if(req.body.type == "getempnum"){
+    var record = await employeeSchema.find();
+    var result = {};
+    if(record.length == 0){
+      result.Message = "No Data Found.";
+      result.Data = [];
+      result.isSuccess = false;
+    } else{
+      result.Message = "Data Found.";
+      result.Data = record.length;
+      result.isSuccess = true;
+    }
+    res.json(result);
   }
 });
 

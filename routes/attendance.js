@@ -738,7 +738,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           var result = {};
           result.Message = "Perform attendance with your registered WiFi.";
           result.Data = [];
-          result.isSuccess = false;
+          result.isSuccess = true;
           res.json(result);
       }
     } else if(longlat.GpsTrack == true) {
