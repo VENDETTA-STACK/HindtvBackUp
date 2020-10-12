@@ -5,6 +5,7 @@ var employeeSchema = require("../models/employee.model");
 var subcompanySchema = require("../models/subcompany.models");
 var adminSchema = require("../models/admin.model");
 var timingSchema = require("../models/timing.models");
+const { computeDestinationPoint } = require("geolib");
 /*Importing Modules */
 
 /*Post request for employee
@@ -24,7 +25,6 @@ var timingSchema = require("../models/timing.models");
     Editied by Dhanpal
 */
 router.post('/',async function(req, res, next){
-  console.log(req.body);
     if(req.body.type=="getdata"){
         var permission = await checkpermission(req.body.type, req.body.token);
         if (permission.isSuccess == true) {
@@ -62,8 +62,14 @@ router.post('/',async function(req, res, next){
         res.json(permission);
         }
     } else if(req.body.type=="getfilterdata"){
-      console.log(req.body);
-        var record = await employeeSchema.find({SubCompany:req.body.subcompanyid}).populate("SubCompany");
+        console.log(req.body.subcompanyid);
+        if(req.body.subcompanyid == undefined){
+          console.log("work");
+          var record = await employeeSchema.find().populate("SubCompany");
+        } else{
+          console.log("!work");
+          var record = await employeeSchema.find({SubCompany:req.body.subcompanyid}).populate("SubCompany");
+        }
         var result = {};
             if (record.length == 0) {
             result.Message = "Employee Not Found";

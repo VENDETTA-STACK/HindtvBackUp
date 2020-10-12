@@ -707,7 +707,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
             if (record.length == 0) {
               result.Message = "Attendance Not Marked";
               result.Data = [];
-              result.isSuccess = true;
+              result.isSuccess = false;
             } else if(memorecord.length==0 && record.length != 0){
               result.Message = "Attendance Marked";
               record = {
@@ -717,7 +717,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
                 "Day": record.Day,
                 "Memo": false,
                 "Message":"Attendance Marked."};
-              result.Data = record;
+              result.Data = [record];
               result.isSuccess = true;
             }else {
               result.Message = "Attendance Marked and Memo Issue.";
@@ -738,7 +738,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           var result = {};
           result.Message = "Perform attendance with your registered WiFi.";
           result.Data = [];
-          result.isSuccess = true;
+          result.isSuccess = false;
           res.json(result);
       }
     } else if(longlat.GpsTrack == true) {
@@ -773,7 +773,6 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         );
         attendancetype = "GPS";
         var memorecord = await checkmemo(req.body.employeeid,period.date,"in");
-
         //var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"in"});    
         var record = attendeanceSchema({
           EmployeeId: req.body.employeeid,
@@ -792,9 +791,6 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           AttendanceType:attendancetype,
         });
         record.save({}, function (err, record) {
-          var data = Object.keys(record).map((key) => [Number(key), record[key]]);
-          console.log(typeof data);
-
           var result = {};
           if (err) {
             result.Message = "Attendance Not Marked";
@@ -804,7 +800,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
             if (record.length == 0) {
               result.Message = "Attendance Not Marked";
               result.Data = [];
-              result.isSuccess = true;
+              result.isSuccess = false;
             }else if(memorecord.length==0 && record.length != 0){
               result.Message = "Attendance Marked";
               record = {
@@ -814,7 +810,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
                 "Day": record.Day,
                 "Memo": false,
                 "Message":"Attendance Marked."};
-              result.Data = record;
+              result.Data = [record];
               result.isSuccess = true;
             }else {
               result.Message = "Attendance Marked and Memo Issue.";
@@ -926,7 +922,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
                   "Day": record.Day,
                   "Memo": false,
                   "Message":"Attendance Marked."};
-                result.Data = record;
+                result.Data = [record];
                 result.isSuccess = true;
               }else if(memorecord.length >= 0 && record.length >=0) {
                 result.Message = "Attendance Marked and Memo Issue.";
@@ -1016,7 +1012,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
                 result.isSuccess = false;
               } else if(memorecord.length == 0 && record.length != 0){
                 result.Message = "Attendance Marked";
-                result.Data = record;
+                result.Data = [record];
                 result.isSuccess = true;
               }else {
                 result.Message = "Attendance Marked and Memo Issue.";

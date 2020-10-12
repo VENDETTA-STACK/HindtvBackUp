@@ -316,9 +316,8 @@ router.post("/", async(req, res) => {
                             for(var datecol=1;datecol<=dateArray.length-1;datecol++){
                                 worksheet.getCell(cellArray[colindex+1]+rowindex).value = dateArray[datecol];
                                 colindex++;
-
                             }
-                            
+
                             for(var key1 in mresult){
                                 worksheet.addRow({Name: key1});
                                 var employeedate  = [];
@@ -330,10 +329,17 @@ router.post("/", async(req, res) => {
                                 var count = 1;
                                 for(var key2 in mresult[key1]){
                                     colindex = 0;
-                                    var indexChecker=1;
+                                    var indexChecker = 1;
+                                    var workingday = 0;
+                                    var memoisuue = 0;
+                                    var lateissue = 0;
+                                    var absent = 0;
+                                    worksheet.getCell("AH8").value = "Working Day"
+                                    worksheet.getCell("AI8").value = "Memo Issue"
+                                    worksheet.getCell("AJ8").value = "Late"
+                                    worksheet.getCell("AK8").value = "Absent"
                                     for(var datecol=1;datecol<=dateArray.length-1;datecol++){
                                         if(employeedate.findIndex(item => item == dateArray[datecol])!=-1){
-                                            
                                             var starttime=0,employeetime=0,cobufferTime=0;
                                             var st=0,et=0,bt=0;
                                             var i = 1;
@@ -348,33 +354,40 @@ router.post("/", async(req, res) => {
                                                 i++;
                                             }
                                             st = st.split(":"); 
-                                            cobufferTime = st[0]+":"+parseInt(st[1]+(bufferTime))+":"+st[2];
+                                            cobufferTime = st[0]+":"+parseInt(st[1]+(parseInt(bufferTime)))+":"+st[2];
                                             cobufferTime = convertSecond(cobufferTime);
-                                           
-                                            
+                                            //console.log(starttime,cobufferTime,employeetime);
                                             if(employeetime <= starttime){
+                                                console.log("P");
                                                 worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value ="P";
-                                            }
-                                            else if(employeetime < cobufferTime){
+                                            }else if(employeetime < cobufferTime){
+                                                console.log("L");
                                                 worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value ="L";
-                                            }
-                                            else {
+                                                lateissue++;
+                                            }else if(employeetime > cobufferTime) {
+                                                console.log("M");
                                                 worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value ="M";
+                                                memoisuue++;
                                             }  
-                                            indexChecker++;  
-                                        }
-                                        
-                                        else{
+                                            indexChecker++;
+                                            workingday++;  
+                                        }else{
                                             worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value = "A";
+                                            absent++;
                                         }
-                                        
                                         //}
-                                        
                                         colindex++;    
                                     }
+                                    //console.log("AH"+parseInt(rowindex+1));
+                                    console.log(workingday,memoisuue,lateissue);
+                                    worksheet.getCell("AH"+parseInt(rowindex+1)).value = workingday;
+                                    worksheet.getCell("AI"+parseInt(rowindex+1)).value = memoisuue;
+                                    worksheet.getCell("AJ"+parseInt(rowindex+1)).value = lateissue;
+                                    worksheet.getCell("AK"+parseInt(rowindex+1)).value = absent;
+
                                     count++;
                                 }
-                               
+                                rowindex = parseInt(rowindex)+1;
                                 //bufferTime = parseInt(parseInt(starttime)+(bufferTime*60));
                                 //colindex = 0;
                                 /*for(var datecol=1;datecol<=dateArray.length-1;datecol++){
@@ -399,7 +412,7 @@ router.post("/", async(req, res) => {
                                     }
                                     colindex++;
                                 }*/
-                                rowindex = parseInt(rowindex)+1;
+                                
                                 
                             }
                             /*
