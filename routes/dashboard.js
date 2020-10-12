@@ -10,6 +10,8 @@ var dateFormat = require("dateformat");
 const e = require("express");
 var moment = require("moment-timezone");
 var memoSchema = require("../models/memo.model");
+var adminSchema = require("../models/admin.model");
+var leaveSchema = require("../models/leave.model");
 /*Importing Modules */
 
 var convertedDate = function () {
@@ -71,18 +73,35 @@ router.post("/", async (req, res) => {
       .split(",")[0];
     date = date.split(" ");
     date = date[0] + "/" + date[1] + "/" + date[2];
-    var record = await attendeanceSchema.find({Date:date,Status:"in"});
-    var result = {};
-    if(record.length == 0){
-      result.Message = "No Data Found.";
-      result.Data = [];
-      result.isSuccess = false;
+    var companyselection = await adminSchema.findById(req.body.token);
+    if (companyselection.allaccessubcompany == true) {
+      var record = await attendeanceSchema.find({Date:date,Status:"in"});
+      var result = {};
+      if(record.length == 0){
+        result.Message = "No Data Found.";
+        result.Data = [];
+        result.isSuccess = false;
+      } else{
+        result.Message = "Data Found.";
+        result.Data = record.length;
+        result.isSuccess = true;
+      }
+      res.json(result);
     } else{
-      result.Message = "Data Found.";
-      result.Data = record.length;
-      result.isSuccess = true;
+      var record = await attendeanceSchema.find({SubCompany: companyselection.accessCompany,Date:date,Status:"in"});
+      var result = {};
+      if(record.length == 0){
+        result.Message = "No Data Found.";
+        result.Data = [];
+        result.isSuccess = false;
+      } else{
+        result.Message = "Data Found.";
+        result.Data = record.length;
+        result.isSuccess = true;
+      }
+      res.json(result);
     }
-    res.json(result);
+      
   } else if(req.body.type == "countmemo"){
     var date = moment()
       .tz("Asia/Calcutta")
@@ -90,37 +109,70 @@ router.post("/", async (req, res) => {
       .split(",")[0];
     date = date.split(" ");
     date = date[0] + "/" + date[1] + "/" + date[2];
-    var record = await memoSchema.find({Date:date});
-    var result = {};
-    if(record.length == 0){
-      result.Message = "No Data Found.";
-      result.Data = [];
-      result.isSuccess = false;
-    } else{
-      result.Message = "Data Found.";
-      result.Data = record.length;
-      result.isSuccess = true;
+    var companyselection = await adminSchema.findById(req.body.token);
+    if (companyselection.allaccessubcompany == true) {
+      var record = await memoSchema.find({Date:date});
+      var result = {};
+      if(record.length == 0){
+        result.Message = "No Data Found.";
+        result.Data = [];
+        result.isSuccess = false;
+      } else{
+        result.Message = "Data Found.";
+        result.Data = record.length;
+        result.isSuccess = true;
+      }
+      res.json(result);
+    } else {
+      var record = await memoSchema.find({SubCompany: companyselection.accessCompany,Date:date});
+      var result = {};
+      if(record.length == 0){
+        result.Message = "No Data Found.";
+        result.Data = [];
+        result.isSuccess = false;
+      } else{
+        result.Message = "Data Found.";
+        result.Data = record.length;
+        result.isSuccess = true;
+      }
+      res.json(result);
     }
-    res.json(result);
+    
   } else if(req.body.type == "getwifiemp"){
-    var date = moment()
+      var date = moment()
       .tz("Asia/Calcutta")
       .format("DD MM YYYY, h:mm:ss a")
       .split(",")[0];
     date = date.split(" ");
     date = date[0] + "/" + date[1] + "/" + date[2];
-    var record = await attendeanceSchema.find({Date:date,AttendanceType:"WIFI"});
-    var result = {};
-    if(record.length == 0){
-      result.Message = "No Data Found.";
-      result.Data = [];
-      result.isSuccess = false;
-    } else{
-      result.Message = "Data Found.";
-      result.Data = record.length;
-      result.isSuccess = true;
-    }
+    var companyselection = await adminSchema.findById(req.body.token);
+    if (companyselection.allaccessubcompany == true) {
+      var record = await attendeanceSchema.find({Date:date,AttendanceType:"WIFI"});
+      var result = {};
+      if(record.length == 0){
+        result.Message = "No Data Found.";
+        result.Data = [];
+        result.isSuccess = false;
+      } else{
+        result.Message = "Data Found.";
+        result.Data = record.length;
+        result.isSuccess = true;
+      }
     res.json(result);
+    } else {
+      var record = await attendeanceSchema.find({SubCompany: companyselection.accessCompany,Date:date,AttendanceType:"WIFI"});
+      var result = {};
+      if(record.length == 0){
+        result.Message = "No Data Found.";
+        result.Data = [];
+        result.isSuccess = false;
+      } else{
+        result.Message = "Data Found.";
+        result.Data = record.length;
+        result.isSuccess = true;
+      }
+      res.json(result);
+    }
   } else if(req.body.type == "getgpsemp"){
     var date = moment()
       .tz("Asia/Calcutta")
@@ -128,32 +180,103 @@ router.post("/", async (req, res) => {
       .split(",")[0];
     date = date.split(" ");
     date = date[0] + "/" + date[1] + "/" + date[2];
-    var record = await attendeanceSchema.find({Date:date,AttendanceType:"GPS"});
-    var result = {};
-    if(record.length == 0){
-      result.Message = "No Data Found.";
-      result.Data = [];
-      result.isSuccess = false;
-    } else{
-      result.Message = "Data Found.";
-      result.Data = record.length;
-      result.isSuccess = true;
+    var companyselection = await adminSchema.findById(req.body.token);
+    if (companyselection.allaccessubcompany == true) {
+      var record = await attendeanceSchema.find({Date:date,AttendanceType:"GPS"});
+      var result = {};
+      if(record.length == 0){
+        result.Message = "No Data Found.";
+        result.Data = [];
+        result.isSuccess = false;
+      } else{
+        result.Message = "Data Found.";
+        result.Data = record.length;
+        result.isSuccess = true;
+      }
+      res.json(result);
+    } else {
+      var record = await attendeanceSchema.find({SubCompany: companyselection.accessCompany,Date:date,AttendanceType:"GPS"});
+      var result = {};
+      if(record.length == 0){
+        result.Message = "No Data Found.";
+        result.Data = [];
+        result.isSuccess = false;
+      } else{
+        result.Message = "Data Found.";
+        result.Data = record.length;
+        result.isSuccess = true;
+      }
+      res.json(result);
     }
-    res.json(result);
-  }
-  else if(req.body.type == "getempnum"){
-    var record = await employeeSchema.find();
-    var result = {};
-    if(record.length == 0){
-      result.Message = "No Data Found.";
-      result.Data = [];
-      result.isSuccess = false;
-    } else{
-      result.Message = "Data Found.";
-      result.Data = record.length;
-      result.isSuccess = true;
+  } else if(req.body.type == "getempnum"){
+    var companyselection = await adminSchema.findById(req.body.token);
+    if (companyselection.allaccessubcompany == true) {
+      var record = await employeeSchema.find();
+      var result = {};
+      if(record.length == 0){
+        result.Message = "No Data Found.";
+        result.Data = [];
+        result.isSuccess = false;
+      } else{
+        result.Message = "Data Found.";
+        result.Data = record.length;
+        result.isSuccess = true;
+      }
+      res.json(result);
+    } else {
+      var record = await employeeSchema.find({SubCompany: companyselection.accessCompany });
+      var result = {};
+      if(record.length == 0){
+        result.Message = "No Data Found.";
+        result.Data = [];
+        result.isSuccess = false;
+      } else{
+        result.Message = "Data Found.";
+        result.Data = record.length;
+        result.isSuccess = true;
+      }
+      res.json(result);
     }
-    res.json(result);
+  } else if(req.body.type == "countleave"){
+  //   var date = moment()
+  //   .tz("Asia/Calcutta")
+  //   .format("DD MM YYYY, h:mm:ss a")
+  //   .split(",")[0];
+  // date = date.split(" ");
+  // date = date[0] + "/" + date[1] + "/" + date[2];
+    var date = new Date();
+    date = date.toISOString().split("T")[0];
+    date = date+"T00:00:00.000+00:00"
+    var companyselection = await adminSchema.findById(req.body.token);
+    if (companyselection.allaccessubcompany == true) {
+      var record = await leaveSchema.find({LeaveStatus:"Pending",});
+      var result = {};
+      if(record.length == 0){
+        result.Message = "No Data Found.";
+        result.Data = [];
+        result.isSuccess = false;
+      } else{
+        result.Message = "Data Found.";
+        result.Data = record.length;
+        result.isSuccess = true;
+      }
+      res.json(result);
+    } else{
+      // ?var record = await leaveSchema.find({SubCompany: companyselection.accessCompany,ApplyDate:date,LeaveStatus:"Rejected"});
+      var record = await leaveSchema.find({SubCompany: companyselection.accessCompany, LeaveStatus:"Pending"});
+      var result = {};
+      if(record.length == 0){
+        result.Message = "No Data Found.";
+        result.Data = [];
+        result.isSuccess = false;
+      } else{
+        result.Message = "Data Found.";
+        result.Data = record.length;
+        result.isSuccess = true;
+      }
+      console.log(record);
+      res.json(result);
+    }
   }
 });
 

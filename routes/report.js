@@ -384,7 +384,6 @@ router.post("/", async(req, res) => {
                                     worksheet.getCell("AI"+parseInt(rowindex+1)).value = memoisuue;
                                     worksheet.getCell("AJ"+parseInt(rowindex+1)).value = lateissue;
                                     worksheet.getCell("AK"+parseInt(rowindex+1)).value = absent;
-
                                     count++;
                                 }
                                 rowindex = parseInt(rowindex)+1;

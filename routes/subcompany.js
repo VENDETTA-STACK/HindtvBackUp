@@ -170,7 +170,7 @@ router.post("/", async function (req, res, next) {
           res.json(result);
         }
       );
-    }
+    } 
   } else if (req.body.type == "getsubcompanydetail") {
     subcompanySchema.find({ _id: req.body.id }, (err, record) => {
       var result = {};

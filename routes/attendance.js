@@ -678,8 +678,9 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           longlat.SubCompany.BufferTime,
           period
         );
-        var memorecord = await checkmemo(req.body.employeeid,period.date,"in");
-        //var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"in"});    
+        //var memorecord = await checkmemo(req.body.employeeid,period.date,"in");
+        var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"in"});  
+        console.log(memorecord);  
         attendancetype = "WIFI";
         var record = attendeanceSchema({
           EmployeeId: req.body.employeeid,
@@ -719,7 +720,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
                 "Message":"Attendance Marked."};
               result.Data = [record];
               result.isSuccess = true;
-            }else {
+            }else if(memorecord.length != 0 && record.length != 0) {
               result.Message = "Attendance Marked and Memo Issue.";
               record = {
                 "Status": record.Status,
@@ -772,8 +773,9 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           period
         );
         attendancetype = "GPS";
-        var memorecord = await checkmemo(req.body.employeeid,period.date,"in");
-        //var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"in"});    
+        //var memorecord = await checkmemo(req.body.employeeid,period.date,"in");
+        console.log(req.body.employeeid,period.date);
+        var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"in"});  
         var record = attendeanceSchema({
           EmployeeId: req.body.employeeid,
           //Status: req.body.type,
@@ -790,6 +792,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           WifiName: req.body.wifiname,
           AttendanceType:attendancetype,
         });
+        console.log(record);
         record.save({}, function (err, record) {
           var result = {};
           if (err) {
@@ -812,7 +815,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
                 "Message":"Attendance Marked."};
               result.Data = [record];
               result.isSuccess = true;
-            }else {
+            }else if(memorecord.length != 0 && record.length != 0) {
               result.Message = "Attendance Marked and Memo Issue.";
               //result.Data = [record];
               record = {
@@ -884,8 +887,8 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
             longlat.SubCompany.BufferTime,
             period
           );
-          var memorecord = await checkmemo(req.body.employeeid,period.date,"out");
-          // var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"out"});    
+          //var memorecord = await checkmemo(req.body.employeeid,period.date,"out");
+          var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"out"});    
           var record = attendeanceSchema({
             EmployeeId: req.body.employeeid,
             //Status: req.body.type,
@@ -924,7 +927,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
                   "Message":"Attendance Marked."};
                 result.Data = [record];
                 result.isSuccess = true;
-              }else if(memorecord.length >= 0 && record.length >=0) {
+              }else if(memorecord.length != 0 && record.length !=0) {
                 result.Message = "Attendance Marked and Memo Issue.";
                 record = {
                   "Status": record.Status,
@@ -983,8 +986,8 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
             longlat.SubCompany.BufferTime,
             period
           );
-          var memorecord = await checkmemo(req.body.employeeid,period.date,"out");
-          // var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"out"});    
+          //var memorecord = await checkmemo(req.body.employeeid,period.date,"out");
+          var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"out"});    
           var record = attendeanceSchema({
             EmployeeId: req.body.employeeid,
             //Status: req.body.type,
@@ -1014,7 +1017,7 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
                 result.Message = "Attendance Marked";
                 result.Data = [record];
                 result.isSuccess = true;
-              }else {
+              }else if(memorecord.length != 0 && record.length != 0){
                 result.Message = "Attendance Marked and Memo Issue.";
                 record = {
                   "Status": record.Status,

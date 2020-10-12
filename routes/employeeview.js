@@ -62,12 +62,11 @@ router.post('/',async function(req, res, next){
         res.json(permission);
         }
     } else if(req.body.type=="getfilterdata"){
-        console.log(req.body.subcompanyid);
-        if(req.body.subcompanyid == undefined){
-          console.log("work");
-          var record = await employeeSchema.find().populate("SubCompany");
+      var sid = req.body.subcompanyid  == 0 ? 0 : req.body.subcompanyid;
+        console.log(sid);
+        if(req.body.subcompanyid == 0){
+          var record = await employeeSchema.find();
         } else{
-          console.log("!work");
           var record = await employeeSchema.find({SubCompany:req.body.subcompanyid}).populate("SubCompany");
         }
         var result = {};

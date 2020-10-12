@@ -12,12 +12,15 @@ router.post("/", async(req, res) => {
     if (req.body.type == "insert") {
         var permission = await checkpermission(req.body.type, req.body.token);
         if(permission.isSuccess == true){
+            var date = new Date();
+            date = date.toISOString().split("T")[0];
+            console.log(data);
             var record = new leaveSchema({
                 EmployeeId: req.body.EmployeeId,
                 SubCompany: req.body.SubCompanyId,
                 Company: req.body.CompanyId,
                 Reason: req.body.ReasonId,
-                ApplyDate : Date.now(),
+                ApplyDate : date,
                 StartDate : req.body.startdate,
                 EndDate : req.body.enddate,
                 LeaveType : req.body.leavetype,
@@ -49,34 +52,64 @@ router.post("/", async(req, res) => {
     else if(req.body.type=="getdata"){
         var permission = await checkpermission(req.body.type, req.body.token);
         if(permission.isSuccess == true){
-            var record = await leaveSchema.find().populate({
-                path:"EmployeeId",
-                select:"Name"
-            }).populate({
-                path:"SubCompany",
-                select:"Name"
-            }).populate({
-                path:"Company",
-                select:"Name"
-                
-            }).populate({
-                path:"Reason",
-                select:"MasterName"
-            }).sort({"ApplyDate":-1});
-            var result = {};
-            if(record.length == 0){
-                result.Message = "Leave Data is not found.";
-                result.Data = [];
-                result.isSuccess = false;
-                res.json(result);
-            }
-            else{
-                result.Message = "Leave Data is found.";
-                result.Data = record;
-                result.isSuccess = true;
-                res.json(result);
-            }
+            var companyselection = await adminSchema.findById(req.body.token);
+            if (companyselection.allaccessubcompany == true) {
+                var record = await leaveSchema.find().populate({
+                    path:"EmployeeId",
+                    select:"Name"
+                }).populate({
+                    path:"SubCompany",
+                    select:"Name"
+                }).populate({
+                    path:"Company",
+                    select:"Name"
+                    
+                }).populate({
+                    path:"Reason",
+                    select:"MasterName"
+                }).sort({"ApplyDate":-1});
+                var result = {};
+                if(record.length == 0){
+                    result.Message = "Leave Data is not found.";
+                    result.Data = [];
+                    result.isSuccess = false;
+                    res.json(result);
+                } else{
+                    result.Message = "Leave Data is found.";
+                    result.Data = record;
+                    result.isSuccess = true;
+                    res.json(result);
+                }
+            }else{
+                var record = await leaveSchema.find({ SubCompany: companyselection.accessCompany }).populate({
+                    path:"EmployeeId",
+                    select:"Name"
+                }).populate({
+                    path:"SubCompany",
+                    select:"Name"
+                }).populate({
+                    path:"Company",
+                    select:"Name"
+                    
+                }).populate({
+                    path:"Reason",
+                    select:"MasterName"
+                }).sort({"ApplyDate":-1});
+                var result = {};
+                if(record.length == 0){
+                    result.Message = "Leave Data is not found.";
+                    result.Data = [];
+                    result.isSuccess = false;
+                    res.json(result);
+                } else{
+                    result.Message = "Leave Data is found.";
+                    result.Data = record;
+                    result.isSuccess = true;
+                    res.json(result);
+                }
+            
         }
+    }
         
     }
     else if(req.body.type=="update"){
