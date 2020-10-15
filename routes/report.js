@@ -106,10 +106,19 @@ router.post("/", async(req, res) => {
         var permission = await checkpermission(req.body.type, req.body.token);
         if (permission.isSuccess == true) {
             try {
+                console.log(req.body);
                 dateArray = [];
-                countDate(req.body.month,req.body.year);
+                var dateArrays = getDates(new Date(req.body.startdate+"T00:00:00.000Z"), new Date(req.body.enddate+"T00:00:00.000Z"));
+                for (i = 0; i < dateArrays.length; i ++ ) {
+                    var date = dateArrays[i].toISOString();
+                    date = date.split("T")[0];
+                    date = date.split("-");
+                    date = date[2]+"/"+date[1]+"/"+date[0];
+                    dateArray[i] = date;
+                }
+                //countDate(req.body.month,req.body.year);
                 var startdate,enddate;
-                startdate = dateArray[1];
+                startdate = dateArray[0];
                 enddate = dateArray[dateArray.length-1];
                 //startdate = req.body.startdate;
                 //enddate = req.body.enddate;
@@ -228,7 +237,6 @@ router.post("/", async(req, res) => {
                             return item.Date;
                         })
                     });
-                   
                 }
                
                 /**
@@ -260,7 +268,7 @@ router.post("/", async(req, res) => {
                                 });
                             });
                         });
-                        console.log(result);
+                        //console.log(result);
                         
                         /*
                         * Start the designing of excelsheet.
@@ -275,7 +283,7 @@ router.post("/", async(req, res) => {
                             worksheet.getCell('C2').value = "SubCompany Name";
                             worksheet.getCell('C2').width = "32";
                             worksheet.mergeCells('B4:D4');
-                            worksheet.getCell('B4').value =  req.body.monthname+" Report";
+                            worksheet.getCell('B4').value =  "Attendance Report";
                             worksheet.getCell('D2').value = req.body.name;
                             worksheet.getCell('A3').value = "P => Present";
                             worksheet.getCell('A4').value = "A => Absent";
@@ -313,10 +321,15 @@ router.post("/", async(req, res) => {
                             worksheet.columns = [{key: "Name", width: 32}];
                             var colindex = 0;
                             //Print Date in the header coloumn.
-                            for(var datecol=1;datecol<=dateArray.length-1;datecol++){
+                            for(var datecol=0;datecol<=dateArray.length-1;datecol++){
                                 worksheet.getCell(cellArray[colindex+1]+rowindex).value = dateArray[datecol];
                                 colindex++;
                             }
+
+                            worksheet.getCell(cellArray[dateArray.length+5]+rowindex).value = "Working Day"
+                            worksheet.getCell(cellArray[dateArray.length+6]+rowindex).value = "Memo Issue"
+                            worksheet.getCell(cellArray[dateArray.length+7]+rowindex).value = "Late"
+                            worksheet.getCell(cellArray[dateArray.length+8]+rowindex).value = "Absent"
 
                             for(var key1 in mresult){
                                 worksheet.addRow({Name: key1});
@@ -329,16 +342,8 @@ router.post("/", async(req, res) => {
                                 var count = 1;
                                 for(var key2 in mresult[key1]){
                                     colindex = 0;
-                                    var indexChecker = 1;
-                                    var workingday = 0;
-                                    var memoisuue = 0;
-                                    var lateissue = 0;
-                                    var absent = 0;
-                                    worksheet.getCell("AH8").value = "Working Day"
-                                    worksheet.getCell("AI8").value = "Memo Issue"
-                                    worksheet.getCell("AJ8").value = "Late"
-                                    worksheet.getCell("AK8").value = "Absent"
-                                    for(var datecol=1;datecol<=dateArray.length-1;datecol++){
+                                    var indexChecker = 1,workingday=0,memoisuue=0,lateissue=0,absent=0;
+                                    for(var datecol=0;datecol<=dateArray.length-1;datecol++){
                                         if(employeedate.findIndex(item => item == dateArray[datecol])!=-1){
                                             var starttime=0,employeetime=0,cobufferTime=0;
                                             var st=0,et=0,bt=0;
@@ -356,21 +361,17 @@ router.post("/", async(req, res) => {
                                             st = st.split(":"); 
                                             cobufferTime = st[0]+":"+parseInt(st[1]+(parseInt(bufferTime)))+":"+st[2];
                                             cobufferTime = convertSecond(cobufferTime);
-                                            //console.log(starttime,cobufferTime,employeetime);
                                             if(employeetime <= starttime){
-                                                console.log("P");
                                                 worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value ="P";
+                                                workingday++;
                                             }else if(employeetime < cobufferTime){
-                                                console.log("L");
                                                 worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value ="L";
                                                 lateissue++;
                                             }else if(employeetime > cobufferTime) {
-                                                console.log("M");
                                                 worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value ="M";
                                                 memoisuue++;
                                             }  
                                             indexChecker++;
-                                            workingday++;  
                                         }else{
                                             worksheet.getCell(cellArray[colindex+1]+parseInt(rowindex+1)).value = "A";
                                             absent++;
@@ -378,12 +379,10 @@ router.post("/", async(req, res) => {
                                         //}
                                         colindex++;    
                                     }
-                                    //console.log("AH"+parseInt(rowindex+1));
-                                    console.log(workingday,memoisuue,lateissue);
-                                    worksheet.getCell("AH"+parseInt(rowindex+1)).value = workingday;
-                                    worksheet.getCell("AI"+parseInt(rowindex+1)).value = memoisuue;
-                                    worksheet.getCell("AJ"+parseInt(rowindex+1)).value = lateissue;
-                                    worksheet.getCell("AK"+parseInt(rowindex+1)).value = absent;
+                                    worksheet.getCell(cellArray[dateArray.length+5]+parseInt(rowindex+1)).value = workingday;
+                                    worksheet.getCell(cellArray[dateArray.length+6]+parseInt(rowindex+1)).value = memoisuue;
+                                    worksheet.getCell(cellArray[dateArray.length+7]+parseInt(rowindex+1)).value = lateissue;
+                                    worksheet.getCell(cellArray[dateArray.length+8]+parseInt(rowindex+1)).value = absent;
                                     count++;
                                 }
                                 rowindex = parseInt(rowindex)+1;
@@ -749,6 +748,27 @@ router.post("/", async(req, res) => {
         }
     }*/
 });
+
+
+//Generate Dates between of two date
+Date.prototype.addDays = function(days) {
+    var dat = new Date(this.valueOf())
+    dat.setDate(dat.getDate() + days);
+    return dat;
+}
+    
+function getDates(startDate, stopDate) {
+    var dateArray = new Array();
+    var currentDate = startDate;
+    while (currentDate <= stopDate) {
+    dateArray.push(currentDate)
+    currentDate = currentDate.addDays(1);
+    }
+    return dateArray;
+}
+    
+
+
 
 function convertSecond(time){
     time = time.toLowerCase();

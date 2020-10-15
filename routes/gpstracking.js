@@ -30,7 +30,8 @@ async function currentLocation(id) {
 
 router.post("/", async function(req,res){
     //Not Working..
-    if(req.body.type == "insert"){/*       
+    if(req.body.type == "insert"){
+        /*       
         console.log("call");
         var employee;
         var date = moment()
@@ -137,83 +138,74 @@ router.post("/", async function(req,res){
         res.json(result);
     }
 });
+
+
 setInterval(gpstrack,1800000); //setinterval for server
-//setInterval(gpstrack,10000);   //setinterval for localhost
+//setInterval(gpstrack,60000);  //setinterval for localhost
+//setInterval(gpstrack,60000);
 //function for fetching lat,lng from firebase & store  in mongodb.
-async function gpstrack(){
-        var employee;
-        var date = moment()
-            .tz("Asia/Calcutta")
-            .format("DD MM YYYY, h:mm:ss a")
-            .split(",")[0];
-        date = date.split(" ");
-        date = date[0] + "/" + date[1] + "/" + date[2];
-        employee =  await attendanceSchema.find({Date:date,Status:"in"}).select("EmployeeId");
-        if(employee.length == 0 || employee.length == null){
-            var result = {};
-                result.Message = "No One is present today.";
-                result.Data = [];
-                result.isSuccess = false;
-                res.json(result);
-        }
-        for(var index = 0; index<employee.length; index++){
-            var checkpoint = await attendanceSchema.find({EmployeeId:employee[index].EmployeeId,Date:date});
-            //var checkpoint = await isDutyIn(employee[index].EmployeeId,date);
-            //console.log(checkpoint);
-            if(checkpoint.length == 1){
-                var mobileNo = await employeeSchema.find({_id:employee[index].EmployeeId,GpsTrack:true}).select('Mobile');
-                if(mobileNo[0] != null || mobileNo.length != 0 || mobileNo[0] != undefined){
-                var location = await currentLocation(mobileNo[0].Mobile);
-                    if(location!=null){
-                        var time = moment()
-                            .tz("Asia/Calcutta")
-                            .format("DD MM YYYY, h:mm:ss a")
-                            .split(",")[1];
-                        var date = new Date();
-                        date = date.toISOString().split("T")[0];
-                        var updatelocation = await gpstrackingSchema.findOne({EmployeeId:employee[index].EmployeeId,Date:date,Latitude:location.latitude,Longitude:location.longitude});
-                        //var checklocation = await isLocationUpdate(employee[index].EmployeeId,date,location.latitude,location.longitude);
-                        //console.log(updatelocation);
-                        if(updatelocation.length == 1){
-                            var record = gpstrackingSchema({
-                                EmployeeId:employee[index].EmployeeId,
-                                Date:date,
-                                Time:time,
-                                Latitude:location.latitude,
-                                Longitude:location.longitude
-                            });
-                            record.save({}, function(err,record){
-                                var result = {};
-                                if(err){
-                                    result.Message="Location is not Inserted.";
-                                    result.Data=[];
-                                    result.isSuccess=false;
-                                } else {
-                                    if(record.length == 0){
-                                        result.Message="Location is not Inserted.";
-                                        result.Data=[];
-                                        result.isSuccess=false;
-                                    }
-                                    else{
-                                        result.Message="Location is Inserted.";
-                                        result.Data=record;
-                                        result.isSuccess=true;
-                                    }
-                                }
-                            });
-                        }
-                    } 
-                }
-            }
-            else if(checkpoint.length != 1){
-                index++;
-            }
-        }
-}
-//0 for false;
-//1 for true;
- async function isDutyIn(EmpId,empdate){
-    var record =  await attendanceSchema.find({EmployeeId:EmpId,Date:empdate});
+// async function gpstrack(){
+//     var date = moment()
+//         .tz("Asia/Calcutta")
+//         .format("DD MM YYYY, h:mm:ss a")
+//         .split(",")[0];
+//     date = date.split(" ");
+//     date = date[0]+"/"+date[1]+"/"+date[2];
+//     var presentEmployee  = await attendanceSchema.find({Date:date,Status:"in"}).select("EmployeeId");
+//     if(presentEmployee.length !=0){
+//         for(var employeeIndex = 0;employeeIndex<presentEmployee.length;employeeIndex++){
+//             var dutystatus = await dutyStatus(presentEmployee[employeeIndex].EmployeeId,date);
+//             if(dutystatus == 1){
+//                 var mobileNo = await employeeSchema.findById(presentEmployee[employeeIndex].EmployeeId).select("Mobile");
+//                 var location = await currentLocation(mobileNo.Mobile);
+//                 if(location != null){
+//                     console.log(mobileNo._id);
+//                     var locationstatus = await locationStatus(mobileNo._id,location.latitude,location.longitude);
+//                     console.log(locationstatus);
+//                     if(locationstatus == 1){
+//                         var time = moment()
+//                                     .tz("Asia/Calcutta")
+//                                     .format("DD MM YYYY, h:mm:ss a")
+//                                     .split(",")[1];
+//                         var date = new Date();
+//                         date = date.toISOString().split("T")[0];
+//                         var record = gpstrackingSchema({
+//                             EmployeeId:mobileNo._id,
+//                             Date:date,
+//                             Time:time,
+//                             Latitude:location.latitude,
+//                             Longitude:location.longitude
+//                         });
+//                         record.save({}, function(err,record){
+//                             var result = {};
+//                             if(err){
+//                                 result.Message="Location is not Inserted.";
+//                                 result.Data=[];
+//                                 result.isSuccess=false;
+//                             } else {
+//                                 if(record.length == 0){
+//                                     result.Message="Location is not Inserted.";
+//                                     result.Data=[];
+//                                     result.isSuccess=false;
+//                                 }
+//                                 else{
+//                                     result.Message="Location is Inserted.";
+//                                     result.Data=record;
+//                                     result.isSuccess=true;
+//                                 }
+//                             }
+//                         });
+//                     }
+//                 }
+//                 // console.log(presentEmployee[employeeIndex].EmployeeId,date,presentEmployee[employeeIndex].EmployeeId,presentEmployee[employeeIndex].EmployeeId);
+//                 // var locationstatus = await locationStatus(presentEmployee[employeeIndex].EmployeeId,date,presentEmployee[employeeIndex].EmployeeId,presentEmployee[employeeIndex].EmployeeId);
+//             }
+//         }
+//     }
+// }
+
+ async function dutyStatus(EmpId,empdate){
+    var record =  await attendanceSchema.find({EmployeeId:EmpId,Date:empdate}).select("Status");
     if(record.length == 1){
         return 1;
     } else if(record.length != 1 ){
@@ -221,79 +213,77 @@ async function gpstrack(){
     }    
 }
 
-async function isLocationUpdate(EmpId,empdate,lat,lng){
-    console.log(EmpId,empdate,lat,lng);
+async function locationStatus(EmpId,empdate,lat,lng){
+    var empdate = new Date();
+    empdate = empdate.toISOString().split("T")[0];
     var record =  await gpstrackingSchema.find({EmployeeId:EmpId,Date:empdate+'T00:00:00.000Z',Latitude:lat,Longitude:lng});  
-    console.log('length '+record.length);
     if(record.length == 0){
         return 1;
-
-    } else if(record.length == 1){
-        console.log("location updated");
+    } else if(record.length != 1){
         return 0;
     }
 }
 
 //Working API
 
-// async function gpstrack(){
-//     var employee;
-//     var date = moment()
-//     .tz("Asia/Calcutta")
-//     .format("DD MM YYYY, h:mm:ss a")
-//     .split(",")[0];
-//     date = date.split(" ");
-//     date = date[0] + "/" + date[1] + "/" + date[2];
-//     employee =  await attendanceSchema.find({Date:date}).select("EmployeeId");
-//     if(employee.length == 0 || employee.length == null){
-//         var result = {};
-//         result.Message = "No One is present today.";
-//         result.Data = [];
-//         result.isSuccess = false;
-//         res.json(result);
-//     }
-//     for(var index = 0; index<employee.length; index++){
-//         var mobileNo = await employeeSchema.find({_id:employee[index].EmployeeId,GpsTrack:true}).select('Mobile');
-//         if(mobileNo[0] != null || mobileNo.length != 0){
-//             var location = await currentLocation(mobileNo[0].Mobile);
-//             if(location!=null){
-//             var time = moment()
-//             .tz("Asia/Calcutta")
-//             .format("DD MM YYYY, h:mm:ss a")
-//             .split(",")[1];
-//             var date = new Date();
-//             date = date.toISOString().split("T")[0];
-//             var record = gpstrackingSchema({
-//                 EmployeeId:employee[index].EmployeeId,
-//                 Date:date,
-//                 Time:time,
-//                 Latitude:location.latitude,
-//                 Longitude:location.longitude
-//             });
-//             record.save({}, function(err,record){
-//                 var result = {};
-//                 if(err){
-//                     result.Message="Location is not Inserted.";
-//                     result.Data=[];
-//                     result.isSuccess=false;
-//                 } else {
-//                     if(record.length == 0){
-//                         result.Message="Location is not Inserted.";
-//                         result.Data=[];
-//                         result.isSuccess=false;
-//                     }
-//                     else{
-//                         result.Message="Location is Inserted.";
-//                         result.Data=record;
-//                         result.isSuccess=true;
-//                     }
-//                 }
-//             });
-//             console.log(record);
-//             }
-//         }
-//     }
-// }
+async function gpstrack(){
+    var employee;
+    var date = moment()
+    .tz("Asia/Calcutta")
+    .format("DD MM YYYY, h:mm:ss a")
+    .split(",")[0];
+    date = date.split(" ");
+    date = date[0] + "/" + date[1] + "/" + date[2];
+    employee =  await attendanceSchema.find({Date:date}).select("EmployeeId");
+    if(employee.length == 0 || employee.length == null){
+        var result = {};
+        result.Message = "No One is present today.";
+        result.Data = [];
+        result.isSuccess = false;
+        res.json(result);
+    }
+    for(var index = 0; index<employee.length; index++){
+        var mobileNo = await employeeSchema.find({_id:employee[index].EmployeeId,GpsTrack:true}).select('Mobile');
+        if(mobileNo[0] != null || mobileNo.length != 0){
+            var location = await currentLocation(mobileNo[0].Mobile);
+            if(location!=null){
+            var time = moment()
+            .tz("Asia/Calcutta")
+            .format("DD MM YYYY, h:mm:ss a")
+            .split(",")[1];
+            var date = new Date();
+            date = date.toISOString().split("T")[0];
+            var record = gpstrackingSchema({
+                EmployeeId:employee[index].EmployeeId,
+                Date:date,
+                Time:time,
+                Latitude:location.latitude,
+                Longitude:location.longitude
+            });
+            record.save({}, function(err,record){
+                var result = {};
+                if(err){
+                    result.Message="Location is not Inserted.";
+                    result.Data=[];
+                    result.isSuccess=false;
+                } else {
+                    if(record.length == 0){
+                        result.Message="Location is not Inserted.";
+                        result.Data=[];
+                        result.isSuccess=false;
+                    }
+                    else{
+                        result.Message="Location is Inserted.";
+                        result.Data=record;
+                        result.isSuccess=true;
+                    }
+                }
+            });
+            console.log(record);
+            }
+        }
+    }
+}
 //Function for finding distance of employee from subcompany
 function calculatelocation(name, lat1, long1, lat2, long2) {
     if (lat1 == 0 || long1 == 0) {

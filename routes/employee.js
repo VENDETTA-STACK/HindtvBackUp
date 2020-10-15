@@ -47,6 +47,7 @@ function dateformate(date){
   console.log(date);
   return date;
 }
+
 router.post("/", upload.fields([{ name:"employeeimage"}, {name:"employeedocument"},{name:"employeedocument2"},{name:"employeedocument3"}]), async function (req, res, next) {
   if (req.body.type == "insert") {
     console.log(req.body);
@@ -328,7 +329,7 @@ router.post("/", upload.fields([{ name:"employeeimage"}, {name:"employeedocument
     }
 
   } else if (req.body.type == "getsubcompanyemployee") {
-    if(req.body.SubCompany == 0){
+    if(req.body.SubCompany == 0 || req.body.SubCompany == undefined ){
       var companyselection = await adminSchema.findById(req.body.token);
       if (companyselection.allaccessubcompany == true) {
           var record = await employeeSchema.find();
@@ -343,7 +344,21 @@ router.post("/", upload.fields([{ name:"employeeimage"}, {name:"employeedocument
             result.isSuccess = true;
           }
           res.json(result);
-      } else {
+      } else if(companyselection.allaccessubcompany == false){
+        var record = await employeeSchema.find();
+          var result = {};
+          if (record.length == 0) {
+            result.Message = "Employee Not Found";
+            result.Data = [];
+            result.isSuccess = false;
+          } else {
+            result.Message = "Employee Found";
+            result.Data = record;
+            result.isSuccess = true;
+          }
+          res.json(result);
+      }
+       else {
         var record = await employeeSchema.find({SubCompany: companyselection.accessCompany});
           var result = {};
           if (record.length == 0) {
@@ -691,25 +706,75 @@ router.post("/", upload.fields([{ name:"employeeimage"}, {name:"employeedocument
       res.json(result);
     }
   } else if (req.body.type == "getgpsemployee") {
-    employeeSchema.find({ GpsTrack:true,SubCompany: req.body.SubCompany }, (err, record) => {
-      var result = {};
-      if (err) {
-        result.Message = "Employee Not Found";
-        result.Data = err;
-        result.isSuccess = false;
-      } else {
-        if (record.length == 0) {
-          result.Message = "Employee Not Found";
-          result.Data = [];
-          result.isSuccess = false;
-        } else {
-          result.Message = "Employee Found";
-          result.Data = record;
-          result.isSuccess = true;
+    var permission = await checkpermission(req.body.type, req.body.token);
+    if (permission.isSuccess == true) {
+      var companyselection = await adminSchema.findById(req.body.token);
+      if (companyselection.allaccessubcompany == true) {
+        console.log(req.body);
+        if(req.body.SubCompany == 0){
+          employeeSchema.find({ GpsTrack:true}, (err, record) => {
+            var result = {};
+            if (err) {
+              result.Message = "Employee Not Found";
+              result.Data = err;
+              result.isSuccess = false;
+            } else {
+              if (record.length == 0) {
+                result.Message = "Employee Not Found";
+                result.Data = [];
+                result.isSuccess = false;
+              } else {
+                result.Message = "Employee Found";
+                result.Data = record;
+                result.isSuccess = true;
+              }
+            }
+            res.json(result);
+          });
+        } else{
+          employeeSchema.find({ SubCompany:companyselection.accessCompany,GpsTrack:true}, (err, record) => {
+            var result = {};
+            if (err) {
+              result.Message = "Employee Not Found";
+              result.Data = err;
+              result.isSuccess = false;
+            } else {
+              if (record.length == 0) {
+                result.Message = "Employee Not Found";
+                result.Data = [];
+                result.isSuccess = false;
+              } else {
+                result.Message = "Employee Found";
+                result.Data = record;
+                result.isSuccess = true;
+              }
+            }
+            res.json(result);
+          });
         }
-      }
-      res.json(result);
-    });
+      } else if(companyselection.allaccessubcompany == false){
+        employeeSchema.find({ SubCompany:req.body.SubCompany,GpsTrack:true}, (err, record) => {
+          var result = {};
+          if (err) {
+            result.Message = "Employee Not Found";
+            result.Data = err;
+            result.isSuccess = false;
+          } else {
+            if (record.length == 0) {
+              result.Message = "Employee Not Found";
+              result.Data = [];
+              result.isSuccess = false;
+            } else {
+              result.Message = "Employee Found";
+              result.Data = record;
+              result.isSuccess = true;
+            }
+          }
+          res.json(result);
+        });
+      } 
+    }
+    
   } else if(req.body.type=="getfilterdata"){
     var sid = req.body.subcompanyid  == 0 ? 0 : req.body.subcompanyid;
     if(req.body.subcompanyid == 0){

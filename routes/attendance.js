@@ -10,9 +10,12 @@ var attendeanceSchema = require("../models/attendance.models");
 var memoSchema = require("../models/memo.model");
 var adminSchema = require("../models/admin.model");
 const geolib = require("geolib");
-const { mongoose } = require("mongoose");
+var mongoose = require("mongoose");
+
 const { isEqual, replace } = require("lodash");
 const memo = require("../models/memo.model");
+const { populate } = require("../models/subcompany.models");
+const { remoteConfig } = require("firebase-admin");
 
 /*Importing Modules */
 
@@ -178,65 +181,378 @@ function calculatelocation(name, lat1, long1, lat2, long2) {
 }
 /*Calculating distance between two lat and long*/
 
- function checkmemo(employeeid,date,type){
-  console.log(employeeid,date,type);
+function checkmemo(employeeid,date,type){
   var memorecord =  memoSchema.find({Eid:employeeid,Date:date,Type:type});   
   return memorecord;
 }
-
 
 /*Post request for attendance */
 router.post("/", upload.single("attendance"), async function (req, res, next) {
   period = getdate(); //Function calling
   var attendancetype;
   //Attendance In Function
-  if (req.body.type == "in") {
-    // var temp = await employeeSchema
-    //     .findById(req.body.employeeid)
-    //     .populate({
-    //       path:"SubCompany",
-    //       select:"Name LocationId",
-    //       populate : {
-    //         path:"LocationId"
-    //       }
-    //     });
-    var longlat = await employeeSchema // Fetching employee data with employeeid
-      .findById(req.body.employeeid)
-      .populate({
-        path:"SubCompany",
-          select:"Name LocationId",
-          populate : {
-            path:"LocationId",
-            select:"Latitude Longitude"
-          }
-      })
-      .populate("Timing")
+  //attendance working api but something went can not handle...both API In/Out
+  // if (req.body.type == "in") {
+  //   // var temp = await employeeSchema
+  //   //     .findById(req.body.employeeid)
+  //   //     .populate({
+  //   //       path:"SubCompany",
+  //   //       select:"Name LocationId",
+  //   //       populate : {
+  //   //         path:"LocationId"
+  //   //       }
+  //   //     });
+  //   var longlat = await employeeSchema // Fetching employee data with employeeid
+  //     .findById(req.body.employeeid)
+  //     .populate({
+  //       path:"SubCompany",
+  //         select:"Name LocationId",
+  //         populate : {
+  //           path:"LocationId",
+  //           select:"Latitude Longitude"
+  //         }
+  //     })
+  //     .populate("Timing")
 
-    if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
+  //   if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
      
-      //if (req.body.wifiname == longlat.WifiName) {
-        var empWifi = req.body.wifiname;
-        var comWifi = longlat.WifiName;
+  //     //if (req.body.wifiname == longlat.WifiName) {
+  //       var empWifi = req.body.wifiname;
+  //       var comWifi = longlat.WifiName;
 
-        if(empWifi.includes(" ")){
-          empWifi = empWifi.split(" ").join("");
-        } 
-        if(comWifi.includes(" ")){
-          comWifi =  comWifi.split(" ").join("");
-        }
-        console.log(comWifi,empWifi);
+  //       if(empWifi.includes(" ")){
+  //         empWifi = empWifi.split(" ").join("");
+  //       } 
+  //       if(comWifi.includes(" ")){
+  //         comWifi =  comWifi.split(" ").join("");
+  //       }
+  //       console.log(comWifi,empWifi);
               
+  //     if(isEqual(empWifi,comWifi)){
+  //       memo = await entrymemo(
+  //         req.body.employeeid,
+  //         longlat.Timing.StartTime,
+  //         longlat.SubCompany.BufferTime,
+  //         period
+  //       );
+  //       attendancetype = "WIFI";
+  //       var record = attendeanceSchema({
+  //         EmployeeId: req.body.employeeid,
+  //         Status: req.body.type,
+  //         Date: period.date,
+  //         Time: period.time,
+  //         Day: period.day,
+  //         Image: req.file.filename,
+  //         Area: longlat.SubCompany.Name,
+  //         Elat: req.body.latitude,
+  //         Elong: req.body.longitude,
+  //         Distance: 0,
+  //         Memo: memo,
+  //         WifiName: req.body.wifiname,
+  //         AttendanceType:attendancetype,
+  //       });
+  //       record.save({}, function (err, record) {
+  //         var result = {};
+  //         if (err) {
+  //           result.Message = "Attendance Not Marked";
+  //           result.Data = err;
+  //           result.isSuccess = false;
+  //         } else {
+  //           if (record.length == 0) {
+  //             result.Message = "Attendance Not Marked";
+  //             result.Data = [];
+  //             result.isSuccess = true;
+  //           } else {
+  //             result.Message = "Attendance Marked";
+  //             result.Data = [record];
+  //             result.isSuccess = true;
+  //           }
+  //         }
+  //         res.json(result);
+  //       });
+  //     } else {
+  //         var result = {};
+  //         result.Message = "Perform attendance with your registered WiFi.";
+  //         result.Data = [];
+  //         result.isSuccess = false;
+  //         res.json(result);
+  //     }
+  //   } else if(longlat.GpsTrack == true) {
+  //     area = calculatelocation(
+  //     longlat.SubCompany.Name,
+  //     //longlat.SubCompany.lat,
+  //     //longlat.SubCompany.long,
+  //     longlat.SubCompany.LocationId.Latitude,
+  //     longlat.SubCompany.LocationId.Longitude,
+  //     req.body.latitude,
+  //     req.body.longitude
+  //     );
+  //     if (area == -1 || area == 1) {
+  //       if (area == 1) {
+  //         var result = {};
+  //         result.Message =
+  //           "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+  //         result.Data = [];
+  //         result.isSuccess = false;
+  //       } else {
+  //         var result = {};
+  //         result.Message =
+  //           "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+  //         result.Data = [];
+  //         result.isSuccess = false;
+  //       }
+  //       res.json(result);
+  //     } else {
+  //       memo = await entrymemo(
+  //         req.body.employeeid,
+  //         longlat.Timing.StartTime,
+  //         longlat.SubCompany.BufferTime,
+  //         period
+  //       );
+  //       attendancetype = "GPS";
+  //       var record = attendeanceSchema({
+  //         EmployeeId: req.body.employeeid,
+  //         Status: req.body.type,
+  //         Date: period.date,
+  //         Time: period.time,
+  //         Day: period.day,
+  //         Image: req.file.filename,
+  //         Area: area,
+  //         Elat: req.body.latitude,
+  //         Elong: req.body.longitude,
+  //         Distance: heading,
+  //         Memo: memo,
+  //         WifiName: req.body.wifiname,
+  //         AttendanceType:attendancetype,
+  //       });
+  //       record.save({}, function (err, record) {
+  //         var result = {};
+  //         if (err) {
+  //           result.Message = "Attendance Not Marked";
+  //           result.Data = err;
+  //           result.isSuccess = false;
+  //         } else {
+  //           if (record.length == 0) {
+  //             result.Message = "Attendance Not Marked";
+  //             result.Data = [];
+  //             result.isSuccess = true;
+  //           } else {
+  //             result.Message = "Attendance Marked";
+  //             result.Data = [record];
+  //             result.isSuccess = true;
+  //           }
+  //         }
+  //         res.json(result);
+  //       });
+  //     }
+  //   }
+  // }
+  // //Attendance Out Function
+  // else if (req.body.type == "out") {
+  //   var date = moment()
+  //     .tz("Asia/Calcutta")
+  //     .format("DD MM YYYY, h:mm:ss a")
+  //     .split(",")[0];
+  //   date = date.split(" ");
+  //   date = date[0] + "/" + date[1] + "/" + date[2];
+  //   record = await attendeanceSchema.find({
+  //     EmployeeId: req.body.employeeid,
+  //     Date: date,
+  //     Status: "out",
+  //   });
+  //   var result = {};
+  //   if (record.length != 0) {
+  //     result.Message = "Out Attendance already mark for the day.";
+  //     result.Data = [
+  //       {
+  //         message: "Out Attendance already mark for the day.",
+  //       },
+  //     ];
+  //     result.isSuccess = false;
+  //     res.json(result);
+  //   } else {
+  //     var longlat = await employeeSchema
+  //       .findById(req.body.employeeid)
+  //       .populate({
+  //         path:"SubCompany",
+  //         select:"Name LocationId",
+  //         populate : {
+  //           path:"LocationId",
+  //           select:"Latitude Longitude"
+  //         }
+  //       })
+  //       .populate("Timing");
+       
+  //     if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
+  //       //if (req.body.wifiname == longlat.WifiName) {
+
+  //         var empWifi = req.body.wifiname;
+  //         empWifi = empWifi.split(" ").join("");
+  //         var comWifi = longlat.WifiName;
+  //         comWifi =  comWifi.split(" ").join("");
+  //         if(isEqual(empWifi,comWifi)){
+  //         memo = await entrymemo(
+  //           req.body.employeeid,
+  //           longlat.Timing.StartTime,
+  //           longlat.SubCompany.BufferTime,
+  //           period
+  //         );
+  //         var record = attendeanceSchema({
+  //           EmployeeId: req.body.employeeid,
+  //           Status: req.body.type,
+  //           Date: period.date,
+  //           Time: period.time,
+  //           Day: period.day,
+  //           Image: req.file.filename,
+  //           Area: longlat.SubCompany.Name,
+  //           Elat: req.body.latitude,
+  //           Elong: req.body.longitude,
+  //           Distance: 0,
+  //           Memo: memo,
+  //           wifiName: req.body.wifiname,
+  //           AttendanceType:"WIFI",
+  //         });
+  //         record.save({}, function (err, record) {
+  //           var result = {};
+  //           if (err) {
+  //             result.Message = "Attendance Not Marked";
+  //             result.Data = err;
+  //             result.isSuccess = false;
+  //           } else {
+  //             if (record.length == 0) {
+  //               result.Message = "Attendance Not Marked";
+  //               result.Data = [];
+  //               result.isSuccess = false;
+  //             } else {
+  //               result.Message = "Attendance Marked";
+  //               result.Data = [record];
+  //               result.isSuccess = true;
+  //             }
+  //           }
+  //           res.json(result);
+  //         });
+  //         } else {
+  //           var result = {};
+  //           result.Message = "You can not perform attendance.";
+  //           result.Data = [];
+  //           result.isSuccess = false;
+  //           res.json(result);
+  //         }
+  //     }
+  //     else {
+  //       area = calculatelocation(
+  //         longlat.SubCompany.Name,
+  //         //longlat.SubCompany.lat,
+  //         //longlat.SubCompany.long,
+  //         longlat.SubCompany.LocationId.Latitude,
+  //         longlat.SubCompany.LocationId.Longitude,
+  //         req.body.latitude,
+  //         req.body.longitude
+  //       );
+  //       if (area == 0 || area == 1) {
+  //         if (area == 1) {
+  //           var result = {};
+  //           result.Message =
+  //             "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+  //           result.Data = [];
+  //           result.isSuccess = false;
+  //         } else {
+  //           var result = {};
+  //           result.Message =
+  //             "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+  //           result.Data = [];
+  //           result.isSuccess = false;
+  //         }
+  //         res.json(result);
+  //       } else {
+  //         memo = await exitmemo(
+  //           req.body.employeeid,
+  //           longlat.Timing.EndTime,
+  //           longlat.SubCompany.BufferTime,
+  //           period
+  //         );
+  //         var record = attendeanceSchema({
+  //           EmployeeId: req.body.employeeid,
+  //           Status: req.body.type,
+  //           Date: period.date,
+  //           Time: period.time,
+  //           Day: period.day,
+  //           Image: req.file.filename,
+  //           Area: area,
+  //           Elat: req.body.latitude,
+  //           Elong: req.body.longitude,
+  //           Distance: heading,
+  //           Memo: parseInt(memo),
+  //         });
+  //         record.save({}, function (err, record) {
+  //           var result = {};
+  //           if (err) {
+  //             result.Message = "Attendance Not Marked";
+  //             result.Data = err;
+  //             result.isSuccess = false;
+  //           } else {
+  //             if (record.length == 0) {
+  //               result.Message = "Attendance Not Marked";
+  //               result.Data = [];
+  //               result.isSuccess = false;
+  //             } else {
+  //               result.Message = "Attendance Marked";
+  //               result.Data = [record];
+  //               result.isSuccess = true;
+  //             }
+  //           }
+  //           res.json(result);
+  //         });
+  //       }
+  //     }
+  //   }
+  // }
+
+//Attendance Working API. It's able to handle something went wrong & memo popup api.
+if (req.body.type == "in") {
+  var checkin = await attendeanceSchema.find({EmployeeId:req.body.employeeid,Date:period.date,Status:"in"});
+  if(checkin.length == 1){
+    var result = {};
+    result.Message = "You are already Perform Attendance."
+    result.Data = checkin;
+    result.isSuccess = false;
+    res.json(result);
+  } else {
+    var longlat = await employeeSchema // Fetching employee data with employeeid
+    .findById(req.body.employeeid)
+    .populate({
+      path:"SubCompany",
+        select:"Name LocationId",
+        populate : {
+          path:"LocationId",
+          select:"Latitude Longitude"
+        }
+    })
+    .populate("Timing");
+
+      var empWifi = req.body.wifiname;
+      var comWifi = longlat.WifiName;
+      if(empWifi.includes(" ")){
+        empWifi = empWifi.split(" ").join("");
+      } 
+      if(comWifi.includes(" ")){
+        comWifi =  comWifi.split(" ").join("");
+      }
+            
       if(isEqual(empWifi,comWifi)){
-        memo = await entrymemo(
+        var memo = await entrymemo(
           req.body.employeeid,
           longlat.Timing.StartTime,
           longlat.SubCompany.BufferTime,
           period
         );
+        //var memorecord = await checkmemo(req.body.employeeid,period.date,"in");
+        var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"in"});  
         attendancetype = "WIFI";
         var record = attendeanceSchema({
           EmployeeId: req.body.employeeid,
-          Status: req.body.type,
+          //Status: req.body.type,
+          Status: "in",
           Date: period.date,
           Time: period.time,
           Day: period.day,
@@ -259,9 +575,43 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
             if (record.length == 0) {
               result.Message = "Attendance Not Marked";
               result.Data = [];
-              result.isSuccess = true;
-            } else {
+              result.isSuccess = false;
+            } else if(memorecord.length==0 && record.length != 0){
               result.Message = "Attendance Marked";
+              record = {
+                "_id":record._id,
+                "EmployeeId":record.EmployeeId,
+                "Status": record.Status,
+                "Date": record.Date,
+                "Time": record.Time,
+                "Day": record.Day,
+                "Image":record.Image,
+                "Area":record.Area,
+                "Elat":record.Elat,
+                "Elong":record.Elong,
+                "Distance":record.Distance,
+                "AttendanceType":record.AttendanceType,
+                "Memo": false,
+                "Message":"Attendance Marked."};
+              result.Data = [record];
+              result.isSuccess = true;
+            }else if(memorecord.length != 0 && record.length != 0) {
+              result.Message = "Attendance Marked and Memo Issued.";
+              record = {
+                "_id":record._id,
+                "EmployeeId":record.EmployeeId,
+                "Status": record.Status,
+                "Date": record.Date,
+                "Time": record.Time,
+                "Day": record.Day,
+                "Image":record.Image,
+                "Area":record.Area,
+                "Elat":record.Elat,
+                "Elong":record.Elong,
+                "Distance":record.Distance,
+                "AttendanceType":record.AttendanceType,
+                "Memo": true,
+                "Message":"Attendance Marked and Memo Issued"};
               result.Data = [record];
               result.isSuccess = true;
             }
@@ -269,17 +619,8 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           res.json(result);
         });
       } else {
-          var result = {};
-          result.Message = "Perform attendance with your registered WiFi.";
-          result.Data = [];
-          result.isSuccess = false;
-          res.json(result);
-      }
-    } else if(longlat.GpsTrack == true) {
       area = calculatelocation(
       longlat.SubCompany.Name,
-      //longlat.SubCompany.lat,
-      //longlat.SubCompany.long,
       longlat.SubCompany.LocationId.Latitude,
       longlat.SubCompany.LocationId.Longitude,
       req.body.latitude,
@@ -308,9 +649,11 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           period
         );
         attendancetype = "GPS";
+        var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"in"});  
         var record = attendeanceSchema({
           EmployeeId: req.body.employeeid,
-          Status: req.body.type,
+          //Status: req.body.type,
+          Status: "in",
           Date: period.date,
           Time: period.time,
           Day: period.day,
@@ -333,156 +676,231 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
             if (record.length == 0) {
               result.Message = "Attendance Not Marked";
               result.Data = [];
-              result.isSuccess = true;
-            } else {
+              result.isSuccess = false;
+            }else if(memorecord.length==0 && record.length != 0){
               result.Message = "Attendance Marked";
+              record = {
+                "_id":record._id,
+                "EmployeeId":record.EmployeeId,
+                "Status": record.Status,
+                "Date": record.Date,
+                "Time": record.Time,
+                "Day": record.Day,
+                "Image":record.Image,
+                "Area":record.Area,
+                "Elat":record.Elat,
+                "Elong":record.Elong,
+                "Distance":record.Distance,
+                "AttendanceType":record.AttendanceType,
+                "Memo": false,
+                "Message":"Attendance Marked."};
               result.Data = [record];
               result.isSuccess = true;
-            }
+            }else if(memorecord.length != 0 && record.length != 0) {
+              result.Message = "Attendance Marked and Memo Issued.";
+              //result.Data = [record];
+              record = {
+                "_id":record._id,
+                "EmployeeId":record.EmployeeId,
+                "Status": record.Status,
+                "Date": record.Date,
+                "Time": record.Time,
+                "Day": record.Day,
+                "Image":record.Image,
+                "Area":record.Area,
+                "Elat":record.Elat,
+                "Elong":record.Elong,
+                "Distance":record.Distance,
+                "AttendanceType":record.AttendanceType,
+                "Memo": true,
+                "Message":"Attendance Marked and Memo Issued."};
+              result.Data = [record];
+              result.isSuccess = true;
+            } //else {
+            //   result.Message = "Attendance Marked";
+            //   result.Data = [record,memorecord];
+            //   result.isSuccess = true;
+            // }
           }
           res.json(result);
         });
       }
-    }
-  }
-  //Attendance Out Function
-  else if (req.body.type == "out") {
-    var date = moment()
-      .tz("Asia/Calcutta")
-      .format("DD MM YYYY, h:mm:ss a")
-      .split(",")[0];
-    date = date.split(" ");
-    date = date[0] + "/" + date[1] + "/" + date[2];
-    record = await attendeanceSchema.find({
-      EmployeeId: req.body.employeeid,
-      Date: date,
-      Status: "out",
-    });
-    var result = {};
-    if (record.length != 0) {
-      result.Message = "Out Attendance already mark for the day.";
-      result.Data = [
-        {
-          message: "Out Attendance already mark for the day.",
-        },
-      ];
-      result.isSuccess = false;
-      res.json(result);
-    } else {
-      var longlat = await employeeSchema
-        .findById(req.body.employeeid)
-        .populate({
-          path:"SubCompany",
-          select:"Name LocationId",
-          populate : {
-            path:"LocationId",
-            select:"Latitude Longitude"
-          }
-        })
-        .populate("Timing");
-       
-      if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
-        //if (req.body.wifiname == longlat.WifiName) {
-
-          var empWifi = req.body.wifiname;
-          empWifi = empWifi.split(" ").join("");
-          var comWifi = longlat.WifiName;
-          comWifi =  comWifi.split(" ").join("");
-          if(isEqual(empWifi,comWifi)){
-          memo = await entrymemo(
-            req.body.employeeid,
-            longlat.Timing.StartTime,
-            longlat.SubCompany.BufferTime,
-            period
-          );
-          var record = attendeanceSchema({
-            EmployeeId: req.body.employeeid,
-            Status: req.body.type,
-            Date: period.date,
-            Time: period.time,
-            Day: period.day,
-            Image: req.file.filename,
-            Area: longlat.SubCompany.Name,
-            Elat: req.body.latitude,
-            Elong: req.body.longitude,
-            Distance: 0,
-            Memo: memo,
-            wifiName: req.body.wifiname,
-            AttendanceType:"WIFI",
-          });
-          record.save({}, function (err, record) {
-            var result = {};
-            if (err) {
-              result.Message = "Attendance Not Marked";
-              result.Data = err;
-              result.isSuccess = false;
-            } else {
-              if (record.length == 0) {
-                result.Message = "Attendance Not Marked";
-                result.Data = [];
-                result.isSuccess = false;
-              } else {
-                result.Message = "Attendance Marked";
-                result.Data = [record];
-                result.isSuccess = true;
-              }
-            }
-            res.json(result);
-          });
-          } else {
-            var result = {};
-            result.Message = "You can not perform attendance.";
-            result.Data = [];
-            result.isSuccess = false;
-            res.json(result);
-          }
       }
-      else {
-        area = calculatelocation(
-          longlat.SubCompany.Name,
-          //longlat.SubCompany.lat,
-          //longlat.SubCompany.long,
-          longlat.SubCompany.LocationId.Latitude,
-          longlat.SubCompany.LocationId.Longitude,
-          req.body.latitude,
-          req.body.longitude
+  }
+}  
+//testing OUT API
+else if (req.body.type == "out") {
+  var date = moment()
+    .tz("Asia/Calcutta")
+    .format("DD MM YYYY, h:mm:ss a")
+    .split(",")[0];
+  date = date.split(" ");
+  date = date[0] + "/" + date[1] + "/" + date[2];
+  record = await attendeanceSchema.find({
+    EmployeeId: req.body.employeeid,
+    Date: date,
+    Status: "out",
+  });
+  var result = {};
+  if (record.length != 0) {
+    result.Message = "Out Attendance already mark for the day.";
+    result.Data = [
+      {
+        message: "Out Attendance already mark for the day.",
+      },
+    ];
+    result.isSuccess = false;
+    res.json(result);
+  } else {
+    var longlat = await employeeSchema
+      .findById(req.body.employeeid)
+      .populate({
+        path:"SubCompany",
+        select:"Name LocationId",
+        populate : {
+          path:"LocationId",
+          select:"Latitude Longitude"
+        }
+      })
+      .populate("Timing");
+     
+      //if (req.body.wifiname == longlat.WifiName) {
+        var empWifi = req.body.wifiname;
+        empWifi = empWifi.split(" ").join("");
+        var comWifi = longlat.WifiName;
+        comWifi =  comWifi.split(" ").join("");
+        if(isEqual(empWifi,comWifi)){
+        memo = await entrymemo(
+          req.body.employeeid,
+          longlat.Timing.StartTime,
+          longlat.SubCompany.BufferTime,
+          period
         );
-        if (area == 0 || area == 1) {
-          if (area == 1) {
-            var result = {};
-            result.Message =
-              "Attendance Not Marked, Latitude and Longitude Not Found of Company";
-            result.Data = [];
+        //var memorecord = await checkmemo(req.body.employeeid,period.date,"out");
+        var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"out"});    
+        var record = attendeanceSchema({
+          EmployeeId: req.body.employeeid,
+          //Status: req.body.type,
+          Status: "out",
+          Date: period.date,
+          Time: period.time,
+          Day: period.day,
+          Image: req.file.filename,
+          Area: longlat.SubCompany.Name,
+          Elat: req.body.latitude,
+          Elong: req.body.longitude,
+          Distance: 0,
+          Memo: memo,
+          wifiName: req.body.wifiname,
+          AttendanceType:"WIFI",
+        });
+        record.save({}, function (err, record) {
+          var result = {};
+          if (err) {
+            result.Message = "Attendance Not Marked";
+            result.Data = err;
             result.isSuccess = false;
           } else {
-            var result = {};
-            result.Message =
-              "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
-            result.Data = [];
-            result.isSuccess = false;
+            if (record.length == 0) {
+              result.Message = "Attendance Not Marked";
+              result.Data = [];
+              result.isSuccess = false;
+            } else if(memorecord.length==0 && record.length != 0){
+              result.Message = "Attendance Marked";
+              record = {
+                "_id":record._id,
+                "EmployeeId":record.EmployeeId,
+                "Status": record.Status,
+                "Date": record.Date,
+                "Time": record.Time,
+                "Day": record.Day,
+                "Image":record.Image,
+                "Area":record.Area,
+                "Elat":record.Elat,
+                "Elong":record.Elong,
+                "Distance":record.Distance,
+                "AttendanceType":record.AttendanceType,
+                "Memo": false,
+                "Message":"Attendance Marked."};
+              result.Data = [record];
+              result.isSuccess = true;
+            }else if(memorecord.length != 0 && record.length !=0) {
+              result.Message = "Attendance Marked and Memo Issued.";
+              record = {
+                "_id":record._id,
+                "EmployeeId":record.EmployeeId,
+                "Status": record.Status,
+                "Date": record.Date,
+                "Time": record.Time,
+                "Day": record.Day,
+                "Image":record.Image,
+                "Area":record.Area,
+                "Elat":record.Elat,
+                "Elong":record.Elong,
+                "Distance":record.Distance,
+                "AttendanceType":record.AttendanceType,
+                "Memo": true,
+                "Message":"Attendance Marked and Memo Issued."};
+              result.Data = [record];
+              result.isSuccess = true;
+             } //else {
+            //   result.Message = "Attendance Marked";
+            //   result.Data = [record,memorecord];
+            //   result.isSuccess = true;
+            // }
           }
           res.json(result);
+        });
         } else {
-          memo = await exitmemo(
-            req.body.employeeid,
-            longlat.Timing.EndTime,
-            longlat.SubCompany.BufferTime,
-            period
-          );
-          var record = attendeanceSchema({
-            EmployeeId: req.body.employeeid,
-            Status: req.body.type,
-            Date: period.date,
-            Time: period.time,
-            Day: period.day,
-            Image: req.file.filename,
-            Area: area,
-            Elat: req.body.latitude,
-            Elong: req.body.longitude,
-            Distance: heading,
-            Memo: parseInt(memo),
-          });
-          record.save({}, function (err, record) {
+              area = calculatelocation(
+      longlat.SubCompany.Name,
+      //longlat.SubCompany.lat,
+      //longlat.SubCompany.long,
+      longlat.SubCompany.LocationId.Latitude,
+      longlat.SubCompany.LocationId.Longitude,
+      req.body.latitude,
+      req.body.longitude
+    );
+              if (area == 0 || area == 1) {
+                if (area == 1) {
+                  var result = {};
+                  result.Message =
+                    "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+                  result.Data = [];
+                  result.isSuccess = false;
+                } else {
+                  var result = {};
+                  result.Message =
+                    "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+                  result.Data = [];
+                  result.isSuccess = false;
+                }
+                res.json(result);
+              } else {
+                memo = await exitmemo(
+                  req.body.employeeid,
+                  longlat.Timing.EndTime,
+                  longlat.SubCompany.BufferTime,
+                  period
+                );
+                //var memorecord = await checkmemo(req.body.employeeid,period.date,"out");
+              var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"out"});    
+              var record = attendeanceSchema({
+                EmployeeId: req.body.employeeid,
+                //Status: req.body.type,
+                Status: "out",
+                Date: period.date,
+                Time: period.time,
+                Day: period.day,
+                Image: req.file.filename,
+                Area: area,
+                Elat: req.body.latitude,
+                Elong: req.body.longitude,
+                Distance: heading,
+                Memo: parseInt(memo),
+                AttendanceType:"GPS",
+              });
+              record.save({}, function (err, record) {
             var result = {};
             if (err) {
               result.Message = "Attendance Not Marked";
@@ -493,21 +911,61 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
                 result.Message = "Attendance Not Marked";
                 result.Data = [];
                 result.isSuccess = false;
-              } else {
-                result.Message = "Attendance Marked";
+              } else if(memorecord.length == 0 && record.length != 0){
+                result.Message = "Attendance Marked.";
+                record = {
+                  "_id":record._id,
+                  "EmployeeId":record.EmployeeId,
+                  "Status": record.Status,
+                  "Date": record.Date,
+                  "Time": record.Time,
+                  "Day": record.Day,
+                  "Image":record.Image,
+                  "Area":record.Area,
+                  "Elat":record.Elat,
+                  "Elong":record.Elong,
+                  "Distance":record.Distance,
+                  "AttendanceType":record.AttendanceType,
+                  "Memo": false,
+                  "Message":"Attendance Marked."};
                 result.Data = [record];
                 result.isSuccess = true;
-              }
+              }else if(memorecord.length != 0 && record.length != 0){
+                result.Message = "Attendance Marked and Memo Issued.";
+                record = {
+                  "_id":record._id,
+                  "EmployeeId":record.EmployeeId,
+                  "Status": record.Status,
+                  "Date": record.Date,
+                  "Time": record.Time,
+                  "Day": record.Day,
+                  "Image":record.Image,
+                  "Area":record.Area,
+                  "Elat":record.Elat,
+                  "Elong":record.Elong,
+                  "Distance":record.Distance,
+                  "AttendanceType":record.AttendanceType,
+                  "Memo": true,
+                  "Message":"Attendance Marked and Memo Issued."};
+                result.Data = [record];
+                result.isSuccess = true;
+              } //else {
+              //   result.Message = "Attendance Marked";
+              //   result.Data = [record,memorecord];
+              //   result.isSuccess = true;
+              // }
             }
             res.json(result);
           });
+            }
         }
-      }
-    }
   }
+}
+
   //Admin Panel fetching data to see attendance in and out records
   //else if (req.body.type == "getdata") {
   else if (req.body.type == "getdata") {
+    console.log(req.body);
     var permission = await checkpermission(req.body.type, req.body.token);
     if (permission.isSuccess == true) {
       const day = req.body.day;
@@ -545,7 +1003,50 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           }
         }
       }
-      var record = await attendeanceSchema.find(query).populate("EmployeeId");
+      // if(req.body.afilter == 0 && req.body.employeeid == 0){
+      //   console.log("first");
+      //   var record = await attendeanceSchema.find({Date:query.Date}).populate("EmployeeId");
+      // } else if(req.body.afilter == 0 && req.body.employeeid != 0){
+      //   console.log("second");
+      //   var record = await attendeanceSchema.find({Date:query.Date})
+      //     .populate({
+      //       path:"EmployeeId",
+      //       match:{
+      //         SubCompany:mongoose.Types.ObjectId(query.Area)
+      //       }
+      //     });
+      // } else if(req.body.afilter != 0 && req.body.employeeid == 0){
+      //   console.log("third");
+      //   var record = await attendeanceSchema.aggregate([{
+      //     $match:{
+      //       Date:query.Date
+      //     }
+      //   }])
+      //   //var record = await attendeanceSchema.find({Date:query.Date})
+      //   .populate({
+      //     path:"EmployeeId",
+      //     match:{
+      //       SubCompany:mongoose.Types.ObjectId(req.body.afilter)
+      //     }
+      //   });
+      // } else
+       //if(req.body.employeeid){
+      //   console.log("four");
+      //   console.log(query.Date);
+      //   date = "01/10/2020";
+      //   var record = await attendeanceSchema.aggregate([{
+      //     $project:{
+      //        Date: { Date: "$date", format: "%d/%m/%Y"  } 
+      //     }
+      //   }]);
+      //  console.log(record);
+        //var record = await attendeanceSchema.find({"EmployeeId":req.body.employeeid}).populate("EmployeeId");
+       //} //else{
+      //   console.log("five");
+
+        var record = await attendeanceSchema.find(query).populate("EmployeeId");
+      // }
+      
       var result = {};
       if (record.length == 0) {
         result.Message = "Attendance Not Found";
@@ -640,16 +1141,23 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           res.json(result);
         });
       }
-      
     }
     else{
       res.json(permission);
     }
   }
 
-  //testing API
+  //testing IN API
   else if (req.body.type == "testin") {
-    var longlat = await employeeSchema // Fetching employee data with employeeid
+    var checkin = await attendeanceSchema.find({EmployeeId:req.body.employeeid,Date:period.date,Status:"in"});
+    if(checkin.length == 1){
+      var result = {};
+      result.Message = "You are already Perform Attendance."
+      result.Data = checkin;
+      result.isSuccess = false;
+      res.json(result);
+    } else {
+      var longlat = await employeeSchema // Fetching employee data with employeeid
       .findById(req.body.employeeid)
       .populate({
         path:"SubCompany",
@@ -659,11 +1167,10 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
             select:"Latitude Longitude"
           }
       })
-      .populate("Timing")
-    if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
+      .populate("Timing");
+
         var empWifi = req.body.wifiname;
         var comWifi = longlat.WifiName;
-
         if(empWifi.includes(" ")){
           empWifi = empWifi.split(" ").join("");
         } 
@@ -671,174 +1178,196 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
           comWifi =  comWifi.split(" ").join("");
         }
               
-      if(isEqual(empWifi,comWifi)){
-        var memo = await entrymemo(
-          req.body.employeeid,
-          longlat.Timing.StartTime,
-          longlat.SubCompany.BufferTime,
-          period
-        );
-        //var memorecord = await checkmemo(req.body.employeeid,period.date,"in");
-        var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"in"});  
-        console.log(memorecord);  
-        attendancetype = "WIFI";
-        var record = attendeanceSchema({
-          EmployeeId: req.body.employeeid,
-          //Status: req.body.type,
-          Status: "in",
-          Date: period.date,
-          Time: period.time,
-          Day: period.day,
-          Image: req.file.filename,
-          Area: longlat.SubCompany.Name,
-          Elat: req.body.latitude,
-          Elong: req.body.longitude,
-          Distance: 0,
-          Memo: memo,
-          WifiName: req.body.wifiname,
-          AttendanceType:attendancetype,
-        });
-        record.save({}, function (err, record) {
-          var result = {};
-          if (err) {
-            result.Message = "Attendance Not Marked";
-            result.Data = err;
-            result.isSuccess = false;
-          } else {
-            if (record.length == 0) {
+        if(isEqual(empWifi,comWifi)){
+          var memo = await entrymemo(
+            req.body.employeeid,
+            longlat.Timing.StartTime,
+            longlat.SubCompany.BufferTime,
+            period
+          );
+          //var memorecord = await checkmemo(req.body.employeeid,period.date,"in");
+          var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"in"});  
+          attendancetype = "WIFI";
+          var record = attendeanceSchema({
+            EmployeeId: req.body.employeeid,
+            //Status: req.body.type,
+            Status: "in",
+            Date: period.date,
+            Time: period.time,
+            Day: period.day,
+            Image: req.file.filename,
+            Area: longlat.SubCompany.Name,
+            Elat: req.body.latitude,
+            Elong: req.body.longitude,
+            Distance: 0,
+            Memo: memo,
+            WifiName: req.body.wifiname,
+            AttendanceType:attendancetype,
+          });
+          record.save({}, function (err, record) {
+            var result = {};
+            if (err) {
               result.Message = "Attendance Not Marked";
-              result.Data = [];
+              result.Data = err;
               result.isSuccess = false;
-            } else if(memorecord.length==0 && record.length != 0){
-              result.Message = "Attendance Marked";
-              record = {
-                "Status": record.Status,
-                "Date": record.Date,
-                "Time": record.Time,
-                "Day": record.Day,
-                "Memo": false,
-                "Message":"Attendance Marked."};
-              result.Data = [record];
-              result.isSuccess = true;
-            }else if(memorecord.length != 0 && record.length != 0) {
-              result.Message = "Attendance Marked and Memo Issue.";
-              record = {
-                "Status": record.Status,
-                "Date": record.Date,
-                "Time": record.Time,
-                "Day": record.Day,
-                "Memo": true,
-                "Message":"Memo Issue"};
-              result.Data = [record];
-              result.isSuccess = true;
+            } else {
+              if (record.length == 0) {
+                result.Message = "Attendance Not Marked";
+                result.Data = [];
+                result.isSuccess = false;
+              } else if(memorecord.length==0 && record.length != 0){
+                result.Message = "Attendance Marked";
+                record = {
+                  "_id":record._id,
+                  "EmployeeId":record.EmployeeId,
+                  "Status": record.Status,
+                  "Date": record.Date,
+                  "Time": record.Time,
+                  "Day": record.Day,
+                  "Image":record.Image,
+                  "Area":record.Area,
+                  "Elat":record.Elat,
+                  "Elong":record.Elong,
+                  "Distance":record.Distance,
+                  "AttendanceType":record.AttendanceType,
+                  "Memo": false,
+                  "Message":"Attendance Marked."};
+                result.Data = [record];
+                result.isSuccess = true;
+              }else if(memorecord.length != 0 && record.length != 0) {
+                result.Message = "Attendance Marked and Memo Issued.";
+                record = {
+                  "_id":record._id,
+                  "EmployeeId":record.EmployeeId,
+                  "Status": record.Status,
+                  "Date": record.Date,
+                  "Time": record.Time,
+                  "Day": record.Day,
+                  "Image":record.Image,
+                  "Area":record.Area,
+                  "Elat":record.Elat,
+                  "Elong":record.Elong,
+                  "Distance":record.Distance,
+                  "AttendanceType":record.AttendanceType,
+                  "Memo": true,
+                  "Message":"Attendance Marked and Memo Issued"};
+                result.Data = [record];
+                result.isSuccess = true;
+              }
             }
-          }
-          res.json(result);
-        });
-      } else {
-          var result = {};
-          result.Message = "Perform attendance with your registered WiFi.";
-          result.Data = [];
-          result.isSuccess = false;
-          res.json(result);
-      }
-    } else if(longlat.GpsTrack == true) {
-      area = calculatelocation(
-      longlat.SubCompany.Name,
-      longlat.SubCompany.LocationId.Latitude,
-      longlat.SubCompany.LocationId.Longitude,
-      req.body.latitude,
-      req.body.longitude
-      );
-      if (area == -1 || area == 1) {
-        if (area == 1) {
-          var result = {};
-          result.Message =
-            "Attendance Not Marked, Latitude and Longitude Not Found of Company";
-          result.Data = [];
-          result.isSuccess = false;
+            res.json(result);
+          });
         } else {
-          var result = {};
-          result.Message =
-            "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
-          result.Data = [];
-          result.isSuccess = false;
-        }
-        res.json(result);
-      } else {
-        memo = await entrymemo(
-          req.body.employeeid,
-          longlat.Timing.StartTime,
-          longlat.SubCompany.BufferTime,
-          period
+        area = calculatelocation(
+        longlat.SubCompany.Name,
+        longlat.SubCompany.LocationId.Latitude,
+        longlat.SubCompany.LocationId.Longitude,
+        req.body.latitude,
+        req.body.longitude
         );
-        attendancetype = "GPS";
-        //var memorecord = await checkmemo(req.body.employeeid,period.date,"in");
-        console.log(req.body.employeeid,period.date);
-        var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"in"});  
-        var record = attendeanceSchema({
-          EmployeeId: req.body.employeeid,
-          //Status: req.body.type,
-          Status: "in",
-          Date: period.date,
-          Time: period.time,
-          Day: period.day,
-          Image: req.file.filename,
-          Area: area,
-          Elat: req.body.latitude,
-          Elong: req.body.longitude,
-          Distance: heading,
-          Memo: memo,
-          WifiName: req.body.wifiname,
-          AttendanceType:attendancetype,
-        });
-        console.log(record);
-        record.save({}, function (err, record) {
-          var result = {};
-          if (err) {
-            result.Message = "Attendance Not Marked";
-            result.Data = err;
+        if (area == -1 || area == 1) {
+          if (area == 1) {
+            var result = {};
+            result.Message =
+              "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+            result.Data = [];
             result.isSuccess = false;
           } else {
-            if (record.length == 0) {
-              result.Message = "Attendance Not Marked";
-              result.Data = [];
-              result.isSuccess = false;
-            }else if(memorecord.length==0 && record.length != 0){
-              result.Message = "Attendance Marked";
-              record = {
-                "Status": record.Status,
-                "Date": record.Date,
-                "Time": record.Time,
-                "Day": record.Day,
-                "Memo": false,
-                "Message":"Attendance Marked."};
-              result.Data = [record];
-              result.isSuccess = true;
-            }else if(memorecord.length != 0 && record.length != 0) {
-              result.Message = "Attendance Marked and Memo Issue.";
-              //result.Data = [record];
-              record = {
-                "Status": record.Status,
-                "Date": record.Date,
-                "Time": record.Time,
-                "Day": record.Day,
-                "Memo": true,
-                "Message":"Memo Issue"};
-              result.Data = [record];
-              result.isSuccess = true;
-             } //else {
-            //   result.Message = "Attendance Marked";
-            //   result.Data = [record,memorecord];
-            //   result.isSuccess = true;
-            // }
+            var result = {};
+            result.Message =
+              "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+            result.Data = [];
+            result.isSuccess = false;
           }
           res.json(result);
-        });
-      }
+        } else {
+          memo = await entrymemo(
+            req.body.employeeid,
+            longlat.Timing.StartTime,
+            longlat.SubCompany.BufferTime,
+            period
+          );
+          attendancetype = "GPS";
+          var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"in"});  
+          var record = attendeanceSchema({
+            EmployeeId: req.body.employeeid,
+            //Status: req.body.type,
+            Status: "in",
+            Date: period.date,
+            Time: period.time,
+            Day: period.day,
+            Image: req.file.filename,
+            Area: area,
+            Elat: req.body.latitude,
+            Elong: req.body.longitude,
+            Distance: heading,
+            Memo: memo,
+            WifiName: req.body.wifiname,
+            AttendanceType:attendancetype,
+          });
+          record.save({}, function (err, record) {
+            var result = {};
+            if (err) {
+              result.Message = "Attendance Not Marked";
+              result.Data = err;
+              result.isSuccess = false;
+            } else {
+              if (record.length == 0) {
+                result.Message = "Attendance Not Marked";
+                result.Data = [];
+                result.isSuccess = false;
+              }else if(memorecord.length==0 && record.length != 0){
+                result.Message = "Attendance Marked";
+                record = {
+                  "_id":record._id,
+                  "EmployeeId":record.EmployeeId,
+                  "Status": record.Status,
+                  "Date": record.Date,
+                  "Time": record.Time,
+                  "Day": record.Day,
+                  "Image":record.Image,
+                  "Area":record.Area,
+                  "Elat":record.Elat,
+                  "Elong":record.Elong,
+                  "Distance":record.Distance,
+                  "AttendanceType":record.AttendanceType,
+                  "Memo": false,
+                  "Message":"Attendance Marked."};
+                result.Data = [record];
+                result.isSuccess = true;
+              }else if(memorecord.length != 0 && record.length != 0) {
+                result.Message = "Attendance Marked and Memo Issued.";
+                //result.Data = [record];
+                record = {
+                  "_id":record._id,
+                  "EmployeeId":record.EmployeeId,
+                  "Status": record.Status,
+                  "Date": record.Date,
+                  "Time": record.Time,
+                  "Day": record.Day,
+                  "Image":record.Image,
+                  "Area":record.Area,
+                  "Elat":record.Elat,
+                  "Elong":record.Elong,
+                  "Distance":record.Distance,
+                  "AttendanceType":record.AttendanceType,
+                  "Memo": true,
+                  "Message":"Attendance Marked and Memo Issued."};
+                result.Data = [record];
+                result.isSuccess = true;
+              } //else {
+              //   result.Message = "Attendance Marked";
+              //   result.Data = [record,memorecord];
+              //   result.isSuccess = true;
+              // }
+            }
+            res.json(result);
+          });
+        }
+        }
     }
-  }
-  //Attendance Out Function
+  }  
+  //testing OUT API
   else if (req.body.type == "testout") {
     var date = moment()
       .tz("Asia/Calcutta")
@@ -874,7 +1403,6 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
         })
         .populate("Timing");
        
-      if(longlat.GpsTrack == false || longlat.GpsTrack == undefined){
         //if (req.body.wifiname == longlat.WifiName) {
           var empWifi = req.body.wifiname;
           empWifi = empWifi.split(" ").join("");
@@ -919,23 +1447,39 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
               } else if(memorecord.length==0 && record.length != 0){
                 result.Message = "Attendance Marked";
                 record = {
+                  "_id":record._id,
+                  "EmployeeId":record.EmployeeId,
                   "Status": record.Status,
                   "Date": record.Date,
                   "Time": record.Time,
                   "Day": record.Day,
+                  "Image":record.Image,
+                  "Area":record.Area,
+                  "Elat":record.Elat,
+                  "Elong":record.Elong,
+                  "Distance":record.Distance,
+                  "AttendanceType":record.AttendanceType,
                   "Memo": false,
                   "Message":"Attendance Marked."};
                 result.Data = [record];
                 result.isSuccess = true;
               }else if(memorecord.length != 0 && record.length !=0) {
-                result.Message = "Attendance Marked and Memo Issue.";
+                result.Message = "Attendance Marked and Memo Issued.";
                 record = {
+                  "_id":record._id,
+                  "EmployeeId":record.EmployeeId,
                   "Status": record.Status,
                   "Date": record.Date,
                   "Time": record.Time,
                   "Day": record.Day,
+                  "Image":record.Image,
+                  "Area":record.Area,
+                  "Elat":record.Elat,
+                  "Elong":record.Elong,
+                  "Distance":record.Distance,
+                  "AttendanceType":record.AttendanceType,
                   "Memo": true,
-                  "Message":"Attendance Marked and Memo Issue."};
+                  "Message":"Attendance Marked and Memo Issued."};
                 result.Data = [record];
                 result.isSuccess = true;
                } //else {
@@ -947,97 +1491,113 @@ router.post("/", upload.single("attendance"), async function (req, res, next) {
             res.json(result);
           });
           } else {
-            var result = {};
-            result.Message = "You can not perform attendance.";
-            result.Data = [];
-            result.isSuccess = false;
-            res.json(result);
-          }
-      }
-      else {
-        area = calculatelocation(
-          longlat.SubCompany.Name,
-          //longlat.SubCompany.lat,
-          //longlat.SubCompany.long,
-          longlat.SubCompany.LocationId.Latitude,
-          longlat.SubCompany.LocationId.Longitude,
-          req.body.latitude,
-          req.body.longitude
-        );
-        if (area == 0 || area == 1) {
-          if (area == 1) {
-            var result = {};
-            result.Message =
-              "Attendance Not Marked, Latitude and Longitude Not Found of Company";
-            result.Data = [];
-            result.isSuccess = false;
-          } else {
-            var result = {};
-            result.Message =
-              "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
-            result.Data = [];
-            result.isSuccess = false;
-          }
-          res.json(result);
-        } else {
-          memo = await exitmemo(
-            req.body.employeeid,
-            longlat.Timing.EndTime,
-            longlat.SubCompany.BufferTime,
-            period
-          );
-          //var memorecord = await checkmemo(req.body.employeeid,period.date,"out");
-          var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"out"});    
-          var record = attendeanceSchema({
-            EmployeeId: req.body.employeeid,
-            //Status: req.body.type,
-            Status: "out",
-            Date: period.date,
-            Time: period.time,
-            Day: period.day,
-            Image: req.file.filename,
-            Area: area,
-            Elat: req.body.latitude,
-            Elong: req.body.longitude,
-            Distance: heading,
-            Memo: parseInt(memo),
-          });
-          record.save({}, function (err, record) {
-            var result = {};
-            if (err) {
-              result.Message = "Attendance Not Marked";
-              result.Data = err;
-              result.isSuccess = false;
-            } else {
-              if (record.length == 0) {
+                area = calculatelocation(
+        longlat.SubCompany.Name,
+        //longlat.SubCompany.lat,
+        //longlat.SubCompany.long,
+        longlat.SubCompany.LocationId.Latitude,
+        longlat.SubCompany.LocationId.Longitude,
+        req.body.latitude,
+        req.body.longitude
+      );
+                if (area == 0 || area == 1) {
+                  if (area == 1) {
+                    var result = {};
+                    result.Message =
+                      "Attendance Not Marked, Latitude and Longitude Not Found of Company";
+                    result.Data = [];
+                    result.isSuccess = false;
+                  } else {
+                    var result = {};
+                    result.Message =
+                      "Attendance Not Marked, Latitude and Longitude Not Found of Employee";
+                    result.Data = [];
+                    result.isSuccess = false;
+                  }
+                  res.json(result);
+                } else {
+                  memo = await exitmemo(
+                    req.body.employeeid,
+                    longlat.Timing.EndTime,
+                    longlat.SubCompany.BufferTime,
+                    period
+                  );
+                  //var memorecord = await checkmemo(req.body.employeeid,period.date,"out");
+                var memorecord = await memoSchema.find({Eid:req.body.employeeid,Date: period.date,Type:"out"});    
+                var record = attendeanceSchema({
+                  EmployeeId: req.body.employeeid,
+                  //Status: req.body.type,
+                  Status: "out",
+                  Date: period.date,
+                  Time: period.time,
+                  Day: period.day,
+                  Image: req.file.filename,
+                  Area: area,
+                  Elat: req.body.latitude,
+                  Elong: req.body.longitude,
+                  Distance: heading,
+                  Memo: parseInt(memo),
+                  AttendanceType:"GPS",
+                });
+                record.save({}, function (err, record) {
+              var result = {};
+              if (err) {
                 result.Message = "Attendance Not Marked";
-                result.Data = [];
+                result.Data = err;
                 result.isSuccess = false;
-              } else if(memorecord.length == 0 && record.length != 0){
-                result.Message = "Attendance Marked";
-                result.Data = [record];
-                result.isSuccess = true;
-              }else if(memorecord.length != 0 && record.length != 0){
-                result.Message = "Attendance Marked and Memo Issue.";
-                record = {
-                  "Status": record.Status,
-                  "Date": record.Date,
-                  "Time": record.Time,
-                  "Day": record.Day,
-                  "Memo": true,
-                  "Message":"Memo Issue"};
-                result.Data = [record];
-                result.isSuccess = true;
-              } //else {
-              //   result.Message = "Attendance Marked";
-              //   result.Data = [record,memorecord];
-              //   result.isSuccess = true;
-              // }
-            }
-            res.json(result);
-          });
-        }
-      }
+              } else {
+                if (record.length == 0) {
+                  result.Message = "Attendance Not Marked";
+                  result.Data = [];
+                  result.isSuccess = false;
+                } else if(memorecord.length == 0 && record.length != 0){
+                  result.Message = "Attendance Marked.";
+                  record = {
+                    "_id":record._id,
+                    "EmployeeId":record.EmployeeId,
+                    "Status": record.Status,
+                    "Date": record.Date,
+                    "Time": record.Time,
+                    "Day": record.Day,
+                    "Image":record.Image,
+                    "Area":record.Area,
+                    "Elat":record.Elat,
+                    "Elong":record.Elong,
+                    "Distance":record.Distance,
+                    "AttendanceType":record.AttendanceType,
+                    "Memo": false,
+                    "Message":"Attendance Marked."};
+                  result.Data = [record];
+                  result.isSuccess = true;
+                }else if(memorecord.length != 0 && record.length != 0){
+                  result.Message = "Attendance Marked and Memo Issued.";
+                  record = {
+                    "_id":record._id,
+                    "EmployeeId":record.EmployeeId,
+                    "Status": record.Status,
+                    "Date": record.Date,
+                    "Time": record.Time,
+                    "Day": record.Day,
+                    "Image":record.Image,
+                    "Area":record.Area,
+                    "Elat":record.Elat,
+                    "Elong":record.Elong,
+                    "Distance":record.Distance,
+                    "AttendanceType":record.AttendanceType,
+                    "Memo": true,
+                    "Message":"Attendance Marked and Memo Issued."};
+                  result.Data = [record];
+                  result.isSuccess = true;
+                } //else {
+                //   result.Message = "Attendance Marked";
+                //   result.Data = [record,memorecord];
+                //   result.isSuccess = true;
+                // }
+              }
+              res.json(result);
+            });
+              }
+          }
     }
   }
 });
