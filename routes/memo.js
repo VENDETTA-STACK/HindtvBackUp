@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
           $gte: req.body.startdate,
           $lte: req.body.enddate,
         },
-      },{sort:{Date:1}},
+      },
       async (err, record) => {
         var result = {};
         if (err) {
