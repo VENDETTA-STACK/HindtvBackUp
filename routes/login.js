@@ -87,7 +87,7 @@ router.post("/", async function (req, res, next) {
             "CertificateImage2": record[0].CertificateImage2,
             "MemberType":memberType
       }
-      result.Data = record;
+      result.Data = [record];
       result.isSuccess = true;
     }
     res.json(result);
