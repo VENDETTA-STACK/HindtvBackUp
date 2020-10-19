@@ -5,7 +5,7 @@ var subcompanySchema = require("../models/subcompany.models");
 var attendeanceSchema = require("../models/attendance.models");
 var employeeSchema = require("../models/employee.model");
 const geolib = require("geolib");
-const { mongoose } = require("mongoose");
+var mongoose  = require("mongoose");
 var dateFormat = require("dateformat");
 const e = require("express");
 var moment = require("moment-timezone");
@@ -88,7 +88,30 @@ router.post("/", async (req, res) => {
       }
       res.json(result);
     } else{
-      var record = await attendeanceSchema.find({SubCompany: companyselection.accessCompany,Date:date,Status:"in"});
+      //var record = await attendeanceSchema.find({SubCompany: companyselection.accessCompany,Date:date,Status:"in"});
+      var record = await attendeanceSchema.aggregate([
+        {
+            $match:{
+              Date : date,
+              Status:"in"
+            }
+        },
+        {
+            $lookup:{
+                from: "employees",
+                localField: "EmployeeId",
+                foreignField: "_id",
+                as: "EmployeeId"
+            }
+        },
+        { "$unwind": "$EmployeeId" },
+        {
+            $match:{
+                "EmployeeId.SubCompany":mongoose.Types.ObjectId(companyselection.accessCompany),
+            }
+        }
+        ]);
+
       var result = {};
       if(record.length == 0){
         result.Message = "No Data Found.";
@@ -124,7 +147,27 @@ router.post("/", async (req, res) => {
       }
       res.json(result);
     } else {
-      var record = await memoSchema.find({SubCompany: companyselection.accessCompany,Date:date});
+      var record = await memoSchema.aggregate([
+        {
+            $match:{
+              Date : date,
+            }
+        },
+        {
+            $lookup:{
+                from: "employees",
+                localField: "Eid",
+                foreignField: "_id",
+                as: "EmployeeId"
+            }
+        },
+        { "$unwind": "$EmployeeId" },
+        {
+            $match:{
+                "EmployeeId.SubCompany":mongoose.Types.ObjectId(companyselection.accessCompany),
+            }
+        }
+        ]);
       var result = {};
       if(record.length == 0){
         result.Message = "No Data Found.";
@@ -160,7 +203,29 @@ router.post("/", async (req, res) => {
       }
     res.json(result);
     } else {
-      var record = await attendeanceSchema.find({SubCompany: companyselection.accessCompany,Date:date,AttendanceType:"WIFI"});
+      //var record = await attendeanceSchema.find({SubCompany: companyselection.accessCompany,Date:date,AttendanceType:"WIFI"});
+      var record = await attendeanceSchema.aggregate([
+      {
+          $match:{
+            Date : date,
+            AttendanceType:"WIFI"
+          }
+      },
+      {
+          $lookup:{
+              from: "employees",
+              localField: "EmployeeId",
+              foreignField: "_id",
+              as: "EmployeeId"
+          }
+      },
+      { "$unwind": "$EmployeeId" },
+      {
+          $match:{
+              "EmployeeId.SubCompany":mongoose.Types.ObjectId(companyselection.accessCompany),
+          }
+      }
+      ]);
       var result = {};
       if(record.length == 0){
         result.Message = "No Data Found.";
@@ -195,7 +260,28 @@ router.post("/", async (req, res) => {
       }
       res.json(result);
     } else {
-      var record = await attendeanceSchema.find({SubCompany: companyselection.accessCompany,Date:date,AttendanceType:"GPS"});
+      var record = await attendeanceSchema.aggregate([
+        {
+            $match:{
+              Date : date,
+              AttendanceType:"GPS"
+            }
+        },
+        {
+            $lookup:{
+                from: "employees",
+                localField: "EmployeeId",
+                foreignField: "_id",
+                as: "EmployeeId"
+            }
+        },
+        { "$unwind": "$EmployeeId" },
+        {
+            $match:{
+                "EmployeeId.SubCompany":mongoose.Types.ObjectId(companyselection.accessCompany),
+            }
+        }
+        ]);
       var result = {};
       if(record.length == 0){
         result.Message = "No Data Found.";
@@ -274,7 +360,6 @@ router.post("/", async (req, res) => {
         result.Data = record.length;
         result.isSuccess = true;
       }
-      console.log(record);
       res.json(result);
     }
   }

@@ -114,8 +114,4 @@ router.post("/getotp", (req, res) => {
 
 router.post("/testing", async (req, res) => {});
 
-router.post("/testing1", async (req, res) => {
-  res.json(req.file);
-});
-
 module.exports = router;
